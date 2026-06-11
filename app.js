@@ -497,7 +497,11 @@ function tickListHTML(items, stateArr, action) {
     <div class="ex-row small ${stateArr[i] ? 'done' : ''}">
       <div class="top">
         <button class="check" data-action="${action}" data-i="${i}" aria-label="Done">${stateArr[i] ? '✓' : ''}</button>
-        <div class="ex-main"><div class="ex-name">${esc(p[0])}</div><div class="ex-scheme">${esc(p[1])}</div></div>
+        <div class="ex-main">
+          <div class="ex-name">${esc(p.name)}</div>
+          <div class="ex-scheme">${esc(p.scheme)}</div>
+          ${p.hint ? `<div class="ex-last">${esc(p.hint)}</div>` : ''}
+        </div>
       </div>
     </div>`).join('');
 }
@@ -1077,6 +1081,7 @@ function renderProgress() {
 
   // hall of fame (milestones)
   const bests = allBests();
+  const shortLift = n => n.replace(' Machine', '');
   parts.push(`<div class="card"><h2>Hall of Fame 🏆<span class="sub">Measured against one person only: past you</span></h2><div class="fame-grid">`);
   MILESTONES.forEach((m, i) => {
     const b = bests[m.name];
@@ -1085,12 +1090,12 @@ function renderProgress() {
     const pct = Math.min(100, Math.round(cur / m.target * 100));
     parts.push(hit ? `
       <button class="fame hit" data-action="fame-flip">
-        <div class="ff-front"><span class="medal">🏆</span><b>${esc(m.label)}</b><span>${esc(m.name)}</span></div>
+        <div class="ff-front"><span class="medal">🏆</span><b>${esc(m.label)}</b><span>${esc(shortLift(m.name))}</span></div>
         <div class="ff-back"><b>${esc(m.label)}</b><span>${esc(m.story)}</span><span class="d">${b ? esc(shortDate(b.d)) : ''}</span></div>
       </button>` : `
       <div class="fame">
         <div class="ff-front">
-          <b>${esc(m.label)}</b><span>${esc(m.name)} · ${m.target} kg${m.reps ? ' × ' + m.reps : ''}</span>
+          <b>${esc(m.label)}</b><span>${esc(shortLift(m.name))} · ${m.target} kg${m.reps ? ' × ' + m.reps : ''}</span>
           <div class="bar"><i style="width:${pct}%"></i></div>
           <span class="d">${cur ? cur + ' kg so far' : 'waiting for you'}</span>
         </div>
@@ -1284,12 +1289,17 @@ function renderProgram() {
     </div>`);
 
   // routines
+  const routineRows = items => items.map(p => `
+    <div class="plan-ex">
+      <span class="nm">${esc(p.name)}${p.hint ? `<small>${esc(p.hint)}</small>` : ''}</span>
+      <span class="sc">${esc(p.scheme)}</span>
+    </div>`).join('');
   parts.push(`
     <div class="card"><h2>🦩 ${esc(HIP_ROUTINE.title)}</h2><p class="hint">${esc(HIP_ROUTINE.sub)}.</p>
-      ${HIP_ROUTINE.items.map(p => `<div class="plan-ex"><span class="nm">${esc(p[0])}</span><span class="sc">${esc(p[1])}</span></div>`).join('')}
+      ${routineRows(HIP_ROUTINE.items)}
     </div>
     <div class="card"><h2>🧘 ${esc(POSTURE_RESET.title)}</h2><p class="hint">${esc(POSTURE_RESET.sub)}.</p>
-      ${POSTURE_RESET.items.map(p => `<div class="plan-ex"><span class="nm">${esc(p[0])}</span><span class="sc">${esc(p[1])}</span></div>`).join('')}
+      ${routineRows(POSTURE_RESET.items)}
     </div>`);
 
   // coach notes + his note

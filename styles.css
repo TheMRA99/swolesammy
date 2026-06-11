@@ -13,7 +13,7 @@
   --surface-2: #fdf3f6;
   --field: #ffffff;
   --text: #432c39;
-  --muted: #a47e90;
+  --muted: #91697e;
   --line: #f3dde6;
   --rose: #d96d8c;
   --rose-deep: #b14c6e;
@@ -598,11 +598,11 @@ details.card[open] > summary { margin-bottom: 12px; }
 .phase-head.pill-ovulation  { background: linear-gradient(120deg, #eda865, #e2924b); }
 .phase-head.pill-luteal     { background: linear-gradient(120deg, #b39ddb, #9d83cf); }
 
-.plan-ex { display: flex; justify-content: space-between; gap: 10px; padding: 8px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.plan-ex { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
 .plan-ex:last-child { border-bottom: none; }
-.plan-ex .nm { font-weight: 700; }
-.plan-ex .nm small { display: block; color: var(--muted); font-size: 11.5px; font-weight: 600; }
-.plan-ex .sc { font-weight: 900; color: var(--rose-deep); white-space: nowrap; font-size: 12.5px; max-width: 46%; }
+.plan-ex .nm { font-weight: 700; min-width: 0; }
+.plan-ex .nm small { display: block; color: var(--muted); font-size: 12px; font-weight: 600; line-height: 1.45; margin-top: 1px; }
+.plan-ex .sc { font-weight: 800; color: var(--rose-deep); font-size: 13px; max-width: 44%; text-align: right; flex: none; line-height: 1.4; }
 
 .nut-list { margin: 0; padding-left: 18px; }
 .nut-list li { margin: 7px 0; font-size: 13.5px; font-weight: 600; }

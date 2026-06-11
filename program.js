@@ -214,13 +214,13 @@ const CRAMP_RELIEF = {
   title: 'Cramp-Relief Stretch · 8–10 min',
   tip: 'Pairs beautifully with a heat pad before or after. 💗',
   items: [
-    ['Child\'s Pose', '60 sec · knees wide, slow belly breaths'],
-    ['Cat–Cow', '10 slow reps'],
-    ['Knees-to-Chest', '60 sec · gentle rocking is lovely'],
-    ['Supine Twist', '30 sec each side'],
-    ['Happy Baby', '30–45 sec'],
-    ['Reclined Butterfly', '60 sec · hand on belly, soft breaths'],
-    ['Slow Belly Breathing', '10 breaths · in 4 sec, out 6 sec'],
+    { name: 'Child\'s Pose', scheme: '60 sec', hint: 'knees wide, slow belly breaths' },
+    { name: 'Cat–Cow', scheme: '× 10', hint: 'slow reps' },
+    { name: 'Knees-to-Chest', scheme: '60 sec', hint: 'gentle rocking is lovely' },
+    { name: 'Supine Twist', scheme: '30 sec', hint: 'each side' },
+    { name: 'Happy Baby', scheme: '30–45 sec', hint: '' },
+    { name: 'Reclined Butterfly', scheme: '60 sec', hint: 'hand on belly, soft breaths' },
+    { name: 'Slow Belly Breathing', scheme: '× 10', hint: 'in 4 sec, out 6 sec' },
   ],
 };
 
@@ -238,9 +238,9 @@ const HIP_ROUTINE = {
   sub: 'Strong, steady hips — a confident stride',
   gymNote: 'On gym days the warm-up already covers the machine work ✓ — this is the home top-up.',
   items: [
-    ['Clamshells', '2 × 15 each side · slow'],
-    ['Standing Hip Abduction', '2 × 15 each side · slow, no band needed'],
-    ['Single-Leg Balance', '30 sec each leg'],
+    { name: 'Clamshells', scheme: '2 × 15', hint: 'each side · slow' },
+    { name: 'Standing Hip Abduction', scheme: '2 × 15', hint: 'each side · slow — no band needed' },
+    { name: 'Single-Leg Balance', scheme: '30 sec', hint: 'each leg' },
   ],
 };
 const POSTURE_RESET = {
@@ -248,11 +248,11 @@ const POSTURE_RESET = {
   sub: 'Undo the desk day — stand tall',
   safety: 'If you ever feel neck pain, numbness or tingling into the arms, see a physio — don\'t push through.',
   items: [
-    ['Chin Tucks', '2 × 10 · glide straight back, 2-sec hold'],
-    ['Wall Angels', '2 × 10 · back and head on the wall'],
-    ['Thoracic Extension', '10 slow · over a chair back or roller'],
-    ['Doorway Chest Stretch', '2 × 30 sec'],
-    ['Prone Y-Raises', '2 × 10 · thumbs up, lift with love'],
+    { name: 'Chin Tucks', scheme: '2 × 10', hint: 'glide straight back · 2-sec hold' },
+    { name: 'Wall Angels', scheme: '2 × 10', hint: 'back and head on the wall' },
+    { name: 'Thoracic Extension', scheme: '× 10', hint: 'slow · over a chair back or roller' },
+    { name: 'Doorway Chest Stretch', scheme: '2 × 30 sec', hint: '' },
+    { name: 'Prone Y-Raises', scheme: '2 × 10', hint: 'thumbs up, lift with love' },
   ],
 };
 
