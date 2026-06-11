@@ -1,0 +1,14 @@
+{
+  "name": "SwoleSammy",
+  "short_name": "SwoleSammy",
+  "description": "Sammy's cycle-synced training, period tracker and gym notepad — made with love.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fdf3f6",
+  "theme_color": "#d96d8c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

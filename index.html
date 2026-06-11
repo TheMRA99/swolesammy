@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="theme-color" content="#d96d8c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SwoleSammy">
+  <title>SwoleSammy 💪💕</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-tab="today">
+
+  <!-- icon sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-dumbbell" viewBox="0 0 24 24">
+      <path d="M7 8v8M17 8v8M4 10v4M20 10v4M7 12h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-drop" viewBox="0 0 24 24">
+      <path d="M12 3.5C12 3.5 6.5 10 6.5 14a5.5 5.5 0 0 0 11 0C17.5 10 12 3.5 12 3.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24">
+      <path d="M4 20h16M5 16l4.2-5 3.4 3 5.4-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-plan" viewBox="0 0 24 24">
+      <rect x="5" y="4" width="14" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M9 9h6M9 13h6M9 17h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24">
+      <path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="15" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="9" cy="16" r="2.2" fill="none" stroke="currentColor" stroke-width="2"/>
+    </symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24">
+      <path d="M19 12a7 7 0 1 1-2-4.9M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
+  <div class="app">
+    <main class="content">
+      <section id="tab-today" class="tab"></section>
+      <section id="tab-cycle" class="tab"></section>
+      <section id="tab-progress" class="tab"></section>
+      <section id="tab-program" class="tab"></section>
+      <section id="tab-settings" class="tab"></section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-tab="today" aria-label="Today"><svg><use href="#i-dumbbell"/></svg><span>Today</span></button>
+      <button class="nav-btn" data-tab="cycle" aria-label="Cycle"><svg><use href="#i-drop"/></svg><span>Cycle</span></button>
+      <button class="nav-btn" data-tab="progress" aria-label="Progress"><svg><use href="#i-chart"/></svg><span>Progress</span></button>
+      <button class="nav-btn" data-tab="program" aria-label="Plan"><svg><use href="#i-plan"/></svg><span>Plan</span></button>
+      <button class="nav-btn" data-tab="settings" aria-label="Settings"><svg><use href="#i-gear"/></svg><span>Settings</span></button>
+    </nav>
+  </div>
+
+  <script src="quotes.js"></script>
+  <script src="program.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
