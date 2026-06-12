@@ -128,8 +128,22 @@ function parseScheme(s) {
 function bumpSets(s) { return String(s).replace(/^(\d+)/, n => +n + 1); }
 function dropSet(s) { return String(s).replace(/^(\d+)/, n => Math.max(1, +n - 1)); }
 
-/* ---------- plan resolution ---------- */
-function scheduledDay(iso) { return SCHEDULE[weekdayOf(iso)] || 'rest'; }
+/* ---------- plan resolution ----------
+   Sequence-based scheduling (spec §5): serve the next day in the
+   D1→2→3→4 rotation based on the last completed session before `iso`.
+   Never weekday-locked, nothing is ever "missed". */
+function lastCompletedSession(beforeISO) {
+  const dates = Object.keys(state.logs).filter(d => d < beforeISO).sort().reverse();
+  for (const d of dates) {
+    const l = state.logs[d];
+    if (typeof l.day === 'number' && (l.completed || (l.ex && l.ex.some(e => e.done)))) return { day: l.day, date: d };
+  }
+  return null;
+}
+function scheduledDay(iso) {
+  const last = lastCompletedSession(iso);
+  return last ? (last.day % 4) + 1 : 1;
+}
 const DAY_TYPE_LABEL = {
   rest: 'Rest · Recovery', 'cycle-rest': 'Cycle rest 🌙', walk: 'Gentle walk',
   stretch: 'Cramp-Relief Stretch', 'gentle-A': 'Gentle Session A', 'gentle-B': 'Gentle Session B',
@@ -311,16 +325,26 @@ function weekCounts() {
   return byWeek;
 }
 function weekCountsFor(monISO, byWeek) { return byWeek[monISO] || { sessions: 0, showed: 0 }; }
-// A week "counts" at 2+ sessions (minimum viable week) or 3+ showed-up days (grace: rest/walk/stretch count)
-function weekCounted(c) { return c.sessions >= 2 || c.showed >= 3; }
+/* Rolling 7-day blocks (spec §5 — no fixed weekly slots).
+   A block "counts" at 2+ sessions (minimum viable week)
+   or 3+ showed-up days (grace: cycle rest / walk / stretch count). */
+function blockQualifies(endISO) {
+  const startISO = addDays(endISO, -6);
+  let s = 0, sh = 0;
+  Object.keys(state.logs).forEach(d => {
+    if (d >= startISO && d <= endISO) {
+      if (isSession(state.logs[d])) s++;
+      if (isShowedUp(state.logs[d])) sh++;
+    }
+  });
+  return s >= 2 || sh >= 3;
+}
 function weeklyStreak() {
-  const byWeek = weekCounts();
   let streak = 0;
-  let w = mondayOf(todayISO());
-  const cur = weekCountsFor(w, byWeek);
-  if (weekCounted(cur)) streak++;            // current week joins once it qualifies
-  w = addDays(w, -7);
-  while (weekCounted(weekCountsFor(w, byWeek))) { streak++; w = addDays(w, -7); }
+  let end = todayISO();
+  if (blockQualifies(end)) streak++;          // current 7 days join once they qualify
+  end = addDays(end, -7);
+  while (blockQualifies(end)) { streak++; end = addDays(end, -7); }
   return streak;
 }
 
@@ -634,6 +658,14 @@ function renderToday() {
           <option value="rest" ${day === 'rest' ? 'selected' : ''}>Rest · Recovery</option>
         </select>
       </div>`);
+  }
+
+  // spacing nudge (spec §5): soft note when leg days stack — never blocks
+  if (typeof day === 'number' && (day === 1 || day === 3)) {
+    const prev = state.logs[addDays(viewDate, -1)];
+    if (prev && typeof prev.day === 'number' && (prev.day === 1 || prev.day === 3) && (prev.completed || (prev.ex || []).some(e => e.done))) {
+      parts.push(`<div class="phase-note"><span>🌶️</span><span>Back-to-back leg days are spicy — Day 2 instead? Your legs, your call. <button class="link-btn" data-action="menu-pick" data-day="2">Switch to Day 2</button></span></div>`);
+    }
   }
 
   // adaptive offer (check-ins DO something — spec §11)
@@ -1026,15 +1058,14 @@ function renderProgress() {
   const parts = [`<h1 class="tab-title">Progress<small>Told in words and numbers you chose — never comparisons</small></h1>`];
   const sessions = sessionDates();
   const today = todayISO();
-  const wkStart = mondayOf(today);
-  const thisWeek = sessions.filter(d => d >= wkStart).length;
+  const last7 = sessions.filter(d => d >= addDays(today, -6)).length;
   const thisMonth = sessions.filter(d => monthKey(d) === monthKey(today)).length;
   const streak = weeklyStreak();
-  const weekTier = thisWeek >= 3 ? 'great week 🌟' : thisWeek >= 2 ? 'week made ✓' : thisWeek === 1 ? 'on the board' : 'fresh page';
+  const weekTier = last7 >= 3 ? 'great week 🌟' : last7 >= 2 ? 'week made ✓' : last7 === 1 ? 'on the board' : 'fresh page';
 
   parts.push(`
     <div class="stat-grid">
-      <div class="stat"><b>${thisWeek}</b><span>${weekTier}</span></div>
+      <div class="stat"><b>${last7}</b><span>${weekTier}</span></div>
       <div class="stat"><b>${thisMonth}</b><span>this month</span></div>
       <div class="stat"><b>${streak || '💛'}</b><span>${streak ? 'week streak' : 'fresh start'}</span></div>
       <div class="stat"><b>${sessions.length}</b><span>sessions ever</span></div>
@@ -1191,12 +1222,11 @@ function renderProgress() {
 function buildShareText() {
   const info = cycleInfo(todayISO());
   const sessions = sessionDates();
-  const wkStart = mondayOf(todayISO());
-  const thisWeek = sessions.filter(d => d >= wkStart).length;
+  const last7 = sessions.filter(d => d >= addDays(todayISO(), -6)).length;
   const thisMonth = sessions.filter(d => monthKey(d) === monthKey(todayISO())).length;
   const lines = [`💪 ${state.name}'s SwoleSammy update`];
   if (info) lines.push(`Cycle: Day ${info.day} · Week ${info.week} ${PHASES[info.week].phase}`);
-  lines.push(`This week: ${thisWeek} session${thisWeek === 1 ? '' : 's'} · This month: ${thisMonth}`);
+  lines.push(`Last 7 days: ${last7} session${last7 === 1 ? '' : 's'} · This month: ${thisMonth}`);
   const bests = allBests();
   const top = Object.keys(bests).filter(n => KEY_LIFTS.includes(n)).slice(0, 4);
   if (top.length) {
@@ -1232,7 +1262,14 @@ function renderProgram() {
       <p class="hint" style="margin-top:12px">Busy week? <b>Two sessions (one lower + one upper) is a complete week.</b> Celebrate it.</p>
     </div>`);
 
-  parts.push(`<div class="card"><h2>Weekly schedule</h2><div class="sched">${[['Mon', 'Day 1 · Glutes & Hamstrings'], ['Tue', 'Day 2 · Back & Shoulders'], ['Wed', 'Walk · Recovery'], ['Thu', 'Day 3 · Glutes & Quads'], ['Fri', 'Walk · Recovery'], ['Sat', 'Day 4 · Chest, Shoulders & Arms'], ['Sun', 'Walk · Recovery']].map(([d, t]) => `<div class="sched-row ${t.startsWith('Walk') ? 'rest-row' : ''}"><span class="sched-day">${d}</span><span>${esc(t)}</span></div>`).join('')}</div><p class="hint" style="margin-top:8px">Keep at least one rest day between Day 1 and Day 3 — both are big lower days.</p></div>`);
+  parts.push(`
+    <div class="card"><h2>The rotation<span class="sub">No fixed weekdays — life happens on its own schedule</span></h2>
+      <div class="rota">
+        ${[1, 2, 3, 4].map(d => `<div class="rota-step"><b>Day ${d}</b><span>${esc(DAY_TITLES[d])}</span></div>`).join('<div class="rota-arrow">→</div>')}
+        <div class="rota-arrow">↻</div>
+      </div>
+      <p class="hint" style="margin-top:12px">Whenever you open the app, it simply queues up <b>whatever comes next</b> and waits for you — nothing is ever missed. Aim for <b>4 sessions every 7–9 days</b>, rest whenever life asks, and give the two leg days a little breathing room (the app nudges if they stack).</p>
+    </div>`);
 
   // hormone structure
   parts.push(`<h2 class="sect-head">Your month, structured</h2>`);

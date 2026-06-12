@@ -66,9 +66,8 @@ const DAY_TAGLINES = {
   4: 'Building <b>strength</b>, keeping it <b>cute</b>.',
 };
 
-// Which weekday maps to which training day (0 = Sun … 6 = Sat)
-// Template: Mon D1 · Tue D2 · Thu D3 · Sat D4 (≥1 rest day between D1 & D3)
-const SCHEDULE = { 1: 1, 2: 2, 4: 3, 6: 4 };
+/* Scheduling is sequence-based (spec §5): Day 1 → 2 → 3 → 4 → repeat.
+   No weekday mapping — the app serves whatever comes next in the rotation. */
 
 /* Exercise schema:
    { name, scheme (string | {week:string}), rest ('90 sec'|'60 sec'),
