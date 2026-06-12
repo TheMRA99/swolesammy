@@ -687,7 +687,7 @@ function renderToday() {
   const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy'].includes(s));
   if (typeof day === 'number' && rough && !current.lighter && !current.offerDismissed && week !== 1) {
     parts.push(`
-      <div class="card offer-card">
+      <div class="card offer-card" id="adaptive-offer">
         <h2>Want today a little lighter? 💗</h2>
         <p class="hint">Rough days still count. Pick whatever feels kind:</p>
         <button class="primary" data-action="lighter">Same workout, one set less everywhere</button>
@@ -696,7 +696,7 @@ function renderToday() {
       </div>`);
   }
   if (typeof day === 'number' && week === 3 && current.symptoms.includes('Energized')) {
-    parts.push(`<div class="overload">☀️ Strongest week + feeling energized? Today's a lovely day to try +2.5 kg on your first lift.</div>`);
+    parts.push(`<div class="overload" id="power-nudge">☀️ Strongest week + feeling energized? Today's a lovely day to try +2.5 kg on your first lift.</div>`);
   }
 
   // ---- render the day ----
@@ -1406,6 +1406,22 @@ function startRest(sec) {
   restInterval = setInterval(tick, 1000);
 }
 
+/* ---------- reveal check-in consequences ----------
+   Mood/symptom taps can spawn an offer card higher up the page —
+   scroll to it so the options are never missed. */
+function revealOffer() {
+  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy'].includes(s));
+  let el = document.querySelector('#adaptive-offer') || document.querySelector('#power-nudge');
+  if (!el && rough) el = document.querySelector('.tier-grid'); // period week: her options ARE the menu
+  if (!el) return;
+  const card = el.closest('.card') || el;
+  card.classList.add('attn');
+  // smooth needs animation frames — fall back to instant when hidden or reduced-motion
+  const smoothOK = !document.hidden && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  card.scrollIntoView({ behavior: smoothOK ? 'smooth' : 'auto', block: 'center' });
+  setTimeout(() => card.classList.remove('attn'), 1700);
+}
+
 /* ---------- hearts ---------- */
 function burstHearts(el) {
   const r = el.getBoundingClientRect();
@@ -1475,8 +1491,8 @@ document.addEventListener('click', e => {
   else if (a === 'toggle-posture') { const i = +t.dataset.i; current.posture[i] = !current.posture[i]; commit(); renderToday(); }
   else if (a === 'toggle-hips') { const i = +t.dataset.i; current.hips[i] = !current.hips[i]; commit(); renderToday(); }
   else if (a === 'toggle-stretch') { const i = +t.dataset.i; current.stretch[i] = !current.stretch[i]; commit(); renderToday(); }
-  else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); }
-  else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); }
+  else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); revealOffer(); }
+  else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); revealOffer(); }
   else if (a === 'habit') { const s = t.dataset.s; const ix = current.habits.indexOf(s); ix === -1 ? current.habits.push(s) : current.habits.splice(ix, 1); commit(); renderToday(); }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
   else if (a === 'offer-gentle') { const g = 'gentle-' + (state.gentleLast === 'A' ? 'B' : 'A'); state.gentleLast = g.slice(-1); current = buildLog(viewDate, g); current.day = g; current.chosen = true; commit(); save(); renderToday(); }

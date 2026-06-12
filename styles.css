@@ -224,6 +224,11 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .hint b { color: var(--rose-deep); }
 
 .offer-card { border: 1.5px solid color-mix(in srgb, var(--rose) 35%, transparent); }
+.attn { animation: attn-pulse 1.5s ease; }
+@keyframes attn-pulse {
+  0%, 100% { box-shadow: var(--shadow-sm); }
+  30%, 60% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--rose) 35%, transparent); }
+}
 .link-btn { border: none; background: none; color: var(--rose-deep); font-family: inherit; font-weight: 800; font-size: 13px; cursor: pointer; padding: 6px 4px; }
 
 /* ---------- date strip ---------- */
