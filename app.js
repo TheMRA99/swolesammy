@@ -467,6 +467,20 @@ function render() {
 }
 
 /* ===================== TODAY ===================== */
+/* Ramp-up sets (spec §3): 1–2 lighter feel sets before the big lifts.
+   Idiot-proof rendering: compute real kg from today's typed weight,
+   falling back to her last logged weight; round to 2.5 kg plates. */
+function rampWeights(e, last) {
+  const base = parseFloat(e.weight) || (last && parseFloat(last.weight)) || null;
+  if (!base) return null;
+  const round = w => Math.max(2.5, Math.round(w / 2.5) * 2.5);
+  return [round(base * 0.5), round(base * 0.75)];
+}
+function rampLabelText(r, rw) {
+  const reps = r === 0 ? '6 easy reps' : '5 smooth reps';
+  const frac = r === 0 ? 'half' : 'about ¾';
+  return `Warm-up set ${r + 1} · ${rw ? '≈' + rw[r] + ' kg' : frac + ' of your working weight'} × ${reps}`;
+}
 function exRowHTML(e, i, day) {
   const meta = exMeta(day, e.name) || exMeta(day, Object.keys(current.swaps).find(k => current.swaps[k] === e.name) || '');
   const origName = Object.keys(current.swaps).find(k => current.swaps[k] === e.name);
@@ -476,14 +490,15 @@ function exRowHTML(e, i, day) {
   const owned = ownedLastTime(e.name, e.scheme, viewDate);
   const hasCues = meta && (meta.cues || meta.note || meta.rest || meta.avoid);
   const hasAlts = baseMeta && baseMeta.alts && baseMeta.alts.length;
+  const rw = (meta && meta.ramp) ? rampWeights(e, last) : null;
   const rampRows = (meta && meta.ramp) ? [0, 1].map(r => {
     const on = (current.ramp[e.name] || [])[r];
     return `
       <div class="ramp-row ${on ? 'done' : ''}">
         <button class="check mini-check" data-action="toggle-ramp" data-name="${esc(e.name)}" data-i="${r}">${on ? '✓' : ''}</button>
-        <span>Ramp ${r + 1} · ${r === 0 ? '≈50% × 6 easy' : '≈75% × 5 smooth'}</span>
+        <span class="ramp-label" data-r="${r}">${esc(rampLabelText(r, rw))}</span>
       </div>`;
-  }).join('') : '';
+  }).join('') + `<div class="ramp-note">These two don't count — they just switch the muscle on. Your real sets start below 👇</div>` : '';
   return `
     <div class="ex-row ${e.done ? 'done' : ''}">
       ${rampRows}
@@ -1286,7 +1301,7 @@ function renderProgram() {
     parts.push(`<div class="statement" style="margin:4px 0 12px">${DAY_TAGLINES[day]}</div>`);
     parts.push(`<div class="section-label">Warm-up</div><ul class="warmup-list">${block.warmup.map(x => `<li>${esc(x)}</li>`).join('')}</ul><div class="section-label">Exercises</div>`);
     block.ex.forEach(e => {
-      parts.push(`<div class="plan-ex"><span class="nm">${esc(e.name)}${e.note ? `<small>${esc(e.note)}</small>` : ''}${e.alts ? `<small>⇄ swaps: ${e.alts.map(a => esc(a.name)).join(', ')}</small>` : ''}</span><span class="sc">${esc(schemeLabel(e.scheme))}</span></div>`);
+      parts.push(`<div class="plan-ex"><span class="nm">${esc(e.name)}${e.note ? `<small>${esc(e.note)}</small>` : ''}${e.ramp ? `<small>starts with 2 light warm-up sets (≈half, then ≈¾ of your weight)</small>` : ''}${e.alts ? `<small>⇄ swaps: ${e.alts.map(a => esc(a.name)).join(', ')}</small>` : ''}</span><span class="sc">${esc(schemeLabel(e.scheme))}</span></div>`);
     });
     if (block.burnout) parts.push(`<div class="section-label">${esc(block.burnout.title)}</div><ul class="warmup-list">${block.burnout.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`);
     parts.push(`<div class="cardio">🚶‍♀️ ${esc(block.cardio)} — part of the session (week 1 swaps to a gentle walk)</div></details>`);
@@ -1550,7 +1565,21 @@ document.addEventListener('input', e => {
   const t = e.target.closest('[data-action]');
   if (!t) return;
   const a = t.dataset.action;
-  if (a === 'ex-field') { const i = +t.dataset.i; current.ex[i][t.dataset.field] = t.value; commit(); }
+  if (a === 'ex-field') {
+    const i = +t.dataset.i;
+    current.ex[i][t.dataset.field] = t.value;
+    commit();
+    // keep the warm-up set suggestions in sync with the weight she types
+    if (t.dataset.field === 'weight') {
+      const row = t.closest('.ex-row');
+      const labels = row ? row.querySelectorAll('.ramp-label') : [];
+      if (labels.length) {
+        const e2 = current.ex[i];
+        const rw = rampWeights(e2, lastPerf(e2.name, viewDate));
+        labels.forEach(el => { el.textContent = rampLabelText(+el.dataset.r, rw); });
+      }
+    }
+  }
   else if (a === 'notes') { current.notes = t.value; commit(); }
 });
 
