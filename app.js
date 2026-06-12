@@ -197,7 +197,7 @@ function blankLog(iso, dayOverride) {
     posture: POSTURE_RESET.items.map(() => false),
     hips: HIP_ROUTINE.items.map(() => false),
     stretch: CRAMP_RELIEF.items.map(() => false),
-    floor: FLOOR_ROUTINE.items.map(() => false),
+    squat: SQUAT_RESET.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
     cardioDone: false, cardioSkipped: false, offerDismissed: false,
     ex: plan.ex ? plan.ex.map(e => ({ name: e.name, scheme: e.scheme, done: false, weight: '', reps: '' })) : [],
@@ -219,7 +219,7 @@ function buildLog(iso, dayOverride) {
   if (!saved) return fresh;
   ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
   ['symptoms', 'habits'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
-  ['posture', 'hips', 'stretch', 'floor'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
+  ['posture', 'hips', 'stretch', 'squat'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
   fresh.ramp = Object.assign({}, saved.ramp || {});
   if (saved.day === day) {
     if (fresh.lighter) fresh.ex = blankLog(iso, day).ex.map((e, i) => e), applyLighter(fresh, iso, day);
@@ -248,7 +248,7 @@ function isMeaningful(log) {
     (log.mood === 0 || log.mood) ||
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
-    (log.stretch && log.stretch.some(Boolean)) || (log.floor && log.floor.some(Boolean)) || log.cardioDone ||
+    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || log.cardioDone ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
     (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '')));
 }
@@ -836,16 +836,13 @@ function renderToday() {
       <p class="hint">${esc(HIP_ROUTINE.sub)}.${isGymDay ? ' ' + esc(HIP_ROUTINE.gymNote) : ''}</p>
       <div class="ex-list">${tickListHTML(HIP_ROUTINE.items, current.hips, 'toggle-hips')}</div>
     </details>`);
-  // skip on crampy period days (belly compression can aggravate cramps)
-  if (!onPeriod) {
-    parts.push(`
-      <details class="card" ${current.floor.some(Boolean) ? 'open' : ''}>
-        <summary>🌷 ${FLOOR_ROUTINE.title}</summary>
-        <p class="hint">${esc(FLOOR_ROUTINE.sub)}.</p>
-        <div class="ex-list">${tickListHTML(FLOOR_ROUTINE.items, current.floor, 'toggle-floor')}</div>
-        <p class="hint" style="margin-top:10px">${esc(FLOOR_ROUTINE.safety)}</p>
-      </details>`);
-  }
+  parts.push(`
+    <details class="card" ${current.squat.some(Boolean) ? 'open' : ''}>
+      <summary>🐸 ${SQUAT_RESET.title}</summary>
+      <p class="hint">${esc(SQUAT_RESET.sub)}.</p>
+      <div class="ex-list">${tickListHTML(SQUAT_RESET.items, current.squat, 'toggle-squat')}</div>
+      <p class="hint" style="margin-top:10px">${esc(SQUAT_RESET.safety)}</p>
+    </details>`);
   parts.push(`
     <details class="card" ${current.posture.some(Boolean) ? 'open' : ''}>
       <summary>🧘 ${POSTURE_RESET.title}</summary>
@@ -1354,8 +1351,8 @@ function renderProgram() {
     <div class="card"><h2>🦩 ${esc(HIP_ROUTINE.title)}</h2><p class="hint">${esc(HIP_ROUTINE.sub)}.</p>
       ${routineRows(HIP_ROUTINE.items)}
     </div>
-    <div class="card"><h2>🌷 ${esc(FLOOR_ROUTINE.title)}</h2><p class="hint">${esc(FLOOR_ROUTINE.sub)}. Takes the week off during your period 🌙</p>
-      ${routineRows(FLOOR_ROUTINE.items)}
+    <div class="card"><h2>🐸 ${esc(SQUAT_RESET.title)}</h2><p class="hint">${esc(SQUAT_RESET.sub)}.</p>
+      ${routineRows(SQUAT_RESET.items)}
     </div>
     <div class="card"><h2>🧘 ${esc(POSTURE_RESET.title)}</h2><p class="hint">${esc(POSTURE_RESET.sub)}.</p>
       ${routineRows(POSTURE_RESET.items)}
@@ -1505,7 +1502,7 @@ document.addEventListener('click', e => {
   }
   else if (a === 'toggle-posture') { const i = +t.dataset.i; current.posture[i] = !current.posture[i]; commit(); renderToday(); }
   else if (a === 'toggle-hips') { const i = +t.dataset.i; current.hips[i] = !current.hips[i]; commit(); renderToday(); }
-  else if (a === 'toggle-floor') { const i = +t.dataset.i; current.floor[i] = !current.floor[i]; commit(); renderToday(); }
+  else if (a === 'toggle-squat') { const i = +t.dataset.i; current.squat[i] = !current.squat[i]; commit(); renderToday(); }
   else if (a === 'toggle-stretch') { const i = +t.dataset.i; current.stretch[i] = !current.stretch[i]; commit(); renderToday(); }
   else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); revealOffer(); }
   else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); revealOffer(); }

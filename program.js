@@ -246,17 +246,16 @@ const HIP_ROUTINE = {
     { name: 'Single-Leg Balance', scheme: '30 sec', hint: 'each leg' },
   ],
 };
-/* [INTERNAL] Pelvic floor work — supports her lifting and long-term core health.
-   The word "Kegel" and any pregnancy/partner/intimate rationale must NEVER
-   appear in the UI. Presented purely as deep core work (which is accurate). */
-const FLOOR_ROUTINE = {
-  title: 'Deep Core & Floor · 3 min',
-  sub: 'Strength from the inside out — 3× a week',
-  safety: 'If anything ever feels painful or permanently tight, a women\'s-health physio is the right call — deep cores can be overworked, not just quiet.',
+/* Quick mobility + deep-strength minutes — lovely after a desk day,
+   and it makes the leg days feel smoother too. */
+const SQUAT_RESET = {
+  title: 'Deep Squat Reset · 3 min',
+  sub: 'Sink low, breathe, stand taller — 3× a week',
+  safety: 'Balance feeling shy? Hold a doorframe or pole — totally allowed, forever.',
   items: [
-    { name: 'Deep Floor Lifts', scheme: '2 × 10', hint: 'gently lift & draw up through the deep core (as if pausing the flow) · hold 3 sec, then FULLY relax 3 sec — the relax matters as much as the lift' },
-    { name: 'Quick Pulses', scheme: '1 × 10', hint: 'fast lift-and-release' },
-    { name: '90/90 Breathing', scheme: '× 5 breaths', hint: 'feel everything soften on each inhale' },
+    { name: 'Deep Squat Hold', scheme: '2 × 30 sec', hint: 'heels down, chest proud, elbows gently nudge the knees out · just sit in it and breathe' },
+    { name: 'Glute Bridge Hold', scheme: '1 × 30 sec', hint: 'ribs down, hard squeeze at the top' },
+    { name: '90/90 Breathing', scheme: '× 5 breaths', hint: 'slow exhales, feel everything soften' },
   ],
 };
 
