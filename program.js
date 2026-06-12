@@ -166,12 +166,13 @@ const DAYS = {
         { name: 'Dumbbell Bench Press', scheme: '2×10', note: 'Flat bench, controlled lowering.' },
         { name: 'Push-Up Progression', scheme: '2×8–12', note: 'Incline → knees → full. Log your variation in notes.' },
       ] },
+      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.' },
       { name: 'Shoulder Press Machine', scheme: '3×10', rest: '90 sec', cues: ['Controlled, no locked elbows'] },
       { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'] },
-      { name: 'Rope Tricep Pushdown', scheme: '2×12', rest: '60 sec', cues: ['Elbows pinned', 'Full extension and squeeze'] },
       { name: 'Overhead Rope Extension', scheme: '2×12', rest: '60 sec', cues: ['Full stretch at the bottom', 'Elbows close to the head'], note: 'Pump exercise — enjoy.' },
       { name: 'Dumbbell Curl', scheme: '2×12', rest: '60 sec', cues: ['No swinging, full range'] },
       { name: 'Face Pull', scheme: '2×15', rest: '60 sec', cues: ['Posture top-up — elbows high'] },
+      { name: 'Farmer\'s Carry', scheme: '2×30–40 m', rest: '90 sec', dist: true, cues: ['Heaviest dumbbells you can hold with tall posture', 'Shoulders back, controlled steps'], note: 'Grip, core, carrying strength — the quiet confidence-builder. Log kg per hand and metres.' },
       { name: 'Front Plank', scheme: '3×30–45 sec', rest: '60 sec', tag: 'core', cues: ['Squeeze glutes, ribs down', 'Breathe'] },
       { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'] },
       { name: 'Vacuum Breathing', scheme: '3 rounds × 10 breaths', rest: '60 sec', tag: 'core', skipOnPeriod: true, cues: ['Exhale fully, draw the belly button in', 'Hold gently, breathe shallow'], note: 'Deep-core control — strength from the inside out.' },
@@ -180,7 +181,10 @@ const DAYS = {
   },
 };
 // Phase-1 volume bump (evolution engine): re-add when unlocked
-const PHASE1_EXTRA_D4 = { name: 'Hammer Curl', scheme: '2×12', rest: '60 sec', cues: ['Neutral grip, no swinging'] };
+const PHASE1_EXTRA_D4 = [
+  { name: 'Hammer Curl', scheme: '2×12', rest: '60 sec', cues: ['Neutral grip, no swinging'] },
+  { name: 'Rope Tricep Pushdown', scheme: '2×12', rest: '60 sec', cues: ['Elbows pinned', 'Full extension and squeeze'] },
+];
 
 function resolveScheme(scheme, week) {
   return typeof scheme === 'object' ? (scheme[week] || scheme[2]) : scheme;
@@ -242,6 +246,20 @@ const HIP_ROUTINE = {
     { name: 'Single-Leg Balance', scheme: '30 sec', hint: 'each leg' },
   ],
 };
+/* [INTERNAL] Pelvic floor work — supports her lifting and long-term core health.
+   The word "Kegel" and any pregnancy/partner/intimate rationale must NEVER
+   appear in the UI. Presented purely as deep core work (which is accurate). */
+const FLOOR_ROUTINE = {
+  title: 'Deep Core & Floor · 3 min',
+  sub: 'Strength from the inside out — 3× a week',
+  safety: 'If anything ever feels painful or permanently tight, a women\'s-health physio is the right call — deep cores can be overworked, not just quiet.',
+  items: [
+    { name: 'Deep Floor Lifts', scheme: '2 × 10', hint: 'gently lift & draw up through the deep core (as if pausing the flow) · hold 3 sec, then FULLY relax 3 sec — the relax matters as much as the lift' },
+    { name: 'Quick Pulses', scheme: '1 × 10', hint: 'fast lift-and-release' },
+    { name: '90/90 Breathing', scheme: '× 5 breaths', hint: 'feel everything soften on each inhale' },
+  ],
+};
+
 const POSTURE_RESET = {
   title: 'Posture Reset · 4 min',
   sub: 'Undo the desk day — stand tall',
@@ -314,7 +332,7 @@ const NUTRITION = {
     lines: [
       'A gentle working range of about <b>1,500–1,750 kcal</b> — never below 1,500.',
       'This is recomposition, not dieting: <b>don\'t chase fat loss, chase strength.</b>',
-      'Judge it by monthly tape measurements and rising lifts — never by a daily scale.',
+      'Judge it by rising lifts and how you feel — never by a daily scale.',
       'Don\'t lift fully fasted — a small bite 60–90 min before (yogurt + banana, toast + eggs) makes sessions feel better.',
     ],
   },
@@ -351,7 +369,7 @@ const NUTRITION = {
 // Expected timeline (motivation screens — process-framed)
 const TIMELINE = [
   ['Months 1–2', 'Standing taller, feeling stronger, habits clicking'],
-  ['Months 3–4', 'Tape measure starts agreeing with you · arms say hello'],
+  ['Months 3–4', 'Clothes start agreeing with you · arms say hello'],
   ['Months 5–6', 'Shoulder lines, back shape, core waking up'],
   ['Months 8–12', 'The athletic look settles in for good'],
 ];

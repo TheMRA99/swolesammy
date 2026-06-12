@@ -14,7 +14,7 @@ const defaultState = () => ({
   theme: 'auto',            // 'light' | 'dark' | 'auto'
   periods: [],              // [{start, end|null}] sorted by start
   logs: {},                 // dateISO -> log
-  measurements: [],         // [{d, waist, hips, weight}] sorted by d
+  pregnant: false,          // pauses all programming with a warm handover
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
   phase1: false,            // volume bump accepted
   lastDeload: null,
@@ -38,7 +38,6 @@ function load() {
       if (p.cycleStartDate && (!p.periods || !p.periods.length)) s.periods = [{ start: p.cycleStartDate, end: null }];
       delete s.cycleStartDate; delete s.quoteCache;
       s.periods = (s.periods || []).filter(x => x && x.start).sort((a, b) => a.start < b.start ? -1 : 1);
-      s.measurements = (s.measurements || []).sort((a, b) => a.d < b.d ? -1 : 1);
       s.v = 3;
       return s;
     }
@@ -119,10 +118,10 @@ function isPeriodStart(iso) { return state.periods.some(p => p.start === iso); }
 /* ---------- names & schemes ---------- */
 const normName = n => ALIASES[n] || n;
 function parseScheme(s) {
-  // '3×8–10' → {sets:3, low:8, top:10}; time/breath schemes return top:null
+  // '3×8–10' → {sets:3, low:8, top:10}; time/breath/distance schemes return top:null
   const m = String(s).match(/(\d+)\s*×\s*(\d+)(?:\s*[–-]\s*(\d+))?/);
   if (!m) return { sets: 1, low: null, top: null };
-  const timed = /sec|min|breath/i.test(s);
+  const timed = /sec|min|breath|\bm\b/i.test(s);
   return { sets: +m[1], low: +m[2], top: timed ? null : +(m[3] || m[2]) };
 }
 function bumpSets(s) { return String(s).replace(/^(\d+)/, n => +n + 1); }
@@ -161,9 +160,11 @@ function planFor(week, day, opts) {
   let ex = block.ex.map(e => ({ ...e, scheme: resolveScheme(e.scheme, week) }));
   if (state.phase1) {
     ex = ex.map((e, i) => i < 2 ? { ...e, scheme: bumpSets(e.scheme) } : e);
-    if (day === 4 && !ex.some(e => e.name === PHASE1_EXTRA_D4.name)) {
+    if (day === 4) {
       const at = ex.findIndex(e => e.name === 'Face Pull');
-      ex.splice(at === -1 ? ex.length : at, 0, { ...PHASE1_EXTRA_D4 });
+      PHASE1_EXTRA_D4.forEach((extra, k) => {
+        if (!ex.some(e => e.name === extra.name)) ex.splice(at === -1 ? ex.length : at + k, 0, { ...extra });
+      });
     }
   }
   if (opts.lighter) ex = ex.map(e => ({ ...e, scheme: dropSet(e.scheme) }));
@@ -178,7 +179,7 @@ function planFor(week, day, opts) {
 function exMeta(day, name) {
   let list = null;
   if (day === 'gentle-A' || day === 'gentle-B') list = GENTLE[day.slice(-1)].ex;
-  else if (DAYS[day]) list = DAYS[day].ex.concat([PHASE1_EXTRA_D4]);
+  else if (DAYS[day]) list = DAYS[day].ex.concat(PHASE1_EXTRA_D4);
   if (!list) return null;
   return list.find(e => e.name === name) || null;
 }
@@ -196,6 +197,7 @@ function blankLog(iso, dayOverride) {
     posture: POSTURE_RESET.items.map(() => false),
     hips: HIP_ROUTINE.items.map(() => false),
     stretch: CRAMP_RELIEF.items.map(() => false),
+    floor: FLOOR_ROUTINE.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
     cardioDone: false, cardioSkipped: false, offerDismissed: false,
     ex: plan.ex ? plan.ex.map(e => ({ name: e.name, scheme: e.scheme, done: false, weight: '', reps: '' })) : [],
@@ -217,7 +219,7 @@ function buildLog(iso, dayOverride) {
   if (!saved) return fresh;
   ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
   ['symptoms', 'habits'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
-  ['posture', 'hips', 'stretch'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
+  ['posture', 'hips', 'stretch', 'floor'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
   fresh.ramp = Object.assign({}, saved.ramp || {});
   if (saved.day === day) {
     if (fresh.lighter) fresh.ex = blankLog(iso, day).ex.map((e, i) => e), applyLighter(fresh, iso, day);
@@ -246,7 +248,7 @@ function isMeaningful(log) {
     (log.mood === 0 || log.mood) ||
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
-    (log.stretch && log.stretch.some(Boolean)) || log.cardioDone ||
+    (log.stretch && log.stretch.some(Boolean)) || (log.floor && log.floor.some(Boolean)) || log.cardioDone ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
     (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '')));
 }
@@ -382,12 +384,12 @@ function plateauedLift() {
   return null;
 }
 function pickEvolutionPrompt() {
-  if (viewDate !== todayISO()) return null;
+  if (viewDate !== todayISO() || state.pregnant) return null;
   const bests = allBests();
   const sessions = sessionDates();
 
   if (!state.phase1 && promptAvailable('volumeBump') && weeksConsistent(4, 3)) {
-    return { id: 'volumeBump', emoji: '📈', title: 'Ready for a little more?', body: 'Four strong weeks in a row. Want to add one set to the first two lifts of each day (and bring Hammer Curls back)? One change, big payoff.', accept: 'Yes — level up', later: 'Not yet' };
+    return { id: 'volumeBump', emoji: '📈', title: 'Ready for a little more?', body: 'Four strong weeks in a row. Want to add one set to the first two lifts of each day (and bring Hammer Curls + Rope Pushdowns back)? One change, big payoff.', accept: 'Yes — level up', later: 'Not yet' };
   }
   if (promptAvailable('deload') && sessions.length >= 28 && (!state.lastDeload || daysBetween(state.lastDeload, todayISO()) > 63)) {
     return { id: 'deload', emoji: '🌿', title: 'Deload week?', body: 'You\'ve been training hard for a couple of months. One easy week — same exercises, about 40% lighter — and you come back stronger. Recovery is part of the program.', accept: 'Take the easy week', later: 'Maybe later' };
@@ -485,8 +487,9 @@ function exRowHTML(e, i, day) {
   const meta = exMeta(day, e.name) || exMeta(day, Object.keys(current.swaps).find(k => current.swaps[k] === e.name) || '');
   const origName = Object.keys(current.swaps).find(k => current.swaps[k] === e.name);
   const baseMeta = origName ? exMeta(day, origName) : meta;
+  const isDist = !!(meta && meta.dist);
   const last = lastPerf(e.name, viewDate);
-  const lastTxt = last ? `Last: ${last.weight ? esc(last.weight) + ' kg' : ''}${last.weight && last.reps ? ' × ' : ''}${last.reps ? esc(last.reps) : ''} · ${esc(shortDate(last.date))}` : '';
+  const lastTxt = last ? `Last: ${last.weight ? esc(last.weight) + ' kg' : ''}${last.weight && last.reps ? ' × ' : ''}${last.reps ? esc(last.reps) + (isDist ? ' m' : '') : ''} · ${esc(shortDate(last.date))}` : '';
   const owned = ownedLastTime(e.name, e.scheme, viewDate);
   const hasCues = meta && (meta.cues || meta.note || meta.rest || meta.avoid);
   const hasAlts = baseMeta && baseMeta.alts && baseMeta.alts.length;
@@ -512,7 +515,7 @@ function exRowHTML(e, i, day) {
         </div>
         <div class="ex-inputs">
           <input class="mini" inputmode="decimal" placeholder="${last && last.weight ? esc(last.weight) : 'kg'}" value="${esc(e.weight)}" data-action="ex-field" data-field="weight" data-i="${i}">
-          <input class="mini" inputmode="text" placeholder="reps" value="${esc(e.reps)}" data-action="ex-field" data-field="reps" data-i="${i}">
+          <input class="mini" inputmode="text" placeholder="${isDist ? 'm' : 'reps'}" value="${esc(e.reps)}" data-action="ex-field" data-field="reps" data-i="${i}">
         </div>
         ${hasAlts ? `<button class="swap-btn" data-action="toggle-swaps" aria-label="Swap exercise">⇄</button>` : ''}
       </div>
@@ -582,6 +585,19 @@ function renderToday() {
       <div class="marquee" aria-hidden="true"><span>${'swolesammy · strongest girl I know · est. 2026 · always showing up · '.repeat(4)}</span></div>
     </div>`);
 
+  // pregnancy guard (spec §8): pause all programming with a warm handover
+  if (state.pregnant) {
+    parts.push(`
+      <div class="card offer-card" style="text-align:center">
+        <span style="font-size:40px">🤍</span>
+        <h2 style="margin-top:8px">A new chapter</h2>
+        <p class="hint">This chapter needs a real-life professional — talk to your doctor about training, and we'll be right here after 💛</p>
+        <p class="hint">Everything you've built is saved and waiting. Gentle walks and rest are always yours.</p>
+      </div>`);
+    $('#tab-today').innerHTML = parts.join('');
+    return;
+  }
+
   // quote / message
   if (!currentQuote) currentQuote = dailyContent();
   parts.push(quoteCardHTML(currentQuote));
@@ -639,6 +655,10 @@ function renderToday() {
   const sCount = sessionDates().length;
   if (isToday && sCount >= 1 && sCount <= 6 && typeof day === 'number') {
     parts.push(`<div class="phase-note"><span>🫶</span><span><b>New-muscle soreness is normal</b> — it peaks a day or two after and fades. Mildly sore: train, movement helps. Can't-sit-down sore: extra rest day + a little lighter next time.</span></div>`);
+  }
+  // one-time gear tip on press day (kind, never body-framed)
+  if (isToday && day === 4 && promptAvailable('braTip')) {
+    parts.push(`<div class="phase-note"><span>🎀</span><span><b>Gear tip.</b> A good supportive sports bra is part of the kit for press days — comfy is strong. <button class="link-btn" data-action="prompt-accept" data-id="braTip">got it 💗</button></span></div>`);
   }
 
   // ---- Period Week Movement Menu (spec §7) ----
@@ -816,6 +836,16 @@ function renderToday() {
       <p class="hint">${esc(HIP_ROUTINE.sub)}.${isGymDay ? ' ' + esc(HIP_ROUTINE.gymNote) : ''}</p>
       <div class="ex-list">${tickListHTML(HIP_ROUTINE.items, current.hips, 'toggle-hips')}</div>
     </details>`);
+  // skip on crampy period days (belly compression can aggravate cramps)
+  if (!onPeriod) {
+    parts.push(`
+      <details class="card" ${current.floor.some(Boolean) ? 'open' : ''}>
+        <summary>🌷 ${FLOOR_ROUTINE.title}</summary>
+        <p class="hint">${esc(FLOOR_ROUTINE.sub)}.</p>
+        <div class="ex-list">${tickListHTML(FLOOR_ROUTINE.items, current.floor, 'toggle-floor')}</div>
+        <p class="hint" style="margin-top:10px">${esc(FLOOR_ROUTINE.safety)}</p>
+      </details>`);
+  }
   parts.push(`
     <details class="card" ${current.posture.some(Boolean) ? 'open' : ''}>
       <summary>🧘 ${POSTURE_RESET.title}</summary>
@@ -1168,32 +1198,6 @@ function renderProgress() {
       </div>`);
   }
 
-  // measurements (tape > scale; cycle-aware weight compare)
-  const meas = state.measurements;
-  const lastM = meas[meas.length - 1];
-  const infoToday = cycleInfo(today);
-  const waterWeek = infoToday && (infoToday.week === 1 || infoToday.week === 4);
-  parts.push(`
-    <div class="card"><h2>Tape check 📏<span class="sub">Monthly waist + hips — the honest, kind metrics</span></h2>
-      ${waterWeek ? '<p class="hint">💧 Water retention is completely normal this week — numbers can wait a few days if you like.</p>' : ''}
-      <div class="meas-row">
-        <input class="select" inputmode="decimal" placeholder="Waist cm" id="m-waist">
-        <input class="select" inputmode="decimal" placeholder="Hips cm" id="m-hips">
-        <input class="select" inputmode="decimal" placeholder="kg · optional" id="m-weight">
-      </div>
-      <button class="primary" data-action="meas-save">Save today's numbers</button>
-      ${meas.slice(-4).reverse().map(m => {
-        let weightNote = '';
-        if (m.weight) {
-          const mInfo = cycleInfo(m.d);
-          const prevSame = meas.filter(x => x.d < m.d && x.weight && cycleInfo(x.d) && mInfo && cycleInfo(x.d).week === mInfo.week).pop();
-          if (prevSame) { const diff = (m.weight - prevSame.weight).toFixed(1); weightNote = ` · vs same week last cycle: ${diff > 0 ? '+' : ''}${diff} kg`; }
-        }
-        return `<div class="ph-row"><span>${esc(shortDate(m.d))}</span><span class="len">${m.waist ? 'waist ' + m.waist : ''}${m.hips ? ' · hips ' + m.hips : ''}${m.weight ? ' · ' + m.weight + ' kg' : ''}${weightNote}</span></div>`;
-      }).join('')}
-      ${lastM && daysBetween(lastM.d, today) > 35 ? '<p class="hint">It\'s been about a month — a fresh tape check would make the story richer 💗</p>' : ''}
-    </div>`);
-
   // patterns (check-ins doing something)
   const mbp = moodByPhase();
   const hd = headachePattern();
@@ -1350,6 +1354,9 @@ function renderProgram() {
     <div class="card"><h2>🦩 ${esc(HIP_ROUTINE.title)}</h2><p class="hint">${esc(HIP_ROUTINE.sub)}.</p>
       ${routineRows(HIP_ROUTINE.items)}
     </div>
+    <div class="card"><h2>🌷 ${esc(FLOOR_ROUTINE.title)}</h2><p class="hint">${esc(FLOOR_ROUTINE.sub)}. Takes the week off during your period 🌙</p>
+      ${routineRows(FLOOR_ROUTINE.items)}
+    </div>
     <div class="card"><h2>🧘 ${esc(POSTURE_RESET.title)}</h2><p class="hint">${esc(POSTURE_RESET.sub)}.</p>
       ${routineRows(POSTURE_RESET.items)}
     </div>`);
@@ -1370,6 +1377,14 @@ function renderSettings() {
       <div class="theme-row">
         ${['light', 'dark', 'auto'].map(t => `<button class="chip-toggle ${state.theme === t ? 'on' : ''}" data-action="theme" data-v="${t}">${t === 'light' ? '☀️ Light' : t === 'dark' ? '🌙 Dark' : '✨ Auto'}</button>`).join('')}
       </div>
+    </div>
+    <div class="card">
+      <h2>Life updates</h2>
+      ${state.pregnant
+        ? `<p class="hint">Training is paused 🤍 Everything you've built is saved and waiting.</p>
+           <button class="primary green" data-action="pregnant-off">We're back — resume training 💛</button>`
+        : `<p class="hint">Expecting? The app steps back and hands training over to your doctor — everything here waits patiently for you.</p>
+           <button class="ghost-btn" data-action="pregnant-on">I'm pregnant 🤍</button>`}
     </div>
     <div class="card">
       <h2>Backup</h2>
@@ -1490,6 +1505,7 @@ document.addEventListener('click', e => {
   }
   else if (a === 'toggle-posture') { const i = +t.dataset.i; current.posture[i] = !current.posture[i]; commit(); renderToday(); }
   else if (a === 'toggle-hips') { const i = +t.dataset.i; current.hips[i] = !current.hips[i]; commit(); renderToday(); }
+  else if (a === 'toggle-floor') { const i = +t.dataset.i; current.floor[i] = !current.floor[i]; commit(); renderToday(); }
   else if (a === 'toggle-stretch') { const i = +t.dataset.i; current.stretch[i] = !current.stretch[i]; commit(); renderToday(); }
   else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); revealOffer(); }
   else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); revealOffer(); }
@@ -1528,14 +1544,10 @@ document.addEventListener('click', e => {
   else if (a === 'goto-cycle') { activeTab = 'cycle'; render(); window.scrollTo(0, 0); }
   else if (a === 'quote-new') { currentQuote = randomContent(); const card = $('#quote-card'); if (card) card.outerHTML = quoteCardHTML(currentQuote); }
   else if (a === 'theme') { state.theme = t.dataset.v; save(); applyTheme(); renderSettings(); }
-  else if (a === 'meas-save') {
-    const waist = parseFloat($('#m-waist').value), hips = parseFloat($('#m-hips').value), weight = parseFloat($('#m-weight').value);
-    if (isNaN(waist) && isNaN(hips) && isNaN(weight)) return;
-    state.measurements = state.measurements.filter(m => m.d !== todayISO());
-    state.measurements.push({ d: todayISO(), waist: isNaN(waist) ? null : waist, hips: isNaN(hips) ? null : hips, weight: isNaN(weight) ? null : weight });
-    state.measurements.sort((a, b) => a.d < b.d ? -1 : 1);
-    save(); renderProgress();
+  else if (a === 'pregnant-on') {
+    if (confirm('Pause training programming? All your history stays safe, and you can resume anytime.')) { state.pregnant = true; save(); render(); }
   }
+  else if (a === 'pregnant-off') { state.pregnant = false; save(); render(); }
   else if (a === 'period-start') {
     const lp = lastPeriod();
     if (lp && daysBetween(lp.start, todayISO()) < 10 && !confirm('Your last period started less than 10 days ago. Log a new one anyway?')) return;

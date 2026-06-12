@@ -544,10 +544,6 @@ details.card[open] > summary { margin-bottom: 12px; }
 .pr-row .v { font-weight: 900; color: var(--rose-deep); font-size: 14px; }
 .pr-row .d { font-size: 11px; color: var(--muted); font-weight: 700; }
 
-/* measurements */
-.meas-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-.meas-row .select { padding: 11px 10px; font-size: 14px; }
-
 .mood-phase { display: flex; gap: 8px; }
 .mood-phase .mp { flex: 1; background: var(--surface-2); border-radius: 12px; padding: 9px 0; text-align: center; }
 .mood-phase .mp span { font-size: 20px; display: block; }
