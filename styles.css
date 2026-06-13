@@ -28,14 +28,15 @@
   --check-border: #ecd3dc;
   --ring-track: #f6e3ea;
   --nav-bg: rgba(255, 255, 255, .88);
-  --shadow: 0 10px 30px rgba(185, 120, 150, .16);
-  --shadow-sm: 0 4px 14px rgba(185, 120, 150, .10);
-  --card-border: rgba(217, 109, 140, .08);
-  --r-lg: 24px;
+  --shadow: 0 1px 2px rgba(140, 80, 105, .05), 0 14px 36px -8px rgba(185, 120, 150, .22);
+  --shadow-sm: 0 1px 2px rgba(140, 80, 105, .04), 0 8px 20px -6px rgba(185, 120, 150, .14);
+  --card-border: rgba(217, 109, 140, .10);
+  --r-lg: 26px;
   --r-md: 16px;
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --font-body: 'Nunito', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', ui-rounded, 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-block: 'Anton', 'Arial Narrow', Impact, sans-serif;
+  --font-script: 'Caveat', 'Segoe Script', 'Brush Script MT', cursive;
 
   --p-menstrual: #e3879a;
   --p-follicular: #6fbb93;
@@ -43,6 +44,9 @@
   --p-luteal: #b39ddb;
   --phase: var(--rose);
 }
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+.tab-title, .card h2, .hero h1, details.card > summary, .story { letter-spacing: -.015em; }
+
 html[data-theme="dark"] {
   --bg-a: #261b22;
   --bg-b: #1f1721;
@@ -178,14 +182,16 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .day-hero .micro { font-weight: 900; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
 .day-hero .big {
   font-family: var(--font-block);
-  font-size: clamp(54px, 17vw, 72px);
-  line-height: .92; letter-spacing: .01em; color: var(--text); text-transform: uppercase;
+  font-size: clamp(56px, 17.5vw, 76px);
+  line-height: .9; letter-spacing: .005em; color: var(--text); text-transform: uppercase;
 }
 .day-hero .big span {
-  display: block; color: transparent;
-  -webkit-text-stroke: 2px var(--rose);
+  display: block;
+  background: linear-gradient(100deg, var(--rose) 10%, var(--lilac) 95%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; -webkit-text-fill-color: transparent;
 }
-.day-hero .statement { margin-top: 10px; font-size: 14.5px; font-weight: 600; color: var(--muted); }
+.day-hero .statement { margin-top: 12px; font-size: 15px; font-weight: 600; color: var(--muted); }
 .day-hero .statement b, .statement b { color: var(--rose-deep); font-weight: 900; }
 
 /* ---------- quote / message card ---------- */
@@ -197,11 +203,11 @@ body[data-tab="settings"] #tab-settings { display: block; }
   margin-bottom: 14px;
   border: 1px solid var(--card-border);
 }
-.quote .mark { font-family: var(--font-display); font-size: 30px; line-height: .8; color: var(--rose); margin-top: 4px; }
+.quote .mark { font-family: var(--font-display); font-weight: 600; font-size: 40px; line-height: .62; color: color-mix(in srgb, var(--rose) 55%, transparent); margin-top: 6px; }
 .quote .q-text { flex: 1; }
-.quote .q-text p { margin: 0; font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 16.5px; line-height: 1.45; }
-.quote.poem .q-text p { white-space: pre-line; font-size: 15.5px; }
-.quote .sig { display: block; margin-top: 8px; font-family: 'Segoe Script', 'Brush Script MT', cursive; font-size: 15px; color: var(--rose-deep); }
+.quote .q-text p { margin: 0; font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 17.5px; line-height: 1.5; letter-spacing: -.01em; }
+.quote.poem .q-text p { white-space: pre-line; font-size: 16px; line-height: 1.55; }
+.quote .sig { display: block; margin-top: 6px; font-family: var(--font-script); font-weight: 700; font-size: 20px; color: var(--rose-deep); }
 .quote.from-him { border: 1.5px solid color-mix(in srgb, var(--rose) 45%, transparent); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--rose) 7%, var(--surface))); }
 .quote .q-new {
   border: none; background: var(--surface-2); color: var(--rose-deep); cursor: pointer;
@@ -635,7 +641,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 }
 .love-card .mark { font-size: 28px; margin-bottom: 6px; }
 .love-card p { font-family: var(--font-display); font-style: italic; font-size: 18px; margin: 0 0 8px; line-height: 1.5; }
-.love-card .sig { font-family: 'Segoe Script', 'Brush Script MT', cursive; font-size: 16px; color: var(--rose-deep); }
+.love-card .sig { font-family: var(--font-script); font-weight: 700; font-size: 24px; color: var(--rose-deep); }
 
 /* ---------- settings ---------- */
 .theme-row { display: flex; gap: 8px; }
@@ -645,9 +651,11 @@ details.card[open] > summary { margin-bottom: 12px; }
 .primary {
   width: 100%; padding: 15px; border: none; border-radius: var(--r-md);
   background: linear-gradient(120deg, var(--rose), #c75d87); color: #fff; font-weight: 800; font-size: 15px;
-  cursor: pointer; font-family: inherit; margin-bottom: 10px; box-shadow: var(--shadow-sm);
+  cursor: pointer; font-family: inherit; margin-bottom: 10px; box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--rose) 55%, transparent);
+  transition: transform .12s, box-shadow .2s;
 }
-.primary.green { background: linear-gradient(120deg, #6fbb93, #54a87e); }
+.primary:active { transform: scale(.985); }
+.primary.green { background: linear-gradient(120deg, #6fbb93, #54a87e); box-shadow: 0 8px 20px -6px rgba(111, 187, 147, .5); }
 .ghost-btn {
   display: block; width: 100%; text-align: center; padding: 14px; border-radius: var(--r-md); border: none;
   background: var(--rose-soft); color: var(--rose-deep); font-weight: 800; font-size: 14.5px; cursor: pointer;
@@ -658,7 +666,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   background: transparent; color: var(--rose-deep); font-weight: 700; font-size: 13.5px; cursor: pointer; font-family: inherit;
 }
 .footer-note { text-align: center; color: var(--muted); font-size: 12.5px; margin: 26px 0 10px; line-height: 1.9; font-weight: 700; }
-.footer-note .love { font-family: var(--font-display); font-style: italic; font-size: 14px; color: var(--rose-deep); }
+.footer-note .love { font-family: var(--font-script); font-weight: 700; font-size: 20px; color: var(--rose-deep); }
 
 /* ---------- bottom nav ---------- */
 .bottom-nav {
