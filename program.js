@@ -169,7 +169,7 @@ const DAYS = {
       { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.', alts: [
         { name: 'Dumbbell Chest Fly', scheme: '2×12', note: 'Rotation option — alternate incline ↔ fly week to week for inner-chest shape.' },
       ] },
-      { name: 'Shoulder Press Machine', scheme: '2×10', rest: '90 sec', cues: ['Controlled, no locked elbows'] },
+      { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Press up smoothly', 'Stop just short of locked elbows', 'Lower with control'] },
       { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'] },
       { name: 'Overhead Rope Extension', scheme: '2×12', rest: '60 sec', cues: ['Full stretch at the bottom', 'Elbows close to the head'], note: 'Pump exercise — enjoy.' },
       { name: 'Dumbbell Curl', scheme: '2×12', rest: '60 sec', cues: ['No swinging, full range'] },
