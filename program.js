@@ -166,12 +166,13 @@ const DAYS = {
         { name: 'Dumbbell Bench Press', scheme: '2×10', note: 'Flat bench, controlled lowering.' },
         { name: 'Push-Up Progression', scheme: '2×8–12', note: 'Incline → knees → full. Log your variation in notes.' },
       ] },
-      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.' },
-      { name: 'Shoulder Press Machine', scheme: '3×10', rest: '90 sec', cues: ['Controlled, no locked elbows'] },
+      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.', alts: [
+        { name: 'Dumbbell Chest Fly', scheme: '2×12', note: 'Rotation option — alternate incline ↔ fly week to week for inner-chest shape.' },
+      ] },
+      { name: 'Shoulder Press Machine', scheme: '2×10', rest: '90 sec', cues: ['Controlled, no locked elbows'] },
       { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'] },
       { name: 'Overhead Rope Extension', scheme: '2×12', rest: '60 sec', cues: ['Full stretch at the bottom', 'Elbows close to the head'], note: 'Pump exercise — enjoy.' },
       { name: 'Dumbbell Curl', scheme: '2×12', rest: '60 sec', cues: ['No swinging, full range'] },
-      { name: 'Face Pull', scheme: '2×15', rest: '60 sec', cues: ['Posture top-up — elbows high'] },
       { name: 'Farmer\'s Carry', scheme: '2×30–40 m', rest: '90 sec', dist: true, cues: ['Heaviest dumbbells you can hold with tall posture', 'Shoulders back, controlled steps'], note: 'Grip, core, carrying strength — the quiet confidence-builder. Log kg per hand and metres.' },
       { name: 'Front Plank', scheme: '3×30–45 sec', rest: '60 sec', tag: 'core', cues: ['Squeeze glutes, ribs down', 'Breathe'] },
       { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'] },
@@ -184,6 +185,7 @@ const DAYS = {
 const PHASE1_EXTRA_D4 = [
   { name: 'Hammer Curl', scheme: '2×12', rest: '60 sec', cues: ['Neutral grip, no swinging'] },
   { name: 'Rope Tricep Pushdown', scheme: '2×12', rest: '60 sec', cues: ['Elbows pinned', 'Full extension and squeeze'] },
+  { name: 'Dumbbell Pullover', scheme: '2×12', rest: '60 sec', cues: ['Soft elbows', 'Big stretch overhead', 'Pull it over with chest and lats'] },
 ];
 
 function resolveScheme(scheme, week) {

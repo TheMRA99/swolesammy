@@ -15,6 +15,9 @@ const defaultState = () => ({
   periods: [],              // [{start, end|null}] sorted by start
   logs: {},                 // dateISO -> log
   pregnant: false,          // pauses all programming with a warm handover
+  onboarded: false,         // first-session welcome shown
+  unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
+  customMessages: [],        // Muneer's own love notes, mixed into the rotation
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
   phase1: false,            // volume bump accepted
   lastDeload: null,
@@ -158,6 +161,14 @@ function planFor(week, day, opts) {
   }
   const block = DAYS[day];
   let ex = block.ex.map(e => ({ ...e, scheme: resolveScheme(e.scheme, week) }));
+  // auto-swap machines her gym doesn't have (Settings → My gym)
+  ex = ex.map(e => {
+    if (state.unavailable[e.name] && e.alts && e.alts.length) {
+      const a = e.alts[0];
+      return { name: a.name, scheme: a.scheme, rest: e.rest, cues: e.cues, note: a.note, tag: e.tag, swappedFrom: e.name };
+    }
+    return e;
+  });
   if (state.phase1) {
     ex = ex.map((e, i) => i < 2 ? { ...e, scheme: bumpSets(e.scheme) } : e);
     if (day === 4) {
@@ -182,6 +193,12 @@ function exMeta(day, name) {
   else if (DAYS[day]) list = DAYS[day].ex.concat(PHASE1_EXTRA_D4);
   if (!list) return null;
   return list.find(e => e.name === name) || null;
+}
+// unique exercises with equipment alternatives (for the My gym toggles)
+function swappableExercises() {
+  const seen = {}, out = [];
+  [1, 2, 3, 4].forEach(d => DAYS[d].ex.forEach(e => { if (e.alts && e.alts.length && !seen[e.name]) { seen[e.name] = 1; out.push(e); } }));
+  return out;
 }
 
 /* ---------- logs ---------- */
@@ -420,10 +437,14 @@ function pickEvolutionPrompt() {
 
 /* ---------- content rotation ---------- */
 function phaseTier(week) { return week === 1 || week === 4 ? 'gentle' : (week === 2 || week === 3 ? 'hype' : 'any'); }
+function allContent() {
+  const custom = (state.customMessages || []).filter(t => t && t.trim()).map(t => ({ type: 'muneer', phase: 'any', text: t.trim(), signed: true }));
+  return CONTENT.concat(custom);
+}
 function contentPool() {
   const info = cycleInfo(todayISO());
   const tier = info ? phaseTier(info.week) : 'any';
-  return CONTENT.filter(c => c.phase === 'any' || c.phase === tier);
+  return allContent().filter(c => c.phase === 'any' || c.phase === tier);
 }
 function hashStr(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
 function pickContent(seed) {
@@ -490,7 +511,7 @@ function exRowHTML(e, i, day) {
   const isDist = !!(meta && meta.dist);
   const last = lastPerf(e.name, viewDate);
   const lastTxt = last ? `Last: ${last.weight ? esc(last.weight) + ' kg' : ''}${last.weight && last.reps ? ' × ' : ''}${last.reps ? esc(last.reps) + (isDist ? ' m' : '') : ''} · ${esc(shortDate(last.date))}` : '';
-  const owned = ownedLastTime(e.name, e.scheme, viewDate);
+  const owned = ownedLastTime(e.name, e.scheme, viewDate) && !(meta && meta.tag === 'core');
   const hasCues = meta && (meta.cues || meta.note || meta.rest || meta.avoid);
   const hasAlts = baseMeta && baseMeta.alts && baseMeta.alts.length;
   const rw = (meta && meta.ramp) ? rampWeights(e, last) : null;
@@ -601,6 +622,22 @@ function renderToday() {
   // quote / message
   if (!currentQuote) currentQuote = dailyContent();
   parts.push(quoteCardHTML(currentQuote));
+
+  // first-session welcome (one-time, skippable)
+  if (isToday && !state.onboarded) {
+    parts.push(`
+      <div class="card offer-card onboard">
+        <h2>Welcome, gorgeous 💪💕</h2>
+        <p class="hint">Three tiny things, then you\'re off:</p>
+        <ul class="onboard-list">
+          <li><b>Leave 2–3 in the tank.</b> Pick a weight you could lift 2–3 more times with pretty form. Form first, always.</li>
+          <li><b>Tap the circle</b> to tick a set, and type your weight + reps — the app remembers everything for next time.</li>
+          <li><b>Warm-ups & cardio track separately</b> — no numbers needed there.</li>
+          <li><b>Week 1 is for learning.</b> Go lighter than feels necessary. You\'ll build fast, promise. 🤍</li>
+        </ul>
+        <button class="primary" data-action="onboard-done">Let\'s go 💪</button>
+      </div>`);
+  }
 
   // date strip
   parts.push(`
@@ -1285,6 +1322,7 @@ function renderProgram() {
         <div class="rota-arrow">↻</div>
       </div>
       <p class="hint" style="margin-top:12px">Whenever you open the app, it simply queues up <b>whatever comes next</b> and waits for you — nothing is ever missed. Aim for <b>4 sessions every 7–9 days</b>, rest whenever life asks, and give the two leg days a little breathing room (the app nudges if they stack).</p>
+      <div class="tagline" style="margin-top:10px">🌙 Rest days are part of the plan, not time off from it — muscle is built while you recover. Two or three across the rotation is perfect.</div>
     </div>`);
 
   // hormone structure
@@ -1374,6 +1412,20 @@ function renderSettings() {
       <div class="theme-row">
         ${['light', 'dark', 'auto'].map(t => `<button class="chip-toggle ${state.theme === t ? 'on' : ''}" data-action="theme" data-v="${t}">${t === 'light' ? '☀️ Light' : t === 'dark' ? '🌙 Dark' : '✨ Auto'}</button>`).join('')}
       </div>
+    </div>
+    <div class="card">
+      <h2>My gym 🏋️<span class="sub">Got this machine? Tap No and the app swaps in a no-equipment move everywhere.</span></h2>
+      ${swappableExercises().map(e => `
+        <div class="gym-row">
+          <div class="gym-name"><b>${esc(e.name)}</b>${state.unavailable[e.name] ? `<span>using ${esc(e.alts[0].name)} instead</span>` : ''}</div>
+          <button class="switch ${state.unavailable[e.name] ? 'off' : 'on'}" data-action="toggle-equip" data-name="${esc(e.name)}">${state.unavailable[e.name] ? 'No' : 'Yes'}</button>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <h2>Love notes 💌<span class="sub">Add your own — they mix into her daily messages, signed Jaan(War).</span></h2>
+      <textarea class="notes" id="muneer-input" rows="2" placeholder="Write something cringey and sweet…"></textarea>
+      <button class="primary" data-action="add-message">Add to the rotation 💌</button>
+      ${(state.customMessages || []).map((m, i) => `<div class="msg-row"><span>${esc(m)}</span><button class="msg-x" data-action="del-message" data-i="${i}" aria-label="Remove">×</button></div>`).join('')}
     </div>
     <div class="card">
       <h2>Life updates</h2>
@@ -1545,6 +1597,14 @@ document.addEventListener('click', e => {
     if (confirm('Pause training programming? All your history stays safe, and you can resume anytime.')) { state.pregnant = true; save(); render(); }
   }
   else if (a === 'pregnant-off') { state.pregnant = false; save(); render(); }
+  else if (a === 'onboard-done') { state.onboarded = true; save(); renderToday(); }
+  else if (a === 'toggle-equip') { const n = t.dataset.name; if (state.unavailable[n]) delete state.unavailable[n]; else state.unavailable[n] = true; save(); renderSettings(); }
+  else if (a === 'add-message') {
+    const inp = document.querySelector('#muneer-input');
+    const v = inp && inp.value.trim();
+    if (v) { state.customMessages = (state.customMessages || []).concat(v); save(); renderSettings(); }
+  }
+  else if (a === 'del-message') { state.customMessages.splice(+t.dataset.i, 1); save(); renderSettings(); }
   else if (a === 'period-start') {
     const lp = lastPeriod();
     if (lp && daysBetween(lp.start, todayISO()) < 10 && !confirm('Your last period started less than 10 days ago. Log a new one anyway?')) return;

@@ -12,7 +12,7 @@ Live: https://themra99.github.io/swolesammy/
 - **Cycle** — period logging anchors the training weeks (never a fixed calendar — PCOS-friendly), predicted next period from her real averages, month calendar, history. Day 1–2 pain → the app proactively suggests **cycle rest 🌙, a fully-completed day**.
 - **Progress** — progress is told **in words** (auto-written stories and monthly letters from her real numbers — no photos, no comparisons), plus stats with a kind streak system (2 sessions = a complete week; lapses show as *fresh start 💛*, never broken), strength curves, milestone **Hall of Fame**, personal bests, and pattern insights (mood by phase, headache heads-up).
 - **Plan** — the full program: split, schedule, hormone-structured month, all days with per-week schemes and swaps, gentle sessions, progression rules, PCOS-aware nutrition (South Indian + halal meal ideas), daily targets, expected timeline, and a note from him 💌.
-- **Settings** — Light/Dark/Auto theme, a pregnancy pause (training hands over to her doctor, with a warm welcome back after), backup export/import, reset.
+- **Settings** — Light/Dark/Auto theme, **My gym** equipment toggles (mark a missing machine → the app auto-swaps in a no-equipment move everywhere), a **love-note editor** (add your own messages, signed Jaan(War), into her rotation), a pregnancy pause (training hands over to her doctor, with a warm welcome back after), backup export/import, reset. A one-time warm onboarding explains RIR, logging, and "week 1 is for learning."
 
 The program evolves with her logs: volume bumps after consistent weeks, plateau help, deload prompts, and variation unlocks — always offered, never automatic.
 

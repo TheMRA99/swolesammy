@@ -646,6 +646,25 @@ details.card[open] > summary { margin-bottom: 12px; }
 /* ---------- settings ---------- */
 .theme-row { display: flex; gap: 8px; }
 .theme-row .chip-toggle { flex: 1; text-align: center; padding: 11px 0; }
+
+.onboard-list { margin: 4px 0 14px; padding-left: 18px; }
+.onboard-list li { margin: 8px 0; font-size: 13.5px; font-weight: 600; line-height: 1.5; }
+.onboard-list b { color: var(--rose-deep); }
+
+.gym-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.gym-row:last-child { border-bottom: none; }
+.gym-name b { font-size: 14px; font-weight: 700; }
+.gym-name span { display: block; font-size: 11.5px; font-weight: 700; color: var(--rose-deep); margin-top: 1px; }
+.switch {
+  flex: none; border: none; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 13px;
+  width: 52px; padding: 8px 0; border-radius: 999px; transition: all .15s;
+}
+.switch.on { background: var(--p-follicular); color: #fff; }
+.switch.off { background: var(--surface-2); color: var(--muted); }
+
+.msg-row { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 12px; padding: 9px 12px; margin-top: 8px; font-size: 13px; font-weight: 600; }
+.msg-row span { flex: 1; }
+.msg-x { flex: none; border: none; background: none; color: var(--rose-deep); font-size: 20px; font-weight: 800; cursor: pointer; line-height: 1; }
 .field { display: block; margin: 12px 0; }
 .field span { display: block; font-size: 12px; font-weight: 800; color: var(--muted); margin: 0 0 6px 6px; text-transform: uppercase; letter-spacing: .07em; }
 .primary {
