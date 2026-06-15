@@ -166,7 +166,8 @@ const DAYS = {
         { name: 'Dumbbell Bench Press', scheme: '2×10', note: 'Flat bench, controlled lowering.' },
         { name: 'Push-Up Progression', scheme: '2×8–12', note: 'Incline → knees → full. Log your variation in notes.' },
       ] },
-      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'Odd weeks (1 & 3) — the upper-chest line, defined and lifted. Even weeks auto-swap to Dumbbell Chest Fly.' },
+      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.' },
+      { name: 'Dumbbell Chest Fly', scheme: '2×12', rest: '60 sec', cues: ['Soft elbow bend, held the whole time', 'Lower wide for a big stretch', 'Squeeze back together like hugging a tree'], note: 'Stretch-and-squeeze for shape a press can\'t give.' },
       { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Press up smoothly', 'Stop just short of locked elbows', 'Lower with control'] },
       { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'] },
       { name: 'Overhead Rope Extension', scheme: '2×12', rest: '60 sec', cues: ['Full stretch at the bottom', 'Elbows close to the head'], note: 'Pump exercise — enjoy.' },
@@ -185,8 +186,6 @@ const PHASE1_EXTRA_D4 = [
   { name: 'Rope Tricep Pushdown', scheme: '2×12', rest: '60 sec', cues: ['Elbows pinned', 'Full extension and squeeze'] },
   { name: 'Dumbbell Pullover', scheme: '2×12', rest: '60 sec', cues: ['Soft elbows', 'Big stretch overhead', 'Pull it over with chest and lats'] },
 ];
-// Day 4 chest rotation — even cycle weeks (2 & 4) swap Incline DB Press for this
-const CHEST_FLY = { name: 'Dumbbell Chest Fly', scheme: '2×12', rest: '60 sec', cues: ['Soft elbow bend, held the whole time', 'Lower wide for a big stretch', 'Squeeze back together like hugging a tree'], note: 'Even weeks (2 & 4) — stretch-and-squeeze for shape a press can\'t give.' };
 
 function resolveScheme(scheme, week) {
   return typeof scheme === 'object' ? (scheme[week] || scheme[2]) : scheme;

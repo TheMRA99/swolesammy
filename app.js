@@ -161,8 +161,6 @@ function planFor(week, day, opts) {
   }
   const block = DAYS[day];
   let ex = block.ex.map(e => ({ ...e, scheme: resolveScheme(e.scheme, week) }));
-  // Day 4 chest rotation: odd weeks (1 & 3) → Incline DB Press, even weeks (2 & 4) → Dumbbell Chest Fly
-  if (day === 4 && week % 2 === 0) ex = ex.map(e => e.name === 'Incline Dumbbell Press' ? { ...CHEST_FLY } : e);
   // auto-swap machines her gym doesn't have (Settings → My gym)
   ex = ex.map(e => {
     if (state.unavailable[e.name] && e.alts && e.alts.length) {
@@ -192,7 +190,7 @@ function planFor(week, day, opts) {
 function exMeta(day, name) {
   let list = null;
   if (day === 'gentle-A' || day === 'gentle-B') list = GENTLE[day.slice(-1)].ex;
-  else if (DAYS[day]) list = DAYS[day].ex.concat(PHASE1_EXTRA_D4, day === 4 ? [CHEST_FLY] : []);
+  else if (DAYS[day]) list = DAYS[day].ex.concat(PHASE1_EXTRA_D4);
   if (!list) return null;
   return list.find(e => e.name === name) || null;
 }
