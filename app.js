@@ -693,10 +693,6 @@ function renderToday() {
   if (isToday && sCount >= 1 && sCount <= 6 && typeof day === 'number') {
     parts.push(`<div class="phase-note"><span>🫶</span><span><b>New-muscle soreness is normal</b> — it peaks a day or two after and fades. Mildly sore: train, movement helps. Can't-sit-down sore: extra rest day + a little lighter next time.</span></div>`);
   }
-  // one-time gear tip on press day (kind, never body-framed)
-  if (isToday && day === 4 && promptAvailable('braTip')) {
-    parts.push(`<div class="phase-note"><span>🎀</span><span><b>Gear tip.</b> A good supportive sports bra is part of the kit for press days — comfy is strong. <button class="link-btn" data-action="prompt-accept" data-id="braTip">got it 💗</button></span></div>`);
-  }
 
   // ---- Period Week Movement Menu (spec §7) ----
   if (week === 1 && onPeriod) {
