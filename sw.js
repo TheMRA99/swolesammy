@@ -1,5 +1,5 @@
 /* SwoleSammy — offline cache */
-const CACHE = 'swolesammy-v8';
+const CACHE = 'swolesammy-v9';
 const FONT_CACHE = 'swolesammy-fonts-v1';
 const ASSETS = [
   './',

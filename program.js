@@ -103,9 +103,9 @@ const DAYS = {
         { name: 'Glute Bridge + Cushion Squeeze', scheme: '2×15', note: 'Squeeze a cushion between the knees through the bridge.' },
         { name: 'Side-Lying Adduction Raise', scheme: '2×12 each side', note: 'Small slow range is perfect.' },
       ] },
-      { name: 'Back Extension', scheme: '2×12', rest: '60 sec', cues: ['Round the upper back slightly', 'Push hips into the pad', 'Squeeze glutes to lift'], alts: [
-        { name: 'Dumbbell Good Morning', scheme: '2×12', note: 'Light DB at chest; hips back, squeeze up.' },
-        { name: 'Superman + Glute Squeeze', scheme: '2×12', note: 'Floor-based, 2-sec hold at the top.' },
+      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Hard glute squeeze at the top', '1-sec pause'], note: 'Glute-focused and spine-friendly — all the burn, none of the lower-back load.', alts: [
+        { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', note: 'Harder — one leg, 1-sec pause at the top.' },
+        { name: 'Cable Kickback', scheme: '2×15 each leg', note: 'Standing, slow, squeeze the glute.' },
       ] },
       { name: 'Pallof Press', scheme: '2×12 each side', rest: '60 sec', tag: 'core', cues: ['Press, pause, resist the twist'], note: 'Deep core — strength from the inside out.' },
     ],
@@ -113,16 +113,21 @@ const DAYS = {
   },
 
   2: {
+    // [INTERNAL] Her highest-priority day for form: a strong upper back (lats/traps/
+    // rhomboids) keeps the spine stacked on every other lift — it protects the lower back.
     warmup: [
       'Band pull-aparts · 2 × 15',
       'Scapular retractions · 2 × 10',
+      'Light lat pulldown feel set · 1 × 12 · ≈half your working weight',
     ],
     ex: [
-      { name: 'Lat Pulldown', scheme: '3×10', rest: '90 sec', ramp: true, cues: ['Chest proud', '“Drive elbows into your pockets”', 'No yanking — control the way back up'] },
-      { name: 'Seated Cable Row', scheme: '3×10', rest: '90 sec', cues: ['Chest tall', 'Pull to the lower ribs', 'Squeeze the shoulder blades'] },
+      { name: 'Lat Pulldown', scheme: '3×10', rest: '90 sec', ramp: true, cues: ['Flat back, proud chest', '“Drive elbows into your pockets”', 'No yanking — control the way back up'], note: 'Vertical pull — builds lat width, the waist-narrowing piece.' },
+      { name: 'Seated Cable Row', scheme: '3×10', rest: '90 sec', cues: ['Flat back, proud chest', 'Pull to the lower ribs', 'Squeeze the shoulder blades', 'Slow return'], note: 'Horizontal pull — mid-back thickness and posture.' },
+      { name: 'Single-Arm Dumbbell Row', scheme: '3×10 each', rest: '90 sec', cues: ['Hand and knee on the bench, flat back', 'Pull the dumbbell to your hip', 'No torso twisting'], note: 'Evens out left and right, and teaches a braced flat back.', alts: [
+        { name: 'Chest-Supported Row', scheme: '3×10', note: 'Chest on an incline bench — zero lower-back load.' },
+      ] },
       { name: 'Face Pull', scheme: '2×15', rest: '60 sec', cues: ['Pull toward the eyes', 'Elbows high, nice and slow'], note: 'Posture gold.' },
       { name: 'Reverse Pec Deck', scheme: '2×15', rest: '60 sec', cues: ['1-sec squeeze at the peak'] },
-      { name: 'Shoulder Press Machine', scheme: '2×10', rest: '90 sec', cues: ['Controlled', 'Stop just short of locked elbows'] },
       { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging'], note: 'The hourglass maker — shoulder width frames everything.' },
       { name: 'Knee Tucks', scheme: '3×12', rest: '60 sec', tag: 'core', cues: ['Slow', 'Exhale as knees pull in', 'Keep the lower back relaxed on the bench'] },
       { name: 'Dead Bug', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Lower back gently pressed down', 'Slow opposite arm + leg'] },
@@ -147,9 +152,8 @@ const DAYS = {
         { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', note: '1-sec pause at the top.' },
       ] },
       { name: 'Leg Extension', scheme: '2×15', rest: '60 sec', cues: ['1-sec pause at the top'], note: 'Pump finisher — enjoy this one.' },
-      { name: 'Back Extension Hold', scheme: '2×30 sec', rest: '60 sec', cues: ['Long line from head to heels', 'Breathe steadily'], note: 'Quiet strength for a tall, proud posture.', alts: [
-        { name: 'Superman Hold', scheme: '2×30 sec', note: 'Floor-based, same idea.' },
-        { name: 'Glute Bridge Hold', scheme: '2×30 sec', note: 'Hips high, ribs down, hard squeeze.' },
+      { name: 'Glute Bridge Hold', scheme: '2×30 sec', rest: '60 sec', cues: ['Hips locked out', 'Ribs down', 'Hard glute squeeze the whole time'], note: 'Glute endurance, spine-friendly — quiet strength for a tall, proud posture.', alts: [
+        { name: 'Single-Leg Glute Bridge Hold', scheme: '2×20 sec each', note: 'Harder — one leg at a time.' },
       ] },
       { name: 'Bird Dog', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Slow and balanced', 'Hips stay level'] },
     ],
@@ -180,7 +184,7 @@ const DAYS = {
       { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'] },
       { name: 'Overhead Rope Extension', scheme: '2×12', rest: '60 sec', cues: ['Full stretch at the bottom', 'Elbows close to the head'], note: 'Pump exercise — enjoy.' },
       { name: 'Dumbbell Curl', scheme: '2×12', rest: '60 sec', cues: ['No swinging, full range'] },
-      { name: 'Farmer\'s Carry', scheme: '2×30–40 m', rest: '90 sec', dist: true, cues: ['Heaviest dumbbells you can hold with tall posture', 'Shoulders back, controlled steps'], note: 'Grip, core, carrying strength — the quiet confidence-builder. Log kg per hand and metres.' },
+      { name: 'Farmer\'s Carry', scheme: '2×30–40 m', rest: '90 sec', dist: true, cues: ['Flat back, proud chest', 'Heaviest dumbbells you can hold tall', 'Shoulders back, controlled steps'], note: 'Grip, core, carrying strength — a quiet confidence-builder. Variation: Suitcase Carry — weight in ONE hand, alternate sides; your core resists the lean, a lovely safe back-toughener. Log kg per hand and metres.' },
       { name: 'Front Plank', scheme: '3×30–45 sec', rest: '60 sec', tag: 'core', cues: ['Squeeze glutes, ribs down', 'Breathe'] },
       { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'] },
       { name: 'Vacuum Breathing', scheme: '3 rounds × 10 breaths', rest: '60 sec', tag: 'core', skipOnPeriod: true, cues: ['Exhale fully, draw the belly button in', 'Hold gently, breathe shallow'], note: 'Deep-core control — strength from the inside out.' },

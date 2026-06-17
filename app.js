@@ -552,6 +552,7 @@ function exRowHTML(e, i, day) {
         <b>Machine busy? Swap to:</b>
         ${baseMeta.alts.map(a => `<button class="chip-toggle ${e.name === a.name ? 'on' : ''}" data-action="swap-pick" data-orig="${esc(origName || e.name)}" data-alt="${esc(a.name)}">${esc(a.name)} · ${esc(a.scheme)}</button>`).join('')}
         ${origName ? `<button class="chip-toggle" data-action="swap-pick" data-orig="${esc(origName)}" data-alt="">↩ back to ${esc(origName)}</button>` : ''}
+        <button class="chip-toggle pain" data-action="pain-swap" data-orig="${esc(origName || e.name)}">🚫 This one hurts — swap for good</button>
       </div>` : ''}
     </div>`;
 }
@@ -623,22 +624,6 @@ function renderToday() {
   // quote / message
   if (!currentQuote) currentQuote = dailyContent();
   parts.push(quoteCardHTML(currentQuote));
-
-  // first-session welcome (one-time, skippable)
-  if (isToday && !state.onboarded) {
-    parts.push(`
-      <div class="card offer-card onboard">
-        <h2>Welcome, gorgeous 💪💕</h2>
-        <p class="hint">Three tiny things, then you\'re off:</p>
-        <ul class="onboard-list">
-          <li><b>Leave 2–3 in the tank.</b> Pick a weight you could lift 2–3 more times with pretty form. Form first, always.</li>
-          <li><b>Tap the circle</b> to tick a set, and type your weight + reps — the app remembers everything for next time.</li>
-          <li><b>Warm-ups & cardio track separately</b> — no numbers needed there.</li>
-          <li><b>Week 1 is for learning.</b> Go lighter than feels necessary. You\'ll build fast, promise. 🤍</li>
-        </ul>
-        <button class="primary" data-action="onboard-done">Let\'s go 💪</button>
-      </div>`);
-  }
 
   // date strip
   parts.push(`
@@ -852,6 +837,22 @@ function renderToday() {
       <div class="chips">${TARGETS.filter(t => showVacuumChip || !t.skipOnPeriod).map(t => `<button class="chip-toggle habit ${current.habits.includes(t.label) ? 'on' : ''}" data-action="habit" data-s="${esc(t.label)}" title="${esc(t.detail)}">${t.icon} ${esc(t.label)}</button>`).join('')}</div>
       ${!showVacuumChip ? '<p class="hint" style="margin-top:8px">Vacuum breathing takes the week off during your period 🌙</p>' : ''}
     </div>`);
+
+  // first-session welcome (one-time, skippable) — sits right under the check-in
+  if (isToday && !state.onboarded) {
+    parts.push(`
+      <div class="card offer-card onboard">
+        <h2>Welcome, gorgeous 💪💕</h2>
+        <p class="hint">Three tiny things, then you\'re off:</p>
+        <ul class="onboard-list">
+          <li><b>Leave 2–3 in the tank.</b> Pick a weight you could lift 2–3 more times with pretty form. Form first, always.</li>
+          <li><b>Tap the circle</b> to tick a set, and type your weight + reps — the app remembers everything for next time.</li>
+          <li><b>Warm-ups & cardio track separately</b> — no numbers needed there.</li>
+          <li><b>Week 1 is for learning.</b> Go lighter than feels necessary. You\'ll build fast, promise. 🤍</li>
+        </ul>
+        <button class="primary" data-action="onboard-done">Let\'s go 💪</button>
+      </div>`);
+  }
 
   // notes + memory
   const prev = recentNotes(viewDate, 3);
@@ -1505,6 +1506,18 @@ function renderProgram() {
       <p class="hint" style="margin-top:10px">The app watches your logs and offers the next step when you're ready — extra sets, new variations, deload weeks. One change at a time, always your choice.</p>
     </div>`);
 
+  // how to brace — one skill that protects the spine on every lift
+  parts.push(`
+    <div class="card"><h2>How to brace 🛡️<span class="sub">One little skill that keeps every lift safe and strong</span></h2>
+      <ol class="prio-list">
+        <li>Breathe <b>into your belly</b>, not your chest.</li>
+        <li>Gently tighten your core, like bracing for a light poke.</li>
+        <li>Keep your back <b>flat and neutral</b> — not rounded, not over-arched.</li>
+        <li>Exhale through the hard part of the rep.</li>
+      </ol>
+      <div class="tagline" style="margin-top:10px">Golden rule: if you can't hold a flat back at a weight, it's too heavy — drop it a little. Strong form first, always. 💛</div>
+    </div>`);
+
   // nutrition
   parts.push(`<h2 class="sect-head">Fuel 🍳</h2>`);
   [NUTRITION.calories, NUTRITION.principles, NUTRITION.meals, NUTRITION.supplements].forEach(sec => {
@@ -1683,6 +1696,16 @@ document.addEventListener('click', e => {
   else if (a === 'toggle-cardio') { current.cardioDone = !current.cardioDone; if (current.cardioDone) current.cardioSkipped = false; commit(); renderToday(); }
   else if (a === 'toggle-cues') { t.closest('.ex-row').classList.toggle('show-cues'); }
   else if (a === 'toggle-swaps') { t.closest('.ex-row').classList.toggle('show-swaps'); }
+  else if (a === 'pain-swap') {
+    // FIX 3: persist the swap to its safe alternative everywhere; never re-suggest it
+    const orig = t.dataset.orig;
+    if (current.swaps && current.swaps[orig]) delete current.swaps[orig];
+    state.unavailable[orig] = true;
+    save();
+    current = buildLog(viewDate, current.day); commit();
+    renderToday();
+    setTimeout(() => alert('Swapped for good 💛 — you won\'t be shown that one again. You can undo this anytime in Settings → My gym. And if pain keeps showing up, a quick physio visit is always worth it.'), 30);
+  }
   else if (a === 'swap-pick') {
     const orig = t.dataset.orig, alt = t.dataset.alt;
     if (alt) current.swaps[orig] = alt; else delete current.swaps[orig];
