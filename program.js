@@ -45,6 +45,14 @@ const PHASES = {
   },
 };
 
+// "Your Month, Decoded" — plain, kind, biology-framed explanations per phase (P24)
+const PHASE_DECODE = {
+  1: { what: 'Your period. Hormones sit at their lowest, so energy dips and cramps or headaches can drop by.', training: 'So the app goes gentle — a feelings-first menu, lighter volume, zero pressure. Rest genuinely counts as training this week.' },
+  2: { what: 'Follicular phase. Estrogen is climbing, and your energy, mood and recovery climb with it.', training: 'The app leans in — this is build time, when pushing the weights both feels good and works.' },
+  3: { what: 'Around ovulation — often the strongest, most powerful days of your whole month.', training: 'The app flags this as your PB window: if a lift has felt close, this is when to go for it.' },
+  4: { what: 'Luteal phase. Progesterone rises, energy and mood can soften, and sleep matters more than usual.', training: 'The app eases volume a touch and leans on recovery — steady beats heroic here.' },
+};
+
 const DAY_TITLES = {
   1: 'Glutes & Hamstrings',
   2: 'Back & Shoulders',

@@ -550,6 +550,21 @@ details.card[open] > summary { margin-bottom: 12px; }
 .pr-row .v { font-weight: 900; color: var(--rose-deep); font-size: 14px; }
 .pr-row .d { font-size: 11px; color: var(--muted); font-weight: 700; }
 
+/* Your Month, Decoded (intelligence layer) */
+.decode-card { background: linear-gradient(150deg, var(--surface), color-mix(in srgb, var(--lilac) 9%, var(--surface))); border: 1px solid color-mix(in srgb, var(--lilac) 30%, transparent); }
+.decode-phase { display: flex; gap: 13px; align-items: flex-start; }
+.decode-phase .emo { font-size: 30px; line-height: 1; margin-top: 2px; }
+.decode-phase .dtext b { font-size: 15px; }
+.decode-phase .dtext p { margin: 5px 0 0; font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.5; }
+.decode-phase .dtext p.how { color: var(--muted); }
+.decode-forecast { margin-top: 13px; display: flex; flex-direction: column; gap: 8px; }
+.fc-line { background: var(--surface-2); border-radius: 12px; padding: 10px 13px; font-size: 13.5px; font-weight: 600; line-height: 1.45; }
+.fc-line b { color: var(--rose-deep); }
+.insight { display: flex; gap: 8px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; font-weight: 600; }
+.insight:last-child { border-bottom: none; }
+.insight > span:first-of-type { flex: 1; }
+.insight .src { font-size: 10.5px; font-weight: 800; color: var(--muted); white-space: nowrap; text-transform: uppercase; letter-spacing: .04em; }
+
 .mood-phase { display: flex; gap: 8px; }
 .mood-phase .mp { flex: 1; background: var(--surface-2); border-radius: 12px; padding: 9px 0; text-align: center; }
 .mood-phase .mp span { font-size: 20px; display: block; }

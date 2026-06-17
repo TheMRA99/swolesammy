@@ -413,7 +413,8 @@ function pickEvolutionPrompt() {
   }
   const pl = plateauedLift();
   if (pl) {
-    return { id: 'plateau-' + pl, emoji: '🔁', title: `${pl} wants a change-up`, body: 'It\'s held steady for a few weeks — totally normal. Pick one: drop the weight ~10% and rebuild with slower reps, swap to the alternative exercise for 3 weeks, or double-check sleep + protein this week.', accept: 'Got it', later: 'Snooze' };
+    const dx = plateauDiagnosis(pl);
+    return { id: 'plateau-' + pl, emoji: dx.emoji, title: dx.title, body: dx.body, accept: 'Got it', later: 'Snooze' };
   }
   const checks = [
     ['hipthrust60', 'Hip Thrust Machine', 60, 10, '🏆', 'Bodyweight hip thrust!', '60 kg × 10 — pause reps (2-sec hold at the top) and single-leg hip thrusts are now unlocked as variations. New toys!'],
@@ -748,8 +749,12 @@ function renderToday() {
         <button class="link-btn" data-action="offer-no">I'm okay — full session 💪</button>
       </div>`);
   }
-  if (typeof day === 'number' && week === 3 && current.symptoms.includes('Energized')) {
-    parts.push(`<div class="overload" id="power-nudge">☀️ Strongest week + feeling energized? Today's a lovely day to try +2.5 kg on your first lift.</div>`);
+  // predictive: headache heads-up (water + iron), surfaced a day or two early from her own pattern
+  const headsUp = isToday ? headacheHeadsUp(viewDate) : null;
+  if (headsUp) parts.push(`<div class="phase-note"><span>💧</span><span>Heads-up: headaches often visit you around cycle day ${headsUp.day} — likely in the next day or two. Front-loading water and an iron-rich meal today really helps. 🍋</span></div>`);
+  // proactive: strong-window PB flag (follicular / ovulation, training days)
+  if (typeof day === 'number' && strongWindowFor(viewDate).active) {
+    parts.push(`<div class="overload" id="power-nudge">✨ Strong window — your energy's up. If a lift's felt close, today's a lovely day to chase a personal best. 💪</div>`);
   }
 
   // ---- render the day ----
@@ -964,6 +969,29 @@ function renderCycle() {
           ${[1, 2, 3, 4].map(w => `<span><i style="background:${PHASE_COLORS[w]}"></i>${PHASES[w].phase}</span>`).join('')}
         </div>
       </div>`);
+
+    // ---- Your Month, Decoded (intelligence layer) ----
+    const dPhase = PHASES[info.week];
+    const dec = PHASE_DECODE[info.week];
+    const sw = strongWindowFor(todayISO());
+    const fc = strengthForecast();
+    const pats = patternsDetected();
+    const fcLines = [];
+    if (sw.active) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
+    if (fc) fcLines.push(`📈 At this pace, <b>${fc.target} kg ${esc(fc.name.replace(' Machine', ''))}</b> around <b>${esc(monthYear(fc.etaISO))}</b> — give or take ~${fc.bandWeeks} weeks. (Strength only, never a number on a scale.)`);
+    parts.push(`
+      <div class="card decode-card">
+        <h2>Your Month, Decoded 🌙<span class="sub">Your body, explained back to you — from your own data</span></h2>
+        <div class="decode-phase">
+          <div class="emo">${dPhase.emoji}</div>
+          <div class="dtext"><b>Right now · ${esc(dPhase.phase)}</b><p>${esc(dec.what)}</p><p class="how">${esc(dec.training)}</p></div>
+        </div>
+        ${fcLines.length ? `<div class="decode-forecast">${fcLines.map(l => `<div class="fc-line">${l}</div>`).join('')}</div>` : ''}
+        ${pats.length
+          ? `<div class="section-label">What your data leans toward</div>${pats.map(p => `<div class="insight">🔍 <span>${esc(p.text)}</span><span class="src">${typeof p.n === 'number' ? p.n + ' sessions' : p.n + ' logs'}</span></div>`).join('')}`
+          : `<p class="hint" style="margin-top:10px">Keep logging — as your story grows, the app starts spotting your own patterns here. 🌱</p>`}
+        ${info.held ? `<p class="hint" style="margin-top:8px">Your cycle\'s been a little unpredictable lately, so the app is keeping things gentle and flexible — no guessing, no pressure. 💗</p>` : ''}
+      </div>`);
   }
 
   // calendar
@@ -1127,6 +1155,126 @@ function headachePattern() {
   });
   if (days.length < 3) return null;
   return Math.round(days.reduce((a, b) => a + b, 0) / days.length);
+}
+
+/* ============================================================
+   INTELLIGENCE LAYER (P24) — 100% on-device, reads only her logs.
+   Reasons + predicts from her own data; degrades gracefully when
+   data is sparse; confidence-honest; kindness rules on every string.
+   ============================================================ */
+function monthYear(iso) { return fromISO(iso).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); }
+
+// how often a recovery habit was ticked over a recent window
+function habitRate(habit, sinceISO) {
+  let total = 0, hit = 0;
+  Object.keys(state.logs).forEach(d => {
+    if (d >= sinceISO && d <= todayISO() && isMeaningful(state.logs[d])) {
+      total++; if ((state.logs[d].habits || []).includes(habit)) hit++;
+    }
+  });
+  return { total, rate: total ? hit / total : null };
+}
+
+// least-squares line over [{x,y}] with residual spread
+function linReg(pts) {
+  const n = pts.length; if (n < 2) return null;
+  let sx = 0, sy = 0, sxx = 0, sxy = 0;
+  pts.forEach(p => { sx += p.x; sy += p.y; sxx += p.x * p.x; sxy += p.x * p.y; });
+  const den = n * sxx - sx * sx; if (den === 0) return null;
+  const slope = (n * sxy - sx * sy) / den;
+  const intercept = (sy - slope * sx) / n;
+  let ss = 0; pts.forEach(p => { const e = p.y - (slope * p.x + intercept); ss += e * e; });
+  return { slope, intercept, resStd: Math.sqrt(ss / Math.max(1, n - 2)), n };
+}
+
+// is today inside a high-energy window? (follicular / ovulation)
+function strongWindowFor(iso) {
+  const info = cycleInfo(iso);
+  return { active: !!info && (info.week === 2 || info.week === 3) };
+}
+
+// headache forecast from her own clustering (only if the pattern exists)
+function headacheHeadsUp(iso) {
+  const info = cycleInfo(iso);
+  const d = headachePattern();
+  if (!info || !d) return null;
+  return (info.day >= d - 2 && info.day <= d) ? { day: d } : null;
+}
+
+// strength ETA: the nearest key-lift milestone she's trending toward (strength only — never weight)
+function strengthForecast() {
+  let best = null;
+  MILESTONES.forEach(m => {
+    const pts = seriesFor(m.name);
+    if (pts.length < 3) return;
+    if (pts[pts.length - 1].w >= m.target) return;
+    const reg = linReg(pts.map(p => ({ x: daysBetween(pts[0].d, p.d), y: p.w })));
+    if (!reg || reg.slope <= 0) return;
+    const xTarget = (m.target - reg.intercept) / reg.slope;
+    const etaDays = xTarget - daysBetween(pts[0].d, todayISO());
+    if (etaDays <= 3 || etaDays > 540) return;
+    const bandWeeks = Math.max(2, Math.round(Math.min(120, (reg.resStd / reg.slope) * 1.6) / 7));
+    if (!best || etaDays < best.etaDays) best = { name: m.name, target: m.target, etaISO: addDays(todayISO(), Math.round(etaDays)), bandWeeks, etaDays };
+  });
+  return best;
+}
+
+// gentle on-device pattern detection across her own logs (each gated by sample size)
+function patternsDetected() {
+  const out = [];
+  const wk = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  KEY_LIFTS.forEach(lift => {
+    const pts = seriesFor(lift);
+    if (pts.length < 3) return;
+    let mx = -1, mxd = null;
+    pts.forEach(p => { if (p.w > mx) { mx = p.w; mxd = p.d; } });
+    const info = mxd && cycleInfo(mxd);
+    if (info) wk[info.week]++;
+  });
+  const totalMax = wk[1] + wk[2] + wk[3] + wk[4];
+  if (totalMax >= 4 && (wk[2] + wk[3]) > (wk[1] + wk[4])) {
+    out.push({ text: 'Your heaviest lifts tend to land in the week or two right after your period — that\'s your strong window.', n: totalMax });
+  }
+  const ms = { 1: [0, 0], 2: [0, 0], 3: [0, 0], 4: [0, 0] };
+  Object.keys(state.logs).forEach(d => {
+    const l = state.logs[d]; if (l.mood === null || l.mood === undefined) return;
+    const info = cycleInfo(d); if (!info) return;
+    ms[info.week][0] += l.mood; ms[info.week][1]++;
+  });
+  const avg = w => ms[w][1] ? ms[w][0] / ms[w][1] : null;
+  const moodN = ms[1][1] + ms[2][1] + ms[3][1] + ms[4][1];
+  const others = [1, 2, 3].map(avg).filter(x => x != null);
+  if (moodN >= 8 && avg(4) != null && others.length && avg(4) < Math.min(...others)) {
+    out.push({ text: 'Lower-mood days are usually your luteal week — biology with a schedule, not a failing. 🤍', n: moodN });
+  }
+  const hd = headachePattern();
+  if (hd) out.push({ text: `Headaches tend to cluster around cycle day ${hd} for you — usually the days just before your period.`, n: '3+' });
+  let sg = [0, 0], sa = [0, 0];
+  Object.keys(state.logs).forEach(d => {
+    const l = state.logs[d]; if (l.mood === null || l.mood === undefined) return;
+    if ((l.habits || []).includes('Sleep')) { sg[0] += l.mood; sg[1]++; } else { sa[0] += l.mood; sa[1]++; }
+  });
+  if (sg[1] >= 4 && sa[1] >= 4 && (sg[0] / sg[1]) - (sa[0] / sa[1]) >= 0.5) {
+    out.push({ text: 'Your best-feeling days follow the nights you logged good sleep. Sleep is quietly your superpower.', n: sg[1] + sa[1] });
+  }
+  return out;
+}
+
+// differential plateau diagnosis: recovery → cycle-timed → real training stall
+function plateauDiagnosis(lift) {
+  const since = addDays(todayISO(), -14);
+  const sleep = habitRate('Sleep', since), protein = habitRate('Protein', since);
+  const low = h => h.total >= 4 && h.rate !== null && h.rate < 0.4;
+  if (low(sleep) || low(protein)) {
+    const which = (low(sleep) && low(protein)) ? 'sleep and protein' : (low(sleep) ? 'sleep' : 'protein');
+    return { emoji: '💛', title: `${lift} stalled? Recovery first`, body: `Your ${lift.toLowerCase()} hasn't budged in a few sessions — but your ${which}'s been light these two weeks, and that's almost always the real reason. Let's top that up first and leave the weights exactly where they are. The strength tends to follow. 💛` };
+  }
+  const recent = seriesFor(lift).slice(-4);
+  const lowEnergyWk = recent.filter(p => { const i = cycleInfo(p.d); return i && (i.week === 1 || i.week === 4); }).length;
+  if (recent.length >= 3 && lowEnergyWk >= Math.ceil(recent.length / 2)) {
+    return { emoji: '🌙', title: `${lift} — this dip is cycle-timed`, body: `This little plateau lines up with your lower-energy weeks, not your strength. It tends to lift right when your energy does. Nothing to change — just keep showing up. 🌙` };
+  }
+  return { emoji: '🎉', title: `${lift} plateau — the fun part`, body: `Easy beginner gains are over, which means you're properly strong now. Let's give ${lift.toLowerCase()} a fresh stimulus: drop it about 10% and rebuild for two weeks with slower, stricter reps. One change at a time — we've got this. 💪` };
 }
 
 function renderProgress() {
