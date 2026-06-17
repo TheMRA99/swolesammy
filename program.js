@@ -219,7 +219,7 @@ const GENTLE = {
     ex: [
       { name: 'Leg Press', scheme: '2×12', rest: '90 sec', cues: ['Light and smooth'] },
       { name: 'Seated Cable Row', scheme: '2×12', rest: '90 sec', cues: ['Easy weight, tall chest'] },
-      { name: 'Back Extension', scheme: '2×12', rest: '60 sec', cues: ['Slow, glutes doing the work'] },
+      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Slow, glutes doing the work'] },
     ],
     cardio: 'Walk · 15 min · easy',
   },
