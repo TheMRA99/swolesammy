@@ -203,6 +203,16 @@ function resolveScheme(scheme, week) {
   return typeof scheme === 'object' ? (scheme[week] || scheme[2]) : scheme;
 }
 
+// Exercises with no external load — the app hides the kg field for these and
+// just logs reps/seconds. Matches by name so swapped-in alternatives count too.
+const BODYWEIGHT = new Set([
+  'Dead Bug', 'Bird Dog', 'Front Plank', 'Side Plank', 'Vacuum Breathing', 'Knee Tucks',
+  'Glute Bridge', 'Glute Bridge Hold', 'Single-Leg Glute Bridge', 'Single-Leg Glute Bridge Hold',
+  'Superman + Glute Squeeze', 'Superman Hold', 'Clamshells', 'Banded Clamshells',
+  'Standing Hip Abduction', 'Side-Lying Adduction Raise', 'Push-Up Progression', 'Single-Leg Balance',
+]);
+function isBodyweight(name) { return BODYWEIGHT.has(name); }
+
 /* ---- Gentle sessions (period week / rough days) — spec §7 ---- */
 const GENTLE = {
   A: {

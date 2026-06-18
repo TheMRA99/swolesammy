@@ -138,7 +138,7 @@ function lastCompletedSession(beforeISO) {
   const dates = Object.keys(state.logs).filter(d => d < beforeISO).sort().reverse();
   for (const d of dates) {
     const l = state.logs[d];
-    if (typeof l.day === 'number' && (l.completed || (l.ex && l.ex.some(e => e.done)))) return { day: l.day, date: d };
+    if (typeof l.day === 'number' && (l.completed || (l.ex && l.ex.some(anySetDone)))) return { day: l.day, date: d };
   }
   return null;
 }
@@ -201,7 +201,28 @@ function swappableExercises() {
   return out;
 }
 
-/* ---------- logs ---------- */
+/* ---------- logs ----------
+   Per-set logging: each exercise holds a `sets` array (the source of truth).
+   e.weight/e.reps/e.done are kept as derived mirrors (heaviest set + all-done)
+   so every analytic that reads raw logs keeps working unchanged. */
+function parseSetCount(scheme) { const m = String(scheme).match(/^(\d+)/); return m ? Math.max(1, +m[1]) : 1; }
+function freshExFromPlan(pe) {
+  const n = parseSetCount(pe.scheme);
+  return { name: pe.name, scheme: pe.scheme, sets: Array.from({ length: n }, () => ({ w: '', r: '', done: false })), done: false, weight: '', reps: '' };
+}
+function syncEx(e) {
+  const sets = e.sets || [];
+  e.done = sets.length > 0 && sets.every(s => s.done);
+  let topW = null, topR = '', anyR = '';
+  sets.forEach(s => {
+    if (s.r !== '') anyR = s.r;
+    const w = parseFloat(s.w);
+    if (!isNaN(w) && (topW === null || w > topW)) { topW = w; topR = s.r; }
+  });
+  if (topW !== null) { e.weight = String(topW); e.reps = topR || anyR; }
+  else { e.weight = ''; e.reps = anyR; }
+}
+function anySetDone(e) { return !!(e && (e.done || (Array.isArray(e.sets) && e.sets.some(s => s.done)))); }
 function blankLog(iso, dayOverride) {
   const info = cycleInfo(iso);
   const week = info ? info.week : 2;
@@ -217,7 +238,7 @@ function blankLog(iso, dayOverride) {
     squat: SQUAT_RESET.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
     cardioDone: false, cardioSkipped: false, offerDismissed: false,
-    ex: plan.ex ? plan.ex.map(e => ({ name: e.name, scheme: e.scheme, done: false, weight: '', reps: '' })) : [],
+    ex: plan.ex ? plan.ex.map(freshExFromPlan) : [],
   };
 }
 function applySwaps(fresh, swaps, day) {
@@ -225,7 +246,7 @@ function applySwaps(fresh, swaps, day) {
     const i = fresh.ex.findIndex(e => e.name === orig);
     const meta = exMeta(day, orig);
     const alt = meta && meta.alts && meta.alts.find(a => a.name === swaps[orig]);
-    if (i !== -1 && alt) fresh.ex[i] = { name: alt.name, scheme: alt.scheme, done: false, weight: '', reps: '' };
+    if (i !== -1 && alt) fresh.ex[i] = freshExFromPlan(alt);
   });
   fresh.swaps = Object.assign({}, swaps);
 }
@@ -246,7 +267,17 @@ function buildLog(iso, dayOverride) {
       saved.ex.forEach(e => { byName[e.name] = e; });
       fresh.ex = fresh.ex.map(e => {
         const s = byName[e.name];
-        return s ? { ...e, done: !!s.done, weight: s.weight || '', reps: s.reps || '' } : e;
+        if (!s) return e;
+        const n = e.sets.length;
+        let sets;
+        if (Array.isArray(s.sets)) {
+          sets = Array.from({ length: n }, (_, k) => s.sets[k] ? { w: s.sets[k].w || '', r: s.sets[k].r || '', done: !!s.sets[k].done } : { w: '', r: '', done: false });
+        } else { // migrate old single-entry logs → set 1 (or all sets if it was completed)
+          sets = Array.from({ length: n }, (_, k) => s.done ? { w: s.weight || '', r: s.reps || '', done: true } : (k === 0 ? { w: s.weight || '', r: s.reps || '', done: false } : { w: '', r: '', done: false }));
+        }
+        const ne = { ...e, sets };
+        syncEx(ne);
+        return ne;
       });
     }
   }
@@ -255,7 +286,7 @@ function buildLog(iso, dayOverride) {
 function applyLighter(log, iso, day) {
   const info = cycleInfo(iso);
   const plan = planFor(info ? info.week : 2, day, { lighter: true });
-  if (plan.ex) log.ex = plan.ex.map(e => ({ name: e.name, scheme: e.scheme, done: false, weight: '', reps: '' }));
+  if (plan.ex) log.ex = plan.ex.map(freshExFromPlan);
 }
 function isMeaningful(log) {
   if (!log) return false;
@@ -267,7 +298,7 @@ function isMeaningful(log) {
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
     (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || log.cardioDone ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
-    (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '')));
+    (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '' || (e.sets || []).some(s => s.done || s.w !== '' || s.r !== ''))));
 }
 
 let current = buildLog(viewDate);
@@ -290,12 +321,27 @@ function lastPerf(name, beforeISO) {
   }
   return null;
 }
+// last session's per-set values for an exercise (for set-by-set pre-fill)
+function lastSets(name, beforeISO) {
+  const target = normName(name);
+  const dates = Object.keys(state.logs).filter(d => d < beforeISO).sort().reverse();
+  for (const d of dates) {
+    const l = state.logs[d]; if (!l.ex) continue;
+    const e = l.ex.find(x => normName(x.name) === target && (Array.isArray(x.sets) ? x.sets.some(s => s.w !== '' || s.r !== '') : (x.weight !== '' || x.reps !== '')));
+    if (e) {
+      const sets = Array.isArray(e.sets) ? e.sets : [{ w: e.weight, r: e.reps, done: !!e.done }];
+      return { date: d, sets, done: Array.isArray(e.sets) ? e.sets.every(s => s.done) : !!e.done };
+    }
+  }
+  return null;
+}
 function ownedLastTime(name, scheme, beforeISO) {
-  // spec §3: all reps comfortable at top of range → prompt +1–2 reps OR +2.5 kg
+  // spec §3: EVERY working set comfortable at the top of the range → +1–2 reps OR +2.5 kg
   const p = parseScheme(scheme);
   if (!p.top) return false;
-  const last = lastPerf(name, beforeISO);
-  return !!(last && last.done && parseInt(last.reps, 10) >= p.top);
+  const ls = lastSets(name, beforeISO);
+  if (!ls || !ls.done || !ls.sets.length) return false;
+  return ls.sets.every(s => { const r = parseInt(s.r, 10); return !isNaN(r) && r >= p.top; });
 }
 function seriesFor(name) {
   const target = normName(name);
@@ -330,7 +376,7 @@ function recentNotes(excludeISO, n) {
 }
 
 /* ---------- sessions, streaks & grace ---------- */
-function isSession(l) { return l && (typeof l.day === 'number' || String(l.day).startsWith('gentle')) && (l.completed || (l.ex && l.ex.some(e => e.done))); }
+function isSession(l) { return l && (typeof l.day === 'number' || String(l.day).startsWith('gentle')) && (l.completed || (l.ex && l.ex.some(anySetDone))); }
 function isShowedUp(l) { return isMeaningful(l) && (l.completed || isSession(l) || ['cycle-rest', 'walk', 'stretch'].includes(l.day)); }
 function sessionDates() { return Object.keys(state.logs).sort().filter(d => isSession(state.logs[d])); }
 function weekCounts() {
@@ -495,7 +541,7 @@ function render() {
    Idiot-proof rendering: compute real kg from today's typed weight,
    falling back to her last logged weight; round to 2.5 kg plates. */
 function rampWeights(e, last) {
-  const base = parseFloat(e.weight) || (last && parseFloat(last.weight)) || null;
+  const base = parseFloat(e.sets && e.sets[0] && e.sets[0].w) || parseFloat(e.weight) || (last && parseFloat(last.weight)) || null;
   if (!base) return null;
   const round = w => Math.max(2.5, Math.round(w / 2.5) * 2.5);
   return [round(base * 0.5), round(base * 0.75)];
@@ -512,7 +558,9 @@ function exRowHTML(e, i, day) {
   const isDist = !!(meta && meta.dist);
   const last = lastPerf(e.name, viewDate);
   const lastTxt = last ? `Last: ${last.weight ? esc(last.weight) + ' kg' : ''}${last.weight && last.reps ? ' × ' : ''}${last.reps ? esc(last.reps) + (isDist ? ' m' : '') : ''} · ${esc(shortDate(last.date))}` : '';
-  const owned = ownedLastTime(e.name, e.scheme, viewDate) && !(meta && meta.tag === 'core');
+  const bw = isBodyweight(e.name);
+  const unit = isDist ? 'm' : (/sec/i.test(e.scheme) ? 'sec' : (/breath/i.test(e.scheme) ? 'breaths' : 'reps'));
+  const owned = ownedLastTime(e.name, e.scheme, viewDate) && !(meta && meta.tag === 'core') && !bw;
   const hasCues = meta && (meta.cues || meta.note || meta.rest || meta.avoid);
   const hasAlts = baseMeta && baseMeta.alts && baseMeta.alts.length;
   const rw = (meta && meta.ramp) ? rampWeights(e, last) : null;
@@ -524,22 +572,33 @@ function exRowHTML(e, i, day) {
         <span class="ramp-label" data-r="${r}">${esc(rampLabelText(r, rw))}</span>
       </div>`;
   }).join('') + `<div class="ramp-note">These two don't count — they just switch the muscle on. Your real sets start below 👇</div>` : '';
+  const ls = lastSets(e.name, viewDate);
+  const setRows = (e.sets || []).map((s, si) => {
+    const pw = ls && ls.sets[si] ? ls.sets[si].w : '';
+    const pr = ls && ls.sets[si] ? ls.sets[si].r : '';
+    return `
+      <div class="set-row ${s.done ? 'done' : ''} ${bw ? 'bw' : ''}">
+        <span class="set-no">Set ${si + 1}</span>
+        ${bw ? '' : `<input class="mini" inputmode="decimal" placeholder="${pw ? esc(pw) : 'kg'}" value="${esc(s.w)}" data-action="set-field" data-field="w" data-i="${i}" data-s="${si}"><span class="setx">×</span>`}
+        <input class="mini" inputmode="text" placeholder="${pr ? esc(pr) : unit}" value="${esc(s.r)}" data-action="set-field" data-field="r" data-i="${i}" data-s="${si}">
+        <button class="check" data-action="toggle-set" data-i="${i}" data-s="${si}" aria-label="Set done">${s.done ? '✓' : ''}</button>
+      </div>`;
+  }).join('');
   return `
     <div class="ex-row ${e.done ? 'done' : ''}">
       ${rampRows}
       <div class="top">
-        <button class="check" data-action="toggle-ex" data-i="${i}" aria-label="Done">${e.done ? '✓' : ''}</button>
         <div class="ex-main" ${hasCues ? `data-action="toggle-cues"` : ''}>
           <div class="ex-name">${esc(e.name)}${hasCues ? ' <span class="info-dot">ⓘ</span>' : ''}</div>
           <div class="ex-scheme">${esc(e.scheme)}${meta && meta.rest ? ` · rest ${esc(meta.rest)}` : ''}</div>
           ${lastTxt ? `<div class="ex-last">${lastTxt}</div>` : ''}
           ${owned ? `<div class="nudge">🔥 Owned last time — add 1–2 reps <b>or</b> 2.5 kg. One, not both.</div>` : ''}
         </div>
-        <div class="ex-inputs">
-          <input class="mini" inputmode="decimal" placeholder="${last && last.weight ? esc(last.weight) : 'kg'}" value="${esc(e.weight)}" data-action="ex-field" data-field="weight" data-i="${i}">
-          <input class="mini" inputmode="text" placeholder="${isDist ? 'm' : 'reps'}" value="${esc(e.reps)}" data-action="ex-field" data-field="reps" data-i="${i}">
-        </div>
         ${hasAlts ? `<button class="swap-btn" data-action="toggle-swaps" aria-label="Swap exercise">⇄</button>` : ''}
+      </div>
+      <div class="set-list">
+        ${setRows}
+        ${(e.sets || []).length > 1 ? `<button class="copy-sets" data-action="copy-sets" data-i="${i}">↓ copy set 1 to all</button>` : ''}
       </div>
       ${hasCues ? `
       <div class="ex-cues">
@@ -1676,16 +1735,22 @@ document.addEventListener('click', e => {
   if (!t) return;
   const a = t.dataset.action;
 
-  if (a === 'toggle-ex') {
-    const i = +t.dataset.i;
-    current.ex[i].done = !current.ex[i].done;
+  if (a === 'toggle-set') {
+    const i = +t.dataset.i, si = +t.dataset.s;
+    const s = current.ex[i].sets[si];
+    s.done = !s.done;
+    syncEx(current.ex[i]);
     commit();
-    if (current.ex[i].done) {
+    if (s.done) {
       const meta = exMeta(current.day, current.ex[i].name);
       const rest = meta && meta.rest ? parseInt(meta.rest, 10) : 60;
       if (rest) startRest(rest);
     }
     renderToday();
+  }
+  else if (a === 'copy-sets') {
+    const i = +t.dataset.i, sets = current.ex[i].sets;
+    if (sets.length) { const f = sets[0]; sets.forEach((s, k) => { if (k) { s.w = f.w; s.r = f.r; } }); syncEx(current.ex[i]); commit(); renderToday(); }
   }
   else if (a === 'toggle-ramp') {
     const n = t.dataset.name, i = +t.dataset.i;
@@ -1817,12 +1882,13 @@ document.addEventListener('input', e => {
   const t = e.target.closest('[data-action]');
   if (!t) return;
   const a = t.dataset.action;
-  if (a === 'ex-field') {
-    const i = +t.dataset.i;
-    current.ex[i][t.dataset.field] = t.value;
+  if (a === 'set-field') {
+    const i = +t.dataset.i, si = +t.dataset.s;
+    current.ex[i].sets[si][t.dataset.field] = t.value;
+    syncEx(current.ex[i]);
     commit();
-    // keep the warm-up set suggestions in sync with the weight she types
-    if (t.dataset.field === 'weight') {
+    // keep the warm-up set suggestions in sync with the working weight (set 1)
+    if (t.dataset.field === 'w' && si === 0) {
       const row = t.closest('.ex-row');
       const labels = row ? row.querySelectorAll('.ramp-label') : [];
       if (labels.length) {

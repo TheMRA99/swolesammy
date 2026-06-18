@@ -371,6 +371,18 @@ select.select {
   padding: 0 2px 10px 36px; margin-top: -3px;
 }
 
+/* per-set logging rows */
+.set-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.set-row { display: flex; align-items: center; gap: 8px; background: var(--field); border: 1.5px solid var(--line); border-radius: 12px; padding: 6px 8px 6px 11px; }
+.set-row.done { background: var(--done-bg); border-color: transparent; }
+.set-row .set-no { font-weight: 800; font-size: 12px; color: var(--muted); width: 40px; flex: none; }
+.set-row.done .set-no { color: var(--done-text); }
+.set-row .mini { flex: 1; width: auto; min-width: 0; }
+.set-row .setx { color: var(--muted); font-weight: 800; flex: none; }
+.set-row .check { width: 30px; height: 30px; flex: none; }
+.set-row.done .check { background: var(--p-follicular); border-color: var(--p-follicular); }
+.copy-sets { align-self: flex-start; border: none; background: none; color: var(--rose-deep); font-family: inherit; font-weight: 800; font-size: 12px; cursor: pointer; padding: 4px 2px; }
+
 .cardio-row { margin-top: 13px; background: linear-gradient(120deg, var(--rose-soft), color-mix(in srgb, var(--rose) 10%, var(--surface))); }
 .cardio-row .ex-name { color: var(--rose-deep); }
 .cardio-row.done { background: var(--done-bg); }
