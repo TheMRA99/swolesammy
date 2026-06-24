@@ -162,9 +162,11 @@ function planFor(week, day, opts) {
   const block = DAYS[day];
   let ex = block.ex.map(e => ({ ...e, scheme: resolveScheme(e.scheme, week) }));
   // auto-swap machines her gym doesn't have (Settings → My gym)
+  // Skip any alt already in today's session — a duplicate name breaks per-name logging.
+  const baseNames = new Set(block.ex.map(x => x.name));
   ex = ex.map(e => {
     if (state.unavailable[e.name] && e.alts && e.alts.length) {
-      const a = e.alts[0];
+      const a = e.alts.find(al => !baseNames.has(al.name)) || e.alts[0];
       return { name: a.name, scheme: a.scheme, rest: e.rest, cues: e.cues, note: a.note, tag: e.tag, swappedFrom: e.name };
     }
     return e;
@@ -194,11 +196,22 @@ function exMeta(day, name) {
   if (!list) return null;
   return list.find(e => e.name === name) || null;
 }
-// unique exercises with equipment alternatives (for the My gym toggles)
+// Genuine machines a gym might not have → a "My gym" Yes/No toggle that
+// auto-swaps to a free-weight / at-home alternative (alts[0]) everywhere.
+// (Every exercise has swap alts now; this keeps the Settings list sensible.)
+const GYM_MACHINES = new Set([
+  'Hip Thrust Machine', 'Hip Abduction Machine', 'Hip Adduction Machine',
+  'Leg Press', 'Leg Extension', 'Reverse Pec Deck', 'Machine Chest Press',
+]);
 function swappableExercises() {
   const seen = {}, out = [];
-  [1, 2, 3, 4].forEach(d => DAYS[d].ex.forEach(e => { if (e.alts && e.alts.length && !seen[e.name]) { seen[e.name] = 1; out.push(e); } }));
+  [1, 2, 3, 4].forEach(d => DAYS[d].ex.forEach(e => { if (GYM_MACHINES.has(e.name) && e.alts && e.alts.length && !seen[e.name]) { seen[e.name] = 1; out.push(e); } }));
   return out;
+}
+// Swap-tag tooltips (✅ equivalent / 🔄 variation / ⚠️ caution — spec §10)
+function tagTitle(tag, note) {
+  const m = { '✅': 'Same muscle — a true like-for-like swap.', '🔄': 'Trains it a little differently — great for variety.', '⚠️': 'Only with good, careful form.' };
+  return ((m[tag] ? m[tag] + ' ' : '') + (note || '')).trim();
 }
 
 /* ---------- logs ----------
@@ -562,7 +575,10 @@ function exRowHTML(e, i, day) {
   const unit = isDist ? 'm' : (/sec/i.test(e.scheme) ? 'sec' : (/breath/i.test(e.scheme) ? 'breaths' : 'reps'));
   const owned = ownedLastTime(e.name, e.scheme, viewDate) && !(meta && meta.tag === 'core') && !bw;
   const hasCues = meta && (meta.cues || meta.note || meta.rest || meta.avoid);
-  const hasAlts = baseMeta && baseMeta.alts && baseMeta.alts.length;
+  // Don't offer an alternative that's already in today's session (same name → broken logging).
+  const sessionNames = new Set((current.ex || []).map(x => x.name));
+  const altList = (baseMeta && baseMeta.alts || []).filter(a => !(sessionNames.has(a.name) && a.name !== e.name));
+  const hasAlts = altList.length > 0;
   const rw = (meta && meta.ramp) ? rampWeights(e, last) : null;
   const rampRows = (meta && meta.ramp) ? [0, 1].map(r => {
     const on = (current.ramp[e.name] || [])[r];
@@ -608,10 +624,11 @@ function exRowHTML(e, i, day) {
       </div>` : ''}
       ${hasAlts ? `
       <div class="ex-swaps">
-        <b>Machine busy? Swap to:</b>
-        ${baseMeta.alts.map(a => `<button class="chip-toggle ${e.name === a.name ? 'on' : ''}" data-action="swap-pick" data-orig="${esc(origName || e.name)}" data-alt="${esc(a.name)}">${esc(a.name)} · ${esc(a.scheme)}</button>`).join('')}
+        <div class="swap-head"><b>Swap it out 🔁</b><span class="swap-legend">✅ same job · 🔄 a fun twist — your call</span></div>
+        ${altList.map(a => `<button class="chip-toggle ${e.name === a.name ? 'on' : ''}" data-action="swap-pick" data-orig="${esc(origName || e.name)}" data-alt="${esc(a.name)}" title="${esc(tagTitle(a.tag, a.note))}">${a.tag ? a.tag + ' ' : ''}${esc(a.name)} · ${esc(a.scheme)}</button>`).join('')}
         ${origName ? `<button class="chip-toggle" data-action="swap-pick" data-orig="${esc(origName)}" data-alt="">↩ back to ${esc(origName)}</button>` : ''}
         <button class="chip-toggle pain" data-action="pain-swap" data-orig="${esc(origName || e.name)}">🚫 This one hurts — swap for good</button>
+        <div class="swap-tip">🔄 swaps train it a little differently — lovely for variety. To watch a number climb cleanly, keep one “main” and rotate the rest in. 💛</div>
       </div>` : ''}
     </div>`;
 }
@@ -1630,10 +1647,10 @@ function renderSettings() {
       </div>
     </div>
     <div class="card">
-      <h2>My gym 🏋️<span class="sub">Got this machine? Tap No and the app swaps in a no-equipment move everywhere.</span></h2>
+      <h2>My gym 🏋️<span class="sub">Got this machine at your gym? Tap No and the app swaps in an at-home / free-weight move everywhere. You can also swap any exercise on the day itself with the ⇄ button.</span></h2>
       ${swappableExercises().map(e => `
         <div class="gym-row">
-          <div class="gym-name"><b>${esc(e.name)}</b>${state.unavailable[e.name] ? `<span>using ${esc(e.alts[0].name)} instead</span>` : ''}</div>
+          <div class="gym-name"><b>${esc(e.name)}</b>${state.unavailable[e.name] ? `<span>swapped in everywhere ✓</span>` : ''}</div>
           <button class="switch ${state.unavailable[e.name] ? 'off' : 'on'}" data-action="toggle-equip" data-name="${esc(e.name)}">${state.unavailable[e.name] ? 'No' : 'Yes'}</button>
         </div>`).join('')}
     </div>

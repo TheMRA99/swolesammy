@@ -92,22 +92,38 @@ const DAYS = {
       'Hip abduction machine · 1 × 15–20 · very light & slow — wake the side-glutes up',
     ],
     ex: [
-      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8–10', 3: '3×8 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Chin tucked, ribs down', 'Drive through heels to full lockout', '1-sec squeeze at the top', 'Exhale as you lift'], avoid: 'Don\'t arch the lower back at the top.', note: 'Your main shape-builder.' },
-      { name: 'Romanian Deadlift', scheme: { 1: '2×10', 2: '3×10', 3: '3×10 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Soft knees, push hips back', 'Long, proud spine', 'Feel the hamstring stretch', 'Exhale on the way up', '“Close a car door with your hips”'] },
-      { name: 'Seated Hamstring Curl', scheme: '2×12', rest: '60 sec', cues: ['2 sec down, 1 sec squeeze'] },
+      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8–10', 3: '3×8 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Chin tucked, ribs down', 'Drive through heels to full lockout', '1-sec squeeze at the top', 'Exhale as you lift'], avoid: 'Don\'t arch the lower back at the top.', note: 'Your main shape-builder.', alts: [
+        { name: 'Glute Bridge', scheme: '3×12', tag: '✅', note: 'Floor version — shorter range, very back-friendly.' },
+        { name: 'Single-Leg Hip Thrust', scheme: '3×10 each', tag: '🔄', note: 'Bodyweight or light — extra glute focus, evens out the sides.' },
+        { name: 'Cable Pull-Through', scheme: '3×12', tag: '🔄', note: 'Rope between the legs, hinge and squeeze to stand. Keep it light.' },
+      ] },
+      { name: 'Romanian Deadlift', scheme: { 1: '2×10', 2: '3×10', 3: '3×10 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Soft knees, push hips back', 'Long, proud spine', 'Feel the hamstring stretch', 'Exhale on the way up', '“Close a car door with your hips”'], alts: [
+        { name: 'Seated Hamstring Curl', scheme: '3×12', tag: '✅', note: 'Isolates the hamstrings, zero spinal load — your safest hamstring builder.' },
+        { name: 'Single-Leg RDL', scheme: '3×8 each', tag: '🔄', note: 'Balance + hamstring + glute. Keep it light, flat back.' },
+        { name: 'Hip Thrust Machine', scheme: '3×10', tag: '✅', note: 'If RDLs ever bug your back, extra thrust covers the glutes.' },
+      ] },
+      { name: 'Seated Hamstring Curl', scheme: '2×12', rest: '60 sec', cues: ['2 sec down, 1 sec squeeze'], alts: [
+        { name: 'Lying Hamstring Curl', scheme: '3×12', tag: '✅', note: 'Same muscle, different machine.' },
+        { name: 'Stability Ball Leg Curl', scheme: '3×12', tag: '🔄', note: 'Heels on a ball, bridge up and curl it in. Core + hamstrings, no spinal load.' },
+      ] },
       { name: 'Hip Abduction Machine', scheme: '2×15', rest: '60 sec', cues: ['Lean slightly forward', 'Push knees apart slowly', 'Feel the sides of the hips working'], note: 'Strong, steady hips — a confident stride.', alts: [
-        { name: 'Seated Banded Abduction', scheme: '2×15–20', note: 'Mini band above knees, any bench.' },
-        { name: 'Banded Clamshells', scheme: '2×15 each side', note: 'Side-lying, slow, 1-sec squeeze.' },
+        { name: 'Seated Banded Abduction', scheme: '2×15–20', tag: '✅', note: 'Mini band above knees, any bench.' },
+        { name: 'Banded Clamshells', scheme: '2×15 each side', tag: '✅', note: 'Side-lying, slow, 1-sec squeeze. Best home option.' },
+        { name: 'Standing Banded Abduction', scheme: '2×15 each side', tag: '🔄', note: 'One leg out to the side, stand tall — adds balance.' },
       ] },
       { name: 'Hip Adduction Machine', scheme: '2×15', rest: '60 sec', cues: ['Slow control both directions', 'No slamming'], note: 'Inner-thigh balance work.', alts: [
-        { name: 'Glute Bridge + Cushion Squeeze', scheme: '2×15', note: 'Squeeze a cushion between the knees through the bridge.' },
-        { name: 'Side-Lying Adduction Raise', scheme: '2×12 each side', note: 'Small slow range is perfect.' },
+        { name: 'Glute Bridge + Cushion Squeeze', scheme: '2×15', tag: '✅', note: 'Squeeze a cushion between the knees through the bridge.' },
+        { name: 'Side-Lying Adduction Raise', scheme: '2×12 each side', tag: '✅', note: 'Small slow range is perfect.' },
       ] },
       { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Hard glute squeeze at the top', '1-sec pause'], note: 'Glute-focused and spine-friendly — all the burn, none of the lower-back load.', alts: [
-        { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', note: 'Harder — one leg, 1-sec pause at the top.' },
-        { name: 'Cable Kickback', scheme: '2×15 each leg', note: 'Standing, slow, squeeze the glute.' },
+        { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', tag: '🔄', note: 'Harder — one leg, 1-sec pause at the top.' },
+        { name: 'Cable Kickback', scheme: '2×15 each leg', tag: '✅', note: 'Standing, slow, squeeze the glute.' },
       ] },
-      { name: 'Pallof Press', scheme: '2×12 each side', rest: '60 sec', tag: 'core', cues: ['Press, pause, resist the twist'], note: 'Deep core — strength from the inside out.' },
+      { name: 'Pallof Press', scheme: '2×12 each side', rest: '60 sec', tag: 'core', cues: ['Press, pause, resist the twist'], note: 'Deep core — strength from the inside out.', alts: [
+        { name: 'Band Anti-Rotation Hold', scheme: '3×20 sec each', tag: '✅', note: 'Same anti-rotation job, just held still.' },
+        { name: 'BOSU + Med-Ball Hold', scheme: '3×30 sec', tag: '🔄', note: 'Kneel on the half-BOSU holding a ball at the chest. Fun balance challenge — trains the core a little differently.' },
+        { name: 'Suitcase Carry', scheme: '2×30 m each', tag: '✅', note: 'Hold a weight in one hand and walk tall — your core resists the lean.' },
+      ] },
     ],
     cardio: 'Incline walk · 15–20 min · 8% incline · 5 km/h',
   },
@@ -121,16 +137,41 @@ const DAYS = {
       'Light lat pulldown feel set · 1 × 12 · ≈half your working weight',
     ],
     ex: [
-      { name: 'Lat Pulldown', scheme: '3×10', rest: '90 sec', ramp: true, cues: ['Flat back, proud chest', '“Drive elbows into your pockets”', 'No yanking — control the way back up'], note: 'Vertical pull — builds lat width, the waist-narrowing piece.' },
-      { name: 'Seated Cable Row', scheme: '3×10', rest: '90 sec', cues: ['Flat back, proud chest', 'Pull to the lower ribs', 'Squeeze the shoulder blades', 'Slow return'], note: 'Horizontal pull — mid-back thickness and posture.' },
-      { name: 'Single-Arm Dumbbell Row', scheme: '3×10 each', rest: '90 sec', cues: ['Hand and knee on the bench, flat back', 'Pull the dumbbell to your hip', 'No torso twisting'], note: 'Evens out left and right, and teaches a braced flat back.', alts: [
-        { name: 'Chest-Supported Row', scheme: '3×10', note: 'Chest on an incline bench — zero lower-back load.' },
+      { name: 'Lat Pulldown', scheme: '3×10', rest: '90 sec', ramp: true, cues: ['Flat back, proud chest', '“Drive elbows into your pockets”', 'No yanking — control the way back up'], note: 'Vertical pull — builds lat width, the waist-narrowing piece.', alts: [
+        { name: 'Assisted Pull-Up', scheme: '3×8', tag: '✅', note: 'Machine or band assisted. Same vertical pull — and a milestone goal lift. 🌟' },
+        { name: 'Single-Arm Lat Pulldown', scheme: '3×10 each', tag: '🔄', note: 'One side at a time — evens out left and right.' },
+        { name: 'Straight-Arm Pulldown', scheme: '3×12', tag: '🔄', note: 'More lat isolation, less biceps.' },
       ] },
-      { name: 'Face Pull', scheme: '2×15', rest: '60 sec', cues: ['Pull toward the eyes', 'Elbows high, nice and slow'], note: 'Posture gold.' },
-      { name: 'Reverse Pec Deck', scheme: '2×15', rest: '60 sec', cues: ['1-sec squeeze at the peak'] },
-      { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging'], note: 'The hourglass maker — shoulder width frames everything.' },
-      { name: 'Knee Tucks', scheme: '3×12', rest: '60 sec', tag: 'core', cues: ['Slow', 'Exhale as knees pull in', 'Keep the lower back relaxed on the bench'] },
-      { name: 'Dead Bug', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Lower back gently pressed down', 'Slow opposite arm + leg'] },
+      { name: 'Seated Cable Row', scheme: '3×10', rest: '90 sec', cues: ['Flat back, proud chest', 'Pull to the lower ribs', 'Squeeze the shoulder blades', 'Slow return'], note: 'Horizontal pull — mid-back thickness and posture.', alts: [
+        { name: 'Chest-Supported Row', scheme: '3×10', tag: '✅', note: 'Chest on the pad — zero lower-back load, perfect for you.' },
+        { name: 'Single-Arm Dumbbell Row', scheme: '3×10 each', tag: '✅', note: 'Already on this day — doubles as the row swap.' },
+        { name: 'Inverted Row', scheme: '3×8–12', tag: '🔄', note: 'Bodyweight horizontal pull — change the angle for difficulty.' },
+      ] },
+      { name: 'Single-Arm Dumbbell Row', scheme: '3×10 each', rest: '90 sec', cues: ['Hand and knee on the bench, flat back', 'Pull the dumbbell to your hip', 'No torso twisting'], note: 'Evens out left and right, and teaches a braced flat back.', alts: [
+        { name: 'Chest-Supported Row', scheme: '3×10', tag: '✅', note: 'Chest on an incline bench — zero lower-back load.' },
+        { name: 'Single-Arm Cable Row', scheme: '3×10 each', tag: '✅', note: 'The cable version, one side at a time.' },
+      ] },
+      { name: 'Face Pull', scheme: '2×15', rest: '60 sec', cues: ['Pull toward the eyes', 'Elbows high, nice and slow'], note: 'Posture gold.', alts: [
+        { name: 'Band Pull-Apart', scheme: '2×20', tag: '✅', note: 'Same rear-delt job, zero equipment.' },
+        { name: 'Reverse Pec Deck', scheme: '2×15', tag: '✅', note: 'Already in your program — same area.' },
+      ] },
+      { name: 'Reverse Pec Deck', scheme: '2×15', rest: '60 sec', cues: ['1-sec squeeze at the peak'], alts: [
+        { name: 'Bent-Over Rear Delt Raise', scheme: '2×15', tag: '✅', note: 'Chest on an incline bench to protect your back. Same muscle.' },
+        { name: 'Face Pull', scheme: '2×15', tag: '✅', note: 'Interchangeable rear-delt work.' },
+      ] },
+      { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging'], note: 'The hourglass maker — shoulder width frames everything.', alts: [
+        { name: 'Cable Lateral Raise', scheme: '3×12 each', tag: '✅', note: 'Constant tension — many find it even better.' },
+        { name: 'Machine Lateral Raise', scheme: '3×12', tag: '✅', note: 'Guided path if your gym has one.' },
+        { name: 'Leaning Lateral Raise', scheme: '3×12 each', tag: '🔄', note: 'Lean away from a support for a bigger range.' },
+      ] },
+      { name: 'Knee Tucks', scheme: '3×12', rest: '60 sec', tag: 'core', cues: ['Slow', 'Exhale as knees pull in', 'Keep the lower back relaxed on the bench'], alts: [
+        { name: 'Reverse Crunch', scheme: '3×12', tag: '✅', note: 'Knees to chest, lift the hips a touch. Lower-ab focus.' },
+        { name: 'Hanging Knee Raise', scheme: '3×12', tag: '🔄', note: 'A progression once your grip allows — more challenging.' },
+      ] },
+      { name: 'Dead Bug', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Lower back gently pressed down', 'Slow opposite arm + leg'], alts: [
+        { name: 'Bird Dog', scheme: '2×10 each side', tag: '✅', note: 'Same anti-extension core, on all fours.' },
+        { name: 'Hollow Body Hold', scheme: '2×20 sec', tag: '🔄', note: 'Isometric version — bend the knees to make it easier.' },
+      ] },
     ],
     cardio: 'Bike · 15–20 min · moderate pace',
   },
@@ -144,18 +185,39 @@ const DAYS = {
       'Hip abduction machine · 1 × 15–20 · very light & slow',
     ],
     ex: [
-      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8', 3: '3×8 heavier', 4: '3×8' }, rest: '90 sec', ramp: true, cues: ['Same beautiful form as Day 1', 'Exhale as you lift'], note: 'Heaviest hip thrust day of the week.' },
-      { name: 'Bulgarian Split Squat', scheme: '3×8 each leg', rest: '90 sec', cues: ['Long stride, slight forward lean', 'Front heel planted', 'Exhale on the way up'], avoid: 'Never grind to failure on these.', note: 'The great evener — both legs get strong.' },
-      { name: 'Leg Press', scheme: '2×12', rest: '90 sec', ramp: true, cues: ['Feet high and shoulder-width', 'Drive through the heels', 'Exhale on the push'] },
+      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8', 3: '3×8 heavier', 4: '3×8' }, rest: '90 sec', ramp: true, cues: ['Same beautiful form as Day 1', 'Exhale as you lift'], note: 'Heaviest hip thrust day of the week.', alts: [
+        { name: 'Glute Bridge', scheme: '3×12', tag: '✅', note: 'Floor version — shorter range, very back-friendly.' },
+        { name: 'Single-Leg Hip Thrust', scheme: '3×10 each', tag: '🔄', note: 'Bodyweight or light — extra glute focus, evens out the sides.' },
+        { name: 'Cable Pull-Through', scheme: '3×12', tag: '🔄', note: 'Rope between the legs, hinge and squeeze to stand. Keep it light.' },
+      ] },
+      { name: 'Bulgarian Split Squat', scheme: '3×8 each leg', rest: '90 sec', cues: ['Long stride, slight forward lean', 'Front heel planted', 'Exhale on the way up'], avoid: 'Never grind to failure on these.', note: 'The great evener — both legs get strong.', alts: [
+        { name: 'Reverse Lunge', scheme: '3×8 each', tag: '✅', note: 'Same unilateral pattern — easier on the knees.' },
+        { name: 'Step-Up', scheme: '3×10 each', tag: '✅', note: 'Onto a bench, drive through the heel. Great for glutes and balance.' },
+        { name: 'Split Squat', scheme: '3×10 each', tag: '✅', note: 'Both feet on the floor — easier if the elevated foot bugs you, still excellent.' },
+      ] },
+      { name: 'Leg Press', scheme: '2×12', rest: '90 sec', ramp: true, cues: ['Feet high and shoulder-width', 'Drive through the heels', 'Exhale on the push'], alts: [
+        { name: 'Goblet Squat', scheme: '3×12', tag: '✅', note: 'Hold a dumbbell at the chest, upright torso — very back-friendly.' },
+        { name: 'Hack Squat Machine', scheme: '3×12', tag: '✅', note: 'Similar to the leg press, a touch more quad.' },
+        { name: 'Heel-Elevated DB Squat', scheme: '3×12', tag: '🔄', note: 'Heels on a small plate — more quad emphasis.' },
+      ] },
       { name: 'Cable Kickback', scheme: '2×15 each leg', rest: '60 sec', cues: ['Slow — no momentum'], alts: [
-        { name: 'Banded Kickback', scheme: '2×15 each leg', note: 'Band low or around ankles, same cues.' },
-        { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', note: '1-sec pause at the top.' },
+        { name: 'Banded Kickback', scheme: '2×15 each leg', tag: '✅', note: 'Band low or around ankles, same cues.' },
+        { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', tag: '✅', note: '1-sec pause at the top.' },
+        { name: 'Quadruped Hip Extension', scheme: '2×15 each leg', tag: '🔄', note: 'On all fours, drive the heel to the ceiling, flat back. Bodyweight anywhere.' },
       ] },
-      { name: 'Leg Extension', scheme: '2×15', rest: '60 sec', cues: ['1-sec pause at the top'], note: 'Pump finisher — enjoy this one.' },
+      { name: 'Leg Extension', scheme: '2×15', rest: '60 sec', cues: ['1-sec pause at the top'], note: 'Pump finisher — enjoy this one.', alts: [
+        { name: 'Goblet Squat', scheme: '2×15', tag: '✅', note: 'Compound quad option, no machine needed.' },
+        { name: 'Wall Sit', scheme: '2×30–45 sec', tag: '🔄', note: 'Isometric quad burn, zero equipment.' },
+        { name: 'Sissy Squat', scheme: '2×12', tag: '🔄', note: 'Bodyweight quad burn — hold a support for balance.' },
+      ] },
       { name: 'Glute Bridge Hold', scheme: '2×30 sec', rest: '60 sec', cues: ['Hips locked out', 'Ribs down', 'Hard glute squeeze the whole time'], note: 'Glute endurance, spine-friendly — quiet strength for a tall, proud posture.', alts: [
-        { name: 'Single-Leg Glute Bridge Hold', scheme: '2×20 sec each', note: 'Harder — one leg at a time.' },
+        { name: 'Single-Leg Glute Bridge Hold', scheme: '2×20 sec each', tag: '🔄', note: 'Harder — one leg at a time.' },
+        { name: 'Superman Hold', scheme: '2×30 sec', tag: '✅', note: 'Floor-based — same glute + back isometric, zero equipment.' },
       ] },
-      { name: 'Bird Dog', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Slow and balanced', 'Hips stay level'] },
+      { name: 'Bird Dog', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Slow and balanced', 'Hips stay level'], alts: [
+        { name: 'Dead Bug', scheme: '2×10 each side', tag: '✅', note: 'Interchangeable anti-extension core.' },
+        { name: 'Plank Shoulder Taps', scheme: '2×10 each side', tag: '🔄', note: 'Anti-rotation in a plank position.' },
+      ] },
     ],
     // Optional finisher — shown weeks 2 & 3 only (skip on gentle weeks)
     burnout: {
@@ -175,18 +237,52 @@ const DAYS = {
     ],
     ex: [
       { name: 'Machine Chest Press', scheme: '2×10', rest: '90 sec', cues: ['Shoulder blades back and down into the pad', 'Elbows about 45°', 'Full stretch at the bottom, no locked elbows'], note: 'A lifted, open-chest look — pairs beautifully with the posture work.', alts: [
-        { name: 'Dumbbell Bench Press', scheme: '2×10', note: 'Flat bench, controlled lowering.' },
-        { name: 'Push-Up Progression', scheme: '2×8–12', note: 'Incline → knees → full. Log your variation in notes.' },
+        { name: 'Dumbbell Bench Press', scheme: '2×10', tag: '✅', note: 'Flat bench, controlled lowering.' },
+        { name: 'Push-Up Progression', scheme: '2×8–12', tag: '✅', note: 'Incline → knees → full. Log your variation in notes.' },
+        { name: 'Cable Chest Press', scheme: '2×12', tag: '🔄', note: 'Standing, braced core, constant tension.' },
       ] },
-      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.' },
-      { name: 'Dumbbell Chest Fly', scheme: '2×12', rest: '60 sec', cues: ['Soft elbow bend, held the whole time', 'Lower wide for a big stretch', 'Squeeze back together like hugging a tree'], note: 'Stretch-and-squeeze for shape a press can\'t give.' },
-      { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Press up smoothly', 'Stop just short of locked elbows', 'Lower with control'] },
-      { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'] },
-      { name: 'Overhead Rope Extension', scheme: '2×12', rest: '60 sec', cues: ['Full stretch at the bottom', 'Elbows close to the head'], note: 'Pump exercise — enjoy.' },
-      { name: 'Dumbbell Curl', scheme: '2×12', rest: '60 sec', cues: ['No swinging, full range'] },
-      { name: 'Farmer\'s Carry', scheme: '2×30–40 m', rest: '90 sec', dist: true, cues: ['Flat back, proud chest', 'Heaviest dumbbells you can hold tall', 'Shoulders back, controlled steps'], note: 'Grip, core, carrying strength — a quiet confidence-builder. Variation: Suitcase Carry — weight in ONE hand, alternate sides; your core resists the lean, a lovely safe back-toughener. Log kg per hand and metres.' },
-      { name: 'Front Plank', scheme: '3×30–45 sec', rest: '60 sec', tag: 'core', cues: ['Squeeze glutes, ribs down', 'Breathe'] },
-      { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'] },
+      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.', alts: [
+        { name: 'Incline Machine Press', scheme: '2×10', tag: '✅', note: 'Same upper-chest angle, machine-guided.' },
+        { name: 'Incline Push-Up', scheme: '2×10', tag: '✅', note: 'Hands elevated — bodyweight upper-chest.' },
+        { name: 'Low-to-High Cable Fly', scheme: '2×12', tag: '🔄', note: 'Upper-chest fly pattern.' },
+      ] },
+      { name: 'Dumbbell Chest Fly', scheme: '2×12', rest: '60 sec', cues: ['Soft elbow bend, held the whole time', 'Lower wide for a big stretch', 'Squeeze back together like hugging a tree'], note: 'Stretch-and-squeeze for shape a press can\'t give.', alts: [
+        { name: 'Pec Deck Machine', scheme: '2×12', tag: '✅', note: 'Same stretch-and-squeeze, guided path.' },
+        { name: 'Cable Fly', scheme: '2×12', tag: '✅', note: 'Constant-tension version.' },
+        { name: 'Floor DB Fly', scheme: '2×12', tag: '🔄', note: 'On the floor — easy on the shoulders.' },
+      ] },
+      { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Press up smoothly', 'Stop just short of locked elbows', 'Lower with control'], alts: [
+        { name: 'Shoulder Press Machine', scheme: '3×10', tag: '✅', note: 'Guided path, back supported.' },
+        { name: 'Arnold Press', scheme: '3×10', tag: '🔄', note: 'Rotational press — more front-delt.' },
+        { name: 'Landmine Press', scheme: '3×10 each', tag: '🔄', note: 'A shoulder-friendly angle if shoulders feel cranky.' },
+      ] },
+      { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'], alts: [
+        { name: 'Cable Lateral Raise', scheme: '3×12 each', tag: '✅', note: 'Constant tension — many find it even better.' },
+        { name: 'Machine Lateral Raise', scheme: '3×12', tag: '✅', note: 'Guided path if your gym has one.' },
+        { name: 'Leaning Lateral Raise', scheme: '3×12 each', tag: '🔄', note: 'Lean away from a support for a bigger range.' },
+      ] },
+      { name: 'Overhead Rope Extension', scheme: '2×12', rest: '60 sec', cues: ['Full stretch at the bottom', 'Elbows close to the head'], note: 'Pump exercise — enjoy.', alts: [
+        { name: 'Rope Pushdown', scheme: '2×12', tag: '✅', note: 'Other end of the same cable — triceps.' },
+        { name: 'Overhead Dumbbell Extension', scheme: '2×12', tag: '✅', note: 'Single or both hands — long-head focus.' },
+        { name: 'Bench Dip', scheme: '2×10', tag: '🔄', note: 'Bodyweight triceps — feet out to scale.' },
+      ] },
+      { name: 'Dumbbell Curl', scheme: '2×12', rest: '60 sec', cues: ['No swinging, full range'], alts: [
+        { name: 'Cable Curl', scheme: '2×12', tag: '✅', note: 'Constant-tension biceps.' },
+        { name: 'Hammer Curl', scheme: '2×12', tag: '🔄', note: 'Neutral grip — forearms + biceps.' },
+        { name: 'Incline Dumbbell Curl', scheme: '2×10', tag: '🔄', note: 'A bigger stretch on the biceps.' },
+      ] },
+      { name: 'Farmer\'s Carry', scheme: '2×30–40 m', rest: '90 sec', dist: true, cues: ['Flat back, proud chest', 'Heaviest dumbbells you can hold tall', 'Shoulders back, controlled steps'], note: 'Grip, core, carrying strength — a quiet confidence-builder. Variation: Suitcase Carry — weight in ONE hand, alternate sides; your core resists the lean, a lovely safe back-toughener. Log kg per hand and metres.', alts: [
+        { name: 'Suitcase Carry', scheme: '2×30–40 m each', tag: '✅', note: 'Weight in ONE hand — your core resists the lean. A lovely safe back-toughener.' },
+        { name: 'Dumbbell Hold', scheme: '2×45–60 sec', tag: '✅', note: 'Tight on space? Just hold heavy, tall and proud.' },
+        { name: 'Trap-Bar Carry', scheme: '2×40 m', tag: '🔄', note: 'If a trap bar is around — easy to load heavy.' },
+      ] },
+      { name: 'Front Plank', scheme: '3×30–45 sec', rest: '60 sec', tag: 'core', cues: ['Squeeze glutes, ribs down', 'Breathe'], alts: [
+        { name: 'Dead Bug', scheme: '3×10 each side', tag: '✅', note: 'Anti-extension option if wrists or shoulders complain.' },
+        { name: 'Stability Ball Plank', scheme: '3×30 sec', tag: '🔄', note: 'Forearms on a ball — harder.' },
+      ] },
+      { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'], alts: [
+        { name: 'BOSU Side Plank', scheme: '2×30 sec each', tag: '🔄', note: 'Add instability when you\'re ready.' },
+      ] },
       { name: 'Vacuum Breathing', scheme: '3 rounds × 10 breaths', rest: '60 sec', tag: 'core', skipOnPeriod: true, cues: ['Exhale fully, draw the belly button in', 'Hold gently, breathe shallow'], note: 'Deep-core control — strength from the inside out.' },
     ],
     cardio: 'StairMaster · 10–12 min · moderate pace',

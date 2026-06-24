@@ -354,7 +354,11 @@ select.select {
 .ex-row.show-cues .ex-cues { display: block; }
 .ex-row.show-swaps .ex-swaps { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
 .ex-swaps b { width: 100%; color: var(--rose-deep); }
-.chip-toggle.pain { border-color: color-mix(in srgb, var(--rose) 40%, transparent); color: var(--rose-deep); }
+.swap-head { width: 100%; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.swap-head b { width: auto; }
+.swap-legend { font-size: 11px; font-weight: 700; color: var(--muted); opacity: .85; }
+.swap-tip { width: 100%; margin-top: 3px; font-size: 11.5px; font-weight: 600; line-height: 1.45; color: var(--muted); opacity: .9; }
+.chip-toggle.pain { width: 100%; border-color: color-mix(in srgb, var(--rose) 40%, transparent); color: var(--rose-deep); }
 .ex-cues b { color: var(--rose-deep); }
 .ex-cues ul { margin: 4px 0 0; padding-left: 16px; }
 .ex-cues li { margin: 2px 0; }
