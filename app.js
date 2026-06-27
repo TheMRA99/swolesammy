@@ -610,10 +610,7 @@ function exRowHTML(e, i, day) {
           ${lastTxt ? `<div class="ex-last">${lastTxt}</div>` : ''}
           ${owned ? `<div class="nudge">🔥 Owned last time — add 1–2 reps <b>or</b> 2.5 kg. One, not both.</div>` : ''}
         </div>
-        ${hasAlts ? `<div class="ex-actions">
-          <button class="swap-btn" data-action="toggle-swaps" title="Swap — for variety or how you feel" aria-label="Swap exercise">⇄</button>
-          <button class="swap-btn taken" data-action="toggle-swaps" title="Machine taken or can't set it up? Tap for a quick alternative" aria-label="Machine taken — alternatives">🆘</button>
-        </div>` : ''}
+        ${hasAlts ? `<button class="swap-btn" data-action="toggle-swaps" title="Swap — for variety, or if a machine's taken / you can't set it up" aria-label="Swap exercise">⇄</button>` : ''}
       </div>
       <div class="set-list">
         ${setRows}

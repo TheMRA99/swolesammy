@@ -361,12 +361,10 @@ select.select {
 }
 .mini::placeholder { color: color-mix(in srgb, var(--muted) 65%, transparent); font-weight: 600; font-size: 13px; }
 .mini:focus { outline: none; border-color: var(--rose); }
-.ex-actions { flex: none; display: flex; gap: 6px; align-items: center; }
 .swap-btn {
   flex: none; width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
   background: var(--rose-soft); color: var(--rose-deep); font-size: 14px; font-weight: 800;
 }
-.swap-btn.taken { background: var(--field); font-size: 13px; }
 .swap-safety {
   width: 100%; margin-bottom: 9px; padding: 9px 11px; border-radius: 10px;
   background: color-mix(in srgb, var(--rose) 10%, transparent);
