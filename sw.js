@@ -1,5 +1,5 @@
 /* SwoleSammy — offline cache */
-const CACHE = 'swolesammy-v14';
+const CACHE = 'swolesammy-v15';
 const FONT_CACHE = 'swolesammy-fonts-v1';
 const ASSETS = [
   './',
@@ -10,6 +10,9 @@ const ASSETS = [
   './app.js',
   './manifest.webmanifest',
   './icon.svg',
+  './icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 self.addEventListener('install', e => {
