@@ -7,8 +7,9 @@
 :root {
   --bg-a: #fdf3f6;
   --bg-b: #f3ecfa;
-  --blob-a: #fbe3ec;
-  --blob-b: #ece2f8;
+  --blob-a: #fcd2e1;
+  --blob-b: #e6d6f8;
+  --blob-c: #ffe0c9;
   --surface: #ffffff;
   --surface-2: #fdf3f6;
   --field: #ffffff;
@@ -19,6 +20,8 @@
   --rose-deep: #b14c6e;
   --rose-soft: #f7dee7;
   --lilac: #b39ddb;
+  --coral: #f2849b;
+  --glow-rose: 0 10px 26px -8px color-mix(in srgb, var(--rose) 52%, transparent);
   --hero-a: #fbd9e5; --hero-b: #f3e0f4; --hero-c: #e4d9f6;
   --hero-text: #7c5a6c;
   --hero-chip: rgba(255, 255, 255, .72);
@@ -50,8 +53,9 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
 html[data-theme="dark"] {
   --bg-a: #261b22;
   --bg-b: #1f1721;
-  --blob-a: #3a2533;
-  --blob-b: #2e2438;
+  --blob-a: #48283b;
+  --blob-b: #362a48;
+  --blob-c: #45303c;
   --surface: #322431;
   --surface-2: #3c2b38;
   --field: #281c26;
@@ -64,6 +68,8 @@ html[data-theme="dark"] {
   --lilac: #c4b0e8;
   --hero-a: #4a2f3f; --hero-b: #41304b; --hero-c: #342a47;
   --hero-text: #d9b6c6;
+  --coral: #ef93ab;
+  --glow-rose: 0 10px 26px -10px color-mix(in srgb, var(--rose) 42%, transparent);
   --hero-chip: rgba(50, 36, 49, .82);
   --warm-a: #43332a; --warm-b: #3b2c24; --warm-line: #5c4434; --warm-text: #eec99d;
   --done-bg: #2b4337;
@@ -87,8 +93,9 @@ body {
   font-family: var(--font-body);
   color: var(--text);
   background:
-    radial-gradient(900px 480px at 110% -8%, var(--blob-a) 0%, transparent 60%),
-    radial-gradient(700px 420px at -15% 12%, var(--blob-b) 0%, transparent 55%),
+    radial-gradient(860px 500px at 112% -8%, var(--blob-a) 0%, transparent 60%),
+    radial-gradient(680px 440px at -16% 10%, var(--blob-b) 0%, transparent 58%),
+    radial-gradient(640px 480px at 50% 114%, var(--blob-c) 0%, transparent 62%),
     linear-gradient(180deg, var(--bg-a), var(--bg-b)) var(--bg-b);
   background-attachment: fixed;
   min-height: 100vh;
@@ -135,15 +142,23 @@ body[data-tab="settings"] #tab-settings { display: block; }
   position: relative; overflow: hidden;
   border-radius: 28px;
   padding: 22px 20px 20px;
-  background: linear-gradient(135deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
+  background:
+    radial-gradient(135% 130% at 0% 0%, color-mix(in srgb, var(--rose) 18%, transparent), transparent 52%),
+    linear-gradient(135deg, var(--hero-a) 0%, var(--hero-b) 52%, var(--hero-c) 100%);
   box-shadow: var(--shadow);
   margin-bottom: 14px;
 }
-.hero::after {
-  content: ''; position: absolute; right: -40px; top: -52px; width: 170px; height: 170px;
-  background: radial-gradient(circle, rgba(255,255,255,.5), rgba(255,255,255,0) 65%);
-  border-radius: 50%;
+.hero::before {
+  content: ''; position: absolute; left: -58px; bottom: -74px; width: 208px; height: 208px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--lilac) 52%, transparent), transparent 68%);
+  border-radius: 50%; pointer-events: none;
 }
+.hero::after {
+  content: ''; position: absolute; right: -40px; top: -52px; width: 184px; height: 184px;
+  background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 66%);
+  border-radius: 50%; pointer-events: none;
+}
+.hero .brand, .hero h1, .hero .date { position: relative; z-index: 1; }
 .hero .brand { font-weight: 900; font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--rose-deep); opacity: .9; }
 .hero h1 { font-family: var(--font-display); font-weight: 700; font-size: 34px; margin: 4px 0 2px; letter-spacing: -.015em; }
 .hero .date { color: var(--hero-text); font-size: 14px; font-weight: 700; }
@@ -166,7 +181,7 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .cycle-chip .t b { font-size: 15px; display: block; }
 .cycle-chip .t span { font-size: 12.5px; color: var(--muted); font-weight: 700; }
 .cycle-chip .bar { height: 5px; border-radius: 99px; background: color-mix(in srgb, var(--text) 12%, transparent); margin-top: 7px; overflow: hidden; }
-.cycle-chip .bar i { display: block; height: 100%; border-radius: 99px; background: var(--phase); }
+.cycle-chip .bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--phase), color-mix(in srgb, var(--phase) 52%, #fff)); }
 .cycle-chip .arrow { color: var(--rose-deep); font-size: 18px; font-weight: 800; }
 
 .marquee {
@@ -191,7 +206,7 @@ body[data-tab="settings"] #tab-settings { display: block; }
 }
 .day-hero .big span {
   display: block;
-  background: linear-gradient(100deg, var(--rose) 10%, var(--lilac) 95%);
+  background: linear-gradient(100deg, var(--coral) 0%, var(--rose) 42%, var(--lilac) 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent; -webkit-text-fill-color: transparent;
 }
@@ -221,7 +236,7 @@ body[data-tab="settings"] #tab-settings { display: block; }
 
 /* ---------- cards ---------- */
 .card {
-  background: var(--surface);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rose) 4%, var(--surface)) 0%, var(--surface) 58%);
   border-radius: var(--r-lg);
   padding: 18px;
   margin-bottom: 14px;
@@ -305,7 +320,7 @@ select.select {
 .tier .emo { font-size: 24px; }
 .tier b { font-size: 13.5px; }
 .tier span:last-child { font-size: 11px; font-weight: 700; color: var(--muted); }
-.tier.on { border-color: var(--rose); background: var(--rose-soft); transform: translateY(-2px); }
+.tier.on { border-color: var(--rose); background: var(--rose-soft); transform: translateY(-2px); box-shadow: 0 8px 18px -7px color-mix(in srgb, var(--rose) 48%, transparent); }
 
 /* ---------- exercises ---------- */
 .ex-list { display: flex; flex-direction: column; gap: 9px; }
@@ -433,15 +448,15 @@ select.select {
   border: 1.5px solid transparent;
 }
 .mood-btn span { font-size: 10px; font-weight: 800; color: var(--muted); }
-.mood-btn.on { background: var(--rose-soft); border-color: var(--rose); transform: translateY(-2px); }
+.mood-btn.on { background: var(--rose-soft); border-color: var(--rose); transform: translateY(-2px); box-shadow: 0 8px 17px -7px color-mix(in srgb, var(--rose) 50%, transparent); }
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chip-toggle {
   border: 1.5px solid var(--line); background: var(--field); color: var(--muted);
   font-family: inherit; font-weight: 800; font-size: 12.5px;
   border-radius: 999px; padding: 7px 13px; cursor: pointer; transition: all .15s;
 }
-.chip-toggle.on { background: var(--rose); border-color: var(--rose); color: #fff; }
-.chip-toggle.habit.on { background: var(--p-follicular); border-color: var(--p-follicular); }
+.chip-toggle.on { background: linear-gradient(120deg, var(--rose), var(--coral)); border-color: transparent; color: #fff; box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--rose) 58%, transparent); }
+.chip-toggle.habit.on { background: linear-gradient(120deg, var(--p-follicular), #84cda6); border-color: transparent; box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--p-follicular) 55%, transparent); }
 .section-label { font-size: 11.5px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; }
 .section-label:first-child { margin-top: 0; }
 
@@ -469,11 +484,12 @@ details.card[open] > summary { margin-bottom: 12px; }
 /* finish */
 .finish {
   width: 100%; padding: 17px; border: none; border-radius: var(--r-lg);
-  background: linear-gradient(120deg, var(--rose), #c75d87);
+  background: linear-gradient(125deg, var(--coral) 0%, var(--rose) 58%, var(--rose-deep) 100%);
   color: #fff; font-size: 16px; font-weight: 800; cursor: pointer;
-  box-shadow: var(--shadow); font-family: inherit; margin: 2px 0 8px;
-  transition: transform .12s;
+  box-shadow: var(--glow-rose); font-family: inherit; margin: 2px 0 8px;
+  transition: transform .12s, box-shadow .2s;
 }
+.finish:hover { box-shadow: 0 14px 32px -8px color-mix(in srgb, var(--rose) 62%, transparent); }
 .finish.is-done { background: linear-gradient(120deg, #6fbb93, #54a87e); }
 .finish:active { transform: scale(.98); }
 
@@ -540,7 +556,11 @@ details.card[open] > summary { margin-bottom: 12px; }
   background: var(--surface); border-radius: 18px; padding: 13px 4px 11px; text-align: center;
   box-shadow: var(--shadow-sm); border: 1px solid var(--card-border);
 }
-.stat b { font-family: var(--font-block); font-size: 26px; font-weight: 400; display: block; line-height: 1.05; letter-spacing: .01em; }
+.stat b {
+  font-family: var(--font-block); font-size: 26px; font-weight: 400; display: block; line-height: 1.05; letter-spacing: .01em;
+  background: linear-gradient(120deg, var(--rose) 0%, var(--lilac) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
+}
 .stat span { font-size: 9.5px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 
 .words-card { background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--rose) 6%, var(--surface))); }
@@ -715,10 +735,11 @@ details.card[open] > summary { margin-bottom: 12px; }
 .field span { display: block; font-size: 12px; font-weight: 800; color: var(--muted); margin: 0 0 6px 6px; text-transform: uppercase; letter-spacing: .07em; }
 .primary {
   width: 100%; padding: 15px; border: none; border-radius: var(--r-md);
-  background: linear-gradient(120deg, var(--rose), #c75d87); color: #fff; font-weight: 800; font-size: 15px;
-  cursor: pointer; font-family: inherit; margin-bottom: 10px; box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--rose) 55%, transparent);
+  background: linear-gradient(125deg, var(--coral) 0%, var(--rose) 58%, var(--rose-deep) 100%); color: #fff; font-weight: 800; font-size: 15px;
+  cursor: pointer; font-family: inherit; margin-bottom: 10px; box-shadow: var(--glow-rose);
   transition: transform .12s, box-shadow .2s;
 }
+.primary:hover { box-shadow: 0 13px 30px -7px color-mix(in srgb, var(--rose) 60%, transparent); }
 .primary:active { transform: scale(.985); }
 .primary.green { background: linear-gradient(120deg, #6fbb93, #54a87e); box-shadow: 0 8px 20px -6px rgba(111, 187, 147, .5); }
 .ghost-btn {
@@ -751,4 +772,4 @@ details.card[open] > summary { margin-bottom: 12px; }
   border-radius: 16px; transition: color .2s, background .2s;
 }
 .nav-btn svg { width: 22px; height: 22px; }
-.nav-btn.active { color: var(--rose-deep); background: var(--rose-soft); }
+.nav-btn.active { color: #fff; background: linear-gradient(125deg, var(--rose), var(--coral)); box-shadow: 0 6px 15px -7px color-mix(in srgb, var(--rose) 62%, transparent); }
