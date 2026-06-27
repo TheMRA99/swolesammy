@@ -610,7 +610,10 @@ function exRowHTML(e, i, day) {
           ${lastTxt ? `<div class="ex-last">${lastTxt}</div>` : ''}
           ${owned ? `<div class="nudge">🔥 Owned last time — add 1–2 reps <b>or</b> 2.5 kg. One, not both.</div>` : ''}
         </div>
-        ${hasAlts ? `<button class="swap-btn" data-action="toggle-swaps" aria-label="Swap exercise">⇄</button>` : ''}
+        ${hasAlts ? `<div class="ex-actions">
+          <button class="swap-btn" data-action="toggle-swaps" title="Swap — for variety or how you feel" aria-label="Swap exercise">⇄</button>
+          <button class="swap-btn taken" data-action="toggle-swaps" title="Machine taken or can't set it up? Tap for a quick alternative" aria-label="Machine taken — alternatives">🆘</button>
+        </div>` : ''}
       </div>
       <div class="set-list">
         ${setRows}
@@ -624,6 +627,7 @@ function exRowHTML(e, i, day) {
       </div>` : ''}
       ${hasAlts ? `
       <div class="ex-swaps">
+        <div class="swap-safety">🤝 Machine taken, or plates stuck? <b>Never wrestle plates alone</b> — ask gym staff or another lifter, everyone does it. Setup feels heavy or off? Don't force it — just swap below. 💛</div>
         <div class="swap-head"><b>Swap it out 🔁</b><span class="swap-legend">✅ same job · 🔄 a fun twist — your call</span></div>
         ${altList.map(a => `<button class="chip-toggle ${e.name === a.name ? 'on' : ''}" data-action="swap-pick" data-orig="${esc(origName || e.name)}" data-alt="${esc(a.name)}" title="${esc(tagTitle(a.tag, a.note))}">${a.tag ? a.tag + ' ' : ''}${esc(a.name)} · ${esc(a.scheme)}</button>`).join('')}
         ${origName ? `<button class="chip-toggle" data-action="swap-pick" data-orig="${esc(origName)}" data-alt="">↩ back to ${esc(origName)}</button>` : ''}
@@ -756,14 +760,28 @@ function renderToday() {
     parts.push(`<div class="phase-note"><span>🫶</span><span><b>New-muscle soreness is normal</b> — it peaks a day or two after and fades. Mildly sore: train, movement helps. Can't-sit-down sore: extra rest day + a little lighter next time.</span></div>`);
   }
 
-  // ---- Period Week Movement Menu (spec §7) ----
+  // ---- Workout picker — ALWAYS visible (spec §5 ★ free choice always) ----
+  // She can pick any workout, any time, period or not. The app suggests; she decides.
+  const pickerHTML = `
+      <div class="session-pick">
+        <label>Choose any workout — your call 💗</label>
+        <select data-action="set-day" class="select">
+          ${[1, 2, 3, 4].map(d => `<option value="${d}" ${day === d ? 'selected' : ''}>Day ${d} · ${DAY_TITLES[d]}</option>`).join('')}
+          <option value="gentle-A" ${day === 'gentle-A' ? 'selected' : ''}>Gentle Session A · short & sweet</option>
+          <option value="gentle-B" ${day === 'gentle-B' ? 'selected' : ''}>Gentle Session B · short & sweet</option>
+          <option value="walk" ${day === 'walk' ? 'selected' : ''}>Gentle walk</option>
+          <option value="stretch" ${day === 'stretch' ? 'selected' : ''}>Cramp-relief stretch</option>
+          <option value="rest" ${day === 'rest' ? 'selected' : ''}>Rest · Recovery</option>
+        </select>
+      </div>`;
+
+  // ---- Period Week Movement Menu (spec §7) — gentle SUGGESTIONS, never a lock ----
   if (week === 1 && onPeriod) {
     const nextGentle = state.gentleLast === 'A' ? 'B' : 'A';
     const tiers = [
       ['stretch', '🌙', 'In pain', 'Cramp-relief stretch · 8 min'],
       ['walk', '🚶‍♀️', 'Low but restless', 'Gentle walk · 15–30 min'],
       ['gentle-' + nextGentle, '🌤', 'Okay-ish', 'Gentle session ' + nextGentle],
-      [String(scheduledDay(viewDate)), '💪', 'Actually fine', 'Normal session, gentle volume'],
     ];
     parts.push(`
       <div class="card">
@@ -774,20 +792,11 @@ function renderToday() {
               <span class="emo">${emo}</span><b>${t}</b><span>${s}</span>
             </button>`).join('')}
         </div>
+        <div class="free-choice-note">💪 Feeling good? You're the boss — pick any workout below. Go a little lighter than usual and listen to your body. 💗</div>
+        ${pickerHTML}
       </div>`);
   } else {
-    // session selector
-    parts.push(`
-      <div class="session-pick">
-        <label>Session</label>
-        <select data-action="set-day" class="select">
-          ${[1, 2, 3, 4].map(d => `<option value="${d}" ${day === d ? 'selected' : ''}>Day ${d} · ${DAY_TITLES[d]}</option>`).join('')}
-          <option value="gentle-A" ${day === 'gentle-A' ? 'selected' : ''}>Gentle Session A · short & sweet</option>
-          <option value="gentle-B" ${day === 'gentle-B' ? 'selected' : ''}>Gentle Session B · short & sweet</option>
-          <option value="walk" ${day === 'walk' ? 'selected' : ''}>Gentle walk</option>
-          <option value="rest" ${day === 'rest' ? 'selected' : ''}>Rest · Recovery</option>
-        </select>
-      </div>`);
+    parts.push(pickerHTML);
   }
 
   // spacing nudge (spec §5): soft note when leg days stack — never blocks

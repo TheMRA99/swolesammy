@@ -97,7 +97,7 @@ const DAYS = {
         { name: 'Single-Leg Hip Thrust', scheme: '3×10 each', tag: '🔄', note: 'Bodyweight or light — extra glute focus, evens out the sides.' },
         { name: 'Cable Pull-Through', scheme: '3×12', tag: '🔄', note: 'Rope between the legs, hinge and squeeze to stand. Keep it light.' },
       ] },
-      { name: 'Romanian Deadlift', scheme: { 1: '2×10', 2: '3×10', 3: '3×10 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Soft knees, push hips back', 'Long, proud spine', 'Feel the hamstring stretch', 'Exhale on the way up', '“Close a car door with your hips”'], alts: [
+      { name: 'Romanian Deadlift', scheme: { 1: '2×10', 2: '3×10', 3: '3×10 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Flat back, proud chest', 'Soft knees, push hips back', 'Feel the hamstring stretch', 'Exhale on the way up', '“Close a car door with your hips”', 'Earn your depth — lower only as far as your back stays flat (just below the knee to start). Your range grows on its own as you loosen up.'], avoid: 'If your back starts to round, that\'s your bottom — come back up. Don\'t chase a deeper stretch.', note: 'Deeper isn\'t better here — a flat back is. Depth comes with time.', alts: [
         { name: 'Seated Hamstring Curl', scheme: '3×12', tag: '✅', note: 'Isolates the hamstrings, zero spinal load — your safest hamstring builder.' },
         { name: 'Single-Leg RDL', scheme: '3×8 each', tag: '🔄', note: 'Balance + hamstring + glute. Keep it light, flat back.' },
         { name: 'Hip Thrust Machine', scheme: '3×10', tag: '✅', note: 'If RDLs ever bug your back, extra thrust covers the glutes.' },
