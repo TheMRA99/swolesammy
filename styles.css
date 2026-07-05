@@ -34,6 +34,8 @@
   --shadow: 0 1px 2px rgba(140, 80, 105, .05), 0 14px 36px -8px rgba(185, 120, 150, .22);
   --shadow-sm: 0 1px 2px rgba(140, 80, 105, .04), 0 8px 20px -6px rgba(185, 120, 150, .14);
   --card-border: rgba(217, 109, 140, .10);
+  --card-top: rgba(255, 255, 255, .62);
+  accent-color: var(--rose);
   --r-lg: 26px;
   --r-md: 16px;
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
@@ -80,6 +82,7 @@ html[data-theme="dark"] {
   --shadow: 0 12px 32px rgba(0, 0, 0, .45);
   --shadow-sm: 0 4px 14px rgba(0, 0, 0, .35);
   --card-border: rgba(230, 132, 163, .12);
+  --card-top: rgba(255, 255, 255, .05);
 }
 body[data-phase="menstrual"]  { --phase: var(--p-menstrual); }
 body[data-phase="follicular"] { --phase: var(--p-follicular); }
@@ -87,7 +90,7 @@ body[data-phase="ovulation"]  { --phase: var(--p-ovulation); }
 body[data-phase="luteal"]     { --phase: var(--p-luteal); }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html { background: var(--bg-b); }            /* solid themed base — no white on overscroll */
+html { background: var(--bg-b); scroll-behavior: smooth; }   /* solid themed base — no white on overscroll */
 html, body { margin: 0; padding: 0; min-height: 100%; }
 body {
   font-family: var(--font-body);
@@ -240,7 +243,7 @@ body[data-tab="settings"] #tab-settings { display: block; }
   border-radius: var(--r-lg);
   padding: 18px;
   margin-bottom: 14px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 var(--card-top);
   border: 1px solid var(--card-border);
 }
 .card h2 { font-family: var(--font-display); font-size: 18.5px; font-weight: 600; margin: 0 0 12px; letter-spacing: -.01em; }
@@ -360,7 +363,7 @@ select.select {
   border: 1.5px solid var(--line); border-radius: 12px; background: var(--field); color: var(--text);
 }
 .mini::placeholder { color: color-mix(in srgb, var(--muted) 65%, transparent); font-weight: 600; font-size: 13px; }
-.mini:focus { outline: none; border-color: var(--rose); }
+.mini:focus { outline: none; border-color: var(--rose); background: var(--field); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rose) 15%, transparent); }
 .swap-btn {
   flex: none; width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
   background: var(--rose-soft); color: var(--rose-deep); font-size: 14px; font-weight: 800;
@@ -402,6 +405,7 @@ select.select {
 .set-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
 .set-row { display: flex; align-items: center; gap: 8px; background: var(--field); border: 1.5px solid var(--line); border-radius: 12px; padding: 6px 8px 6px 11px; }
 .set-row.done { background: var(--done-bg); border-color: transparent; }
+.set-row:focus-within { border-color: color-mix(in srgb, var(--rose) 42%, transparent); }
 .set-row .set-no { font-weight: 800; font-size: 12px; color: var(--muted); width: 40px; flex: none; }
 .set-row.done .set-no { color: var(--done-text); }
 .set-row .mini { flex: 1; width: auto; min-width: 0; }
@@ -771,3 +775,21 @@ details.card[open] > summary { margin-bottom: 12px; }
 }
 .nav-btn svg { width: 22px; height: 22px; }
 .nav-btn.active { color: #fff; background: linear-gradient(125deg, var(--rose), var(--coral)); box-shadow: 0 6px 15px -7px color-mix(in srgb, var(--rose) 62%, transparent); }
+
+/* ---------- interaction polish ---------- */
+::selection { background: color-mix(in srgb, var(--rose) 28%, transparent); }
+:focus-visible { outline: 2.5px solid var(--rose); outline-offset: 2px; border-radius: 6px; }
+/* smooth, tactile feedback for elements that didn't already transition */
+.swap-btn, .sess, .fame, .cal-cell, .ds-arrow, .ds-mid, .cycle-chip, .stat, .q-new,
+.copy-sets, .link-btn, .ghost-btn, .danger, .primary, .finish, .check, .set-row {
+  transition: transform .14s ease, box-shadow .22s ease, background .22s ease, border-color .2s ease, color .2s ease;
+}
+/* press-in on tap — one consistent language across the app */
+.chip-toggle:active, .tier:active, .mood-btn:active, .nav-btn:active, .swap-btn:active,
+.sess:active, .fame.hit:active, .cal-cell:active, .ds-arrow:active, .ds-mid:active,
+.cycle-chip:active, .q-new:active, .switch:active, .link-btn:active, .copy-sets:active,
+.ghost-btn:active, .danger:active { transform: scale(.955); }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
