@@ -17,6 +17,7 @@ const defaultState = () => ({
   pregnant: false,          // pauses all programming with a warm handover
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
+  suppsOff: {},             // supplement key -> true (removed from her care plan)
   customMessages: [],        // Muneer's own love notes, mixed into the rotation
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
   phase1: false,            // volume bump accepted
@@ -244,7 +245,7 @@ function blankLog(iso, dayOverride) {
   return {
     week, day,
     completed: false, notes: '', mood: null,
-    symptoms: [], habits: [],
+    symptoms: [], habits: [], supps: [],
     posture: POSTURE_RESET.items.map(() => false),
     hips: HIP_ROUTINE.items.map(() => false),
     stretch: CRAMP_RELIEF.items.map(() => false),
@@ -269,7 +270,7 @@ function buildLog(iso, dayOverride) {
   const fresh = blankLog(iso, day);
   if (!saved) return fresh;
   ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
-  ['symptoms', 'habits'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
+  ['symptoms', 'habits', 'supps'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
   ['posture', 'hips', 'stretch', 'squat'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
   fresh.ramp = Object.assign({}, saved.ramp || {});
   if (saved.day === day) {
@@ -307,7 +308,7 @@ function isMeaningful(log) {
     (log.swaps && Object.keys(log.swaps).length) ||
     (log.notes && log.notes.trim()) ||
     (log.mood === 0 || log.mood) ||
-    (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) ||
+    (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) || (log.supps && log.supps.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
     (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || log.cardioDone ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
@@ -648,6 +649,38 @@ function tickListHTML(items, stateArr, action) {
     </div>`).join('');
 }
 
+function activeSupps() { return SUPPLEMENTS.filter(s => !state.suppsOff[s.key]); }
+/* Daily care — supplement/pill tracker, grouped by evidence-based timing.
+   On-device only: no background notifications, so it shows what's due "now"
+   and offers exact alarm times to set once. */
+function dailyCareHTML(isToday) {
+  const active = activeSupps();
+  if (!active.length) return '';
+  const taken = current.supps || [];
+  const hr = isToday ? new Date().getHours() : -1;
+  const nowSlot = hr < 0 ? '' : (hr < 11 ? 'morning' : hr < 20 ? 'meal' : 'evening');
+  let html = `<div class="card care-card"><h2>Daily care 💊<span class="sub">Your doctor's plan — tick as you go 💛</span></h2>`;
+  if (inPeriod(viewDate) && !state.suppsOff.iron) {
+    html += `<div class="care-cycle">🍊 Period week — iron matters extra now. Pair it with a vitamin-C food (orange, lemon, tomato) and an iron-rich plate: chicken thigh, or spinach with a squeeze of lemon.</div>`;
+  }
+  CARE_SLOTS.forEach(slot => {
+    const items = active.filter(s => s.slot === slot.key);
+    if (!items.length) return;
+    const now = slot.key === nowSlot;
+    html += `<div class="care-slot ${now ? 'now' : ''}">
+      <div class="care-when">${slot.icon} ${esc(slot.label)}${now ? ' <b>· now</b>' : ''}</div>
+      <div class="chips">${items.map(s => `<button class="chip-toggle habit ${taken.includes(s.key) ? 'on' : ''}" data-action="supp" data-k="${esc(s.key)}" title="${esc(s.why)}">${s.emoji} ${esc(s.name)}</button>`).join('')}</div>
+      <div class="care-tip">${esc(slot.tip)}</div>
+    </div>`;
+  });
+  html += `<details class="care-guide"><summary>Best times &amp; phone alarms ⏰</summary>
+    <p class="hint" style="margin-top:8px">This app lives fully on your phone, so it can't buzz you on its own — the surest nudge is to set these as alarms once in your Clock app 💛</p>
+    <div class="alarm-list">${CARE_ALARMS.map(([t, d]) => `<div class="alarm-row"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>
+    <p class="care-foot">${esc(CARE_NOTE)}</p>
+  </details></div>`;
+  return html;
+}
+
 function renderToday() {
   reloadCurrent();
   const isToday = viewDate === todayISO();
@@ -919,6 +952,9 @@ function renderToday() {
       <div class="chips">${TARGETS.filter(t => showVacuumChip || !t.skipOnPeriod).map(t => `<button class="chip-toggle habit ${current.habits.includes(t.label) ? 'on' : ''}" data-action="habit" data-s="${esc(t.label)}" title="${esc(t.detail)}">${t.icon} ${esc(t.label)}</button>`).join('')}</div>
       ${!showVacuumChip ? '<p class="hint" style="margin-top:8px">Vacuum breathing takes the week off during your period 🌙</p>' : ''}
     </div>`);
+
+  // daily care — supplements & pills (her doctor's plan)
+  parts.push(dailyCareHTML(isToday));
 
   // first-session welcome (one-time, skippable) — sits right under the check-in
   if (isToday && !state.onboarded) {
@@ -1602,7 +1638,7 @@ function renderProgram() {
 
   // nutrition
   parts.push(`<h2 class="sect-head">Fuel 🍳</h2>`);
-  [NUTRITION.calories, NUTRITION.principles, NUTRITION.meals, NUTRITION.supplements].forEach(sec => {
+  [NUTRITION.calories, NUTRITION.principles, NUTRITION.heart, NUTRITION.meals, NUTRITION.supplements].forEach(sec => {
     parts.push(`<div class="card"><h2>${esc(sec.title)}</h2><ul class="nut-list">${sec.lines.map(l => `<li>${l}</li>`).join('')}</ul></div>`);
   });
 
@@ -1658,6 +1694,14 @@ function renderSettings() {
         <div class="gym-row">
           <div class="gym-name"><b>${esc(e.name)}</b>${state.unavailable[e.name] ? `<span>swapped in everywhere ✓</span>` : ''}</div>
           <button class="switch ${state.unavailable[e.name] ? 'off' : 'on'}" data-action="toggle-equip" data-name="${esc(e.name)}">${state.unavailable[e.name] ? 'No' : 'Yes'}</button>
+        </div>`).join('')}
+    </div>
+    <div class="card">
+      <h2>Daily care 💊<span class="sub">Turn off anything that's not part of her plan — iron usually stops after a recheck.</span></h2>
+      ${SUPPLEMENTS.map(s => `
+        <div class="gym-row">
+          <div class="gym-name"><b>${s.emoji} ${esc(s.name)}</b><span>${esc(s.why)}</span></div>
+          <button class="switch ${state.suppsOff[s.key] ? 'off' : 'on'}" data-action="toggle-supp" data-k="${esc(s.key)}">${state.suppsOff[s.key] ? 'Off' : 'On'}</button>
         </div>`).join('')}
     </div>
     <div class="card">
@@ -1814,6 +1858,8 @@ document.addEventListener('click', e => {
   else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); revealOffer(); }
   else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); revealOffer(); }
   else if (a === 'habit') { const s = t.dataset.s; const ix = current.habits.indexOf(s); ix === -1 ? current.habits.push(s) : current.habits.splice(ix, 1); commit(); renderToday(); }
+  else if (a === 'supp') { const k = t.dataset.k; if (!Array.isArray(current.supps)) current.supps = []; const ix = current.supps.indexOf(k); ix === -1 ? current.supps.push(k) : current.supps.splice(ix, 1); commit(); renderToday(); }
+  else if (a === 'toggle-supp') { const k = t.dataset.k; if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true; save(); renderSettings(); }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
   else if (a === 'offer-gentle') { const g = 'gentle-' + (state.gentleLast === 'A' ? 'B' : 'A'); state.gentleLast = g.slice(-1); current = buildLog(viewDate, g); current.day = g; current.chosen = true; commit(); save(); renderToday(); }
   else if (a === 'offer-no') { current.offerDismissed = true; commit(); renderToday(); }

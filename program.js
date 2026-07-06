@@ -403,6 +403,43 @@ const TARGETS = [
   { icon: '🛏️', label: 'Beauty sleep, queen style ✨', detail: 'Cosy pillow check 💤 — lower pillow, taller mornings' },
 ];
 
+/* ---- Daily care: supplements & pills (her doctor's plan) ----
+   [INTERNAL] Timing is evidence-based for absorption + interactions:
+   • Iron (bisglycinate) on an empty stomach with vitamin C; kept away from
+     tea/coffee/dairy/calcium AND magnesium (chelated form is gentler, but
+     spacing ≥2 h still helps). Iron is TEMPORARY — recheck in 8–12 wks
+     (important with thalassaemia trait — editable/removable in Settings).
+   • Vitamin D3 + Omega-3 are fat-soluble → same fatty meal.
+   • Magnesium bisglycinate at night (sleep + restless legs), hours after iron.
+   • B12 is water-soluble → fine in the morning with the iron.
+   • Birth control → same time every day (habit anchor; matters most of all).
+   The app TRACKS her plan — it never prescribes doses. */
+const CARE_SLOTS = [
+  { key: 'morning', icon: '🌅', label: 'Wake up · empty tummy',
+    tip: 'Iron soaks in best on an empty tummy with a splash of vitamin C (orange or lemon). Hold off tea, coffee & dairy for about an hour around it.' },
+  { key: 'anchor', icon: '💗', label: 'Same time, every day',
+    tip: 'Pick one daily anchor you’ll never miss — brushing your teeth is a good one — and keep it steady. Consistency is the whole game here.' },
+  { key: 'meal', icon: '🍽️', label: 'With your biggest meal',
+    tip: 'These two need a little fat to absorb — take them with your fattiest meal of the day. They buddy up nicely.' },
+  { key: 'evening', icon: '🌙', label: 'Before bed',
+    tip: 'Winds the body down for sleep and eases restless legs. Keep it a few hours after your morning iron.' },
+];
+const SUPPLEMENTS = [
+  { key: 'iron', slot: 'morning', emoji: '⚡', name: 'Iron + vitamin C', why: 'builds your iron back up — steadier energy, calmer legs, happier hair' },
+  { key: 'b12', slot: 'morning', emoji: '🔆', name: 'Vitamin B12', why: 'energy & bright mornings' },
+  { key: 'bc', slot: 'anchor', emoji: '💗', name: 'Birth control', why: 'keep it steady — same time daily' },
+  { key: 'vitd', slot: 'meal', emoji: '☀️', name: 'Vitamin D3', why: 'energy, strong muscles & bones' },
+  { key: 'omega3', slot: 'meal', emoji: '🐟', name: 'Omega-3', why: 'a happy heart and all-over glow' },
+  { key: 'magnesium', slot: 'evening', emoji: '🌙', name: 'Magnesium', why: 'deeper sleep & calmer legs' },
+];
+const CARE_NOTE = 'Iron’s a “for now” fix — your doctor will recheck your levels in a couple of months, so check in before you restock. 💛';
+const CARE_ALARMS = [
+  ['≈ 7:30 am', 'Iron + vitamin C — before your morning tea'],
+  ['your fixed time', 'Birth control — the same time every single day'],
+  ['lunch / dinner', 'Vitamin D3 + Omega-3 — with a meal that has some fat'],
+  ['≈ 10:00 pm', 'Magnesium — winding down for bed'],
+];
+
 // Check-in options
 const MOODS = ['😣', '😕', '🙂', '😊', '🤩'];
 const MOOD_LABELS = ['Rough', 'Meh', 'Okay', 'Good', 'Amazing'];
@@ -472,6 +509,15 @@ const NUTRITION = {
       'Chicken or fish curry + veg + steady rice portion',
       'Greek yogurt or curd bowls, paneer anything',
       'Whey shake on the rushed days — it counts',
+    ],
+  },
+  heart: {
+    title: 'Heart-loving plates 🫶',
+    lines: [
+      'Soluble fibre is the quiet hero: <b>oats, barley, dal, chickpeas, beans, apples, pears, citrus</b> — a little at most meals.',
+      'Swap some heavy fats (ghee, butter, cream, coconut cream, fatty red meat) for <b>olive oil, avocado, a handful of nuts, oily fish</b> (salmon, sardines).',
+      'Lean on plant proteins a few times a week — <b>lentils, chickpeas, tofu, tempeh</b> — alongside fish and skinless chicken.',
+      'A daily bowl of oats or a dal-and-veg plate does more for your heart than any single “superfood”. 🥣',
     ],
   },
   supplements: {
