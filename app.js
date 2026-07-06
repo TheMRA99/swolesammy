@@ -245,13 +245,13 @@ function blankLog(iso, dayOverride) {
   return {
     week, day,
     completed: false, notes: '', mood: null,
-    symptoms: [], habits: [], supps: [],
+    symptoms: [], habits: [], supps: [], suppTimes: {},
     posture: POSTURE_RESET.items.map(() => false),
     hips: HIP_ROUTINE.items.map(() => false),
     stretch: CRAMP_RELIEF.items.map(() => false),
     squat: SQUAT_RESET.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
-    cardioDone: false, cardioSkipped: false, offerDismissed: false,
+    cardioDone: false, cardioSkipped: false, cardioBonus: false, offerDismissed: false,
     ex: plan.ex ? plan.ex.map(freshExFromPlan) : [],
   };
 }
@@ -269,8 +269,9 @@ function buildLog(iso, dayOverride) {
   const day = dayOverride !== undefined ? dayOverride : (saved && saved.day !== undefined ? saved.day : scheduledDay(iso));
   const fresh = blankLog(iso, day);
   if (!saved) return fresh;
-  ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
+  ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
   ['symptoms', 'habits', 'supps'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
+  fresh.suppTimes = Object.assign({}, saved.suppTimes || {});
   ['posture', 'hips', 'stretch', 'squat'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
   fresh.ramp = Object.assign({}, saved.ramp || {});
   if (saved.day === day) {
@@ -310,7 +311,7 @@ function isMeaningful(log) {
     (log.mood === 0 || log.mood) ||
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) || (log.supps && log.supps.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
-    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || log.cardioDone ||
+    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || log.cardioDone || log.cardioBonus ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
     (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '' || (e.sets || []).some(s => s.done || s.w !== '' || s.r !== ''))));
 }
@@ -649,6 +650,7 @@ function tickListHTML(items, stateArr, action) {
     </div>`).join('');
 }
 
+function nowTimeLabel(d) { d = d || new Date(); let h = d.getHours(); const m = String(d.getMinutes()).padStart(2, '0'); const ap = h < 12 ? 'am' : 'pm'; h = h % 12 || 12; return `${h}:${m}${ap}`; }
 function activeSupps() { return SUPPLEMENTS.filter(s => !state.suppsOff[s.key]); }
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
@@ -659,7 +661,8 @@ function dailyCareHTML(isToday) {
   const taken = current.supps || [];
   const hr = isToday ? new Date().getHours() : -1;
   const nowSlot = hr < 0 ? '' : (hr < 11 ? 'morning' : hr < 20 ? 'meal' : 'evening');
-  let html = `<div class="card care-card"><h2>Daily care 💊<span class="sub">Your doctor's plan — tick as you go 💛</span></h2>`;
+  const times = current.suppTimes || {};
+  let html = `<div class="card care-card"><h2>Daily care 💊<span class="sub">Tap each as you take it — it saves the time too ✓</span></h2>`;
   if (inPeriod(viewDate) && !state.suppsOff.iron) {
     html += `<div class="care-cycle">🍊 Period week — iron matters extra now. Pair it with a vitamin-C food (orange, lemon, tomato) and an iron-rich plate: chicken thigh, or spinach with a squeeze of lemon.</div>`;
   }
@@ -669,7 +672,7 @@ function dailyCareHTML(isToday) {
     const now = slot.key === nowSlot;
     html += `<div class="care-slot ${now ? 'now' : ''}">
       <div class="care-when">${slot.icon} ${esc(slot.label)}${now ? ' <b>· now</b>' : ''}</div>
-      <div class="chips">${items.map(s => `<button class="chip-toggle habit ${taken.includes(s.key) ? 'on' : ''}" data-action="supp" data-k="${esc(s.key)}" title="${esc(s.why)}">${s.emoji} ${esc(s.name)}</button>`).join('')}</div>
+      <div class="chips">${items.map(s => { const on = taken.includes(s.key); return `<button class="chip-toggle habit ${on ? 'on' : ''}" data-action="supp" data-k="${esc(s.key)}" title="${esc(s.why)}">${s.emoji} ${esc(s.name)}${on ? ` <span class="t-time">✓${times[s.key] ? ' ' + esc(times[s.key]) : ''}</span>` : ''}</button>`; }).join('')}</div>
       <div class="care-tip">${esc(slot.tip)}</div>
     </div>`;
   });
@@ -955,6 +958,14 @@ function renderToday() {
 
   // daily care — supplements & pills (her doctor's plan)
   parts.push(dailyCareHTML(isToday));
+
+  // bonus movement — optional extra cardio, framed for heart & energy
+  parts.push(`
+    <div class="card bonus-card">
+      <h2>${esc(CARDIO_BONUS.title)}<span class="sub">${esc(CARDIO_BONUS.sub)}</span></h2>
+      <p class="hint">${esc(CARDIO_BONUS.note)}</p>
+      <button class="chip-toggle habit ${current.cardioBonus ? 'on' : ''}" data-action="cardio-bonus">${current.cardioBonus ? '✓ Moved my body — lovely 💗' : 'I got some movement in 💗'}</button>
+    </div>`);
 
   // first-session welcome (one-time, skippable) — sits right under the check-in
   if (isToday && !state.onboarded) {
@@ -1641,6 +1652,7 @@ function renderProgram() {
   [NUTRITION.calories, NUTRITION.principles, NUTRITION.heart, NUTRITION.meals, NUTRITION.supplements].forEach(sec => {
     parts.push(`<div class="card"><h2>${esc(sec.title)}</h2><ul class="nut-list">${sec.lines.map(l => `<li>${l}</li>`).join('')}</ul></div>`);
   });
+  parts.push(`<div class="card"><h2>${esc(HEART_CARDIO.title)}</h2><ul class="nut-list">${HEART_CARDIO.lines.map(l => `<li>${l}</li>`).join('')}</ul></div>`);
 
   // daily targets
   parts.push(`
@@ -1858,7 +1870,16 @@ document.addEventListener('click', e => {
   else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); revealOffer(); }
   else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); revealOffer(); }
   else if (a === 'habit') { const s = t.dataset.s; const ix = current.habits.indexOf(s); ix === -1 ? current.habits.push(s) : current.habits.splice(ix, 1); commit(); renderToday(); }
-  else if (a === 'supp') { const k = t.dataset.k; if (!Array.isArray(current.supps)) current.supps = []; const ix = current.supps.indexOf(k); ix === -1 ? current.supps.push(k) : current.supps.splice(ix, 1); commit(); renderToday(); }
+  else if (a === 'supp') {
+    const k = t.dataset.k;
+    if (!Array.isArray(current.supps)) current.supps = [];
+    if (!current.suppTimes) current.suppTimes = {};
+    const ix = current.supps.indexOf(k);
+    if (ix === -1) { current.supps.push(k); if (viewDate === todayISO()) current.suppTimes[k] = nowTimeLabel(); }
+    else { current.supps.splice(ix, 1); delete current.suppTimes[k]; }
+    commit(); renderToday();
+  }
+  else if (a === 'cardio-bonus') { current.cardioBonus = !current.cardioBonus; commit(); renderToday(); }
   else if (a === 'toggle-supp') { const k = t.dataset.k; if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true; save(); renderSettings(); }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
   else if (a === 'offer-gentle') { const g = 'gentle-' + (state.gentleLast === 'A' ? 'B' : 'A'); state.gentleLast = g.slice(-1); current = buildLog(viewDate, g); current.day = g; current.chosen = true; commit(); save(); renderToday(); }

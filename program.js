@@ -125,7 +125,7 @@ const DAYS = {
         { name: 'Suitcase Carry', scheme: '2×30 m each', tag: '✅', note: 'Hold a weight in one hand and walk tall — your core resists the lean.' },
       ] },
     ],
-    cardio: 'Incline walk · 15–20 min · 8% incline · 5 km/h',
+    cardio: 'Incline walk · 20–25 min · 8% incline · 5 km/h — strong heart, happy legs',
   },
 
   2: {
@@ -173,7 +173,7 @@ const DAYS = {
         { name: 'Hollow Body Hold', scheme: '2×20 sec', tag: '🔄', note: 'Isometric version — bend the knees to make it easier.' },
       ] },
     ],
-    cardio: 'Bike · 15–20 min · moderate pace',
+    cardio: 'Bike · 20–25 min · steady, chatty pace — heart & stamina',
   },
 
   3: {
@@ -225,7 +225,7 @@ const DAYS = {
       note: 'One round, all on a bench or mat with a mini band — perfect when machines are busy or you want extra burn.',
       items: ['Seated banded abductions · 1 × 20', 'Banded glute bridge · 1 × 15 + 10 pulses at the top', 'Banded clamshells · 1 × 15 each side'],
     },
-    cardio: 'Incline walk · 15–20 min',
+    cardio: 'Incline walk · 20–25 min · steady — strong-heart finisher',
   },
 
   4: {
@@ -285,7 +285,7 @@ const DAYS = {
       ] },
       { name: 'Vacuum Breathing', scheme: '3 rounds × 10 breaths', rest: '60 sec', tag: 'core', skipOnPeriod: true, cues: ['Exhale fully, draw the belly button in', 'Hold gently, breathe shallow'], note: 'Deep-core control — strength from the inside out.' },
     ],
-    cardio: 'StairMaster · 10–12 min · moderate pace',
+    cardio: 'StairMaster · 12–15 min · steady pace — heart & stamina',
   },
 };
 // Phase-1 volume bump (evolution engine): re-add when unlocked
@@ -423,7 +423,12 @@ const CARE_SLOTS = [
     tip: 'These two need a little fat to absorb — take them with your fattiest meal of the day. They buddy up nicely.' },
   { key: 'evening', icon: '🌙', label: 'Before bed',
     tip: 'Winds the body down for sleep and eases restless legs. Keep it a few hours after your morning iron.' },
+  { key: 'sips', icon: '🍵', label: 'Cosy sips · your rituals',
+    tip: 'Spearmint in the afternoon (a lovely one for cycle balance), chamomile in the evening to wind down. Keep them a little away from your morning iron and you’re golden.' },
 ];
+// [INTERNAL] Teas are her own rituals, not meds — spearmint has mild anti-androgen
+// support (PCOS-friendly); both are caffeine-free and afternoon/evening, so they
+// don't clash with morning iron. Framed only as cosy rituals.
 const SUPPLEMENTS = [
   { key: 'iron', slot: 'morning', emoji: '⚡', name: 'Iron + vitamin C', why: 'builds your iron back up — steadier energy, calmer legs, happier hair' },
   { key: 'b12', slot: 'morning', emoji: '🔆', name: 'Vitamin B12', why: 'energy & bright mornings' },
@@ -431,6 +436,8 @@ const SUPPLEMENTS = [
   { key: 'vitd', slot: 'meal', emoji: '☀️', name: 'Vitamin D3', why: 'energy, strong muscles & bones' },
   { key: 'omega3', slot: 'meal', emoji: '🐟', name: 'Omega-3', why: 'a happy heart and all-over glow' },
   { key: 'magnesium', slot: 'evening', emoji: '🌙', name: 'Magnesium', why: 'deeper sleep & calmer legs' },
+  { key: 'spearmint', slot: 'sips', emoji: '🌿', name: 'Spearmint tea', why: 'afternoon · lovely for cycle balance' },
+  { key: 'chamomile', slot: 'sips', emoji: '🍵', name: 'Chamomile tea', why: 'evening · winds you down for sleep' },
 ];
 const CARE_NOTE = 'Iron’s a “for now” fix — your doctor will recheck your levels in a couple of months, so check in before you restock. 💛';
 const CARE_ALARMS = [
@@ -439,6 +446,24 @@ const CARE_ALARMS = [
   ['lunch / dinner', 'Vitamin D3 + Omega-3 — with a meal that has some fat'],
   ['≈ 10:00 pm', 'Magnesium — winding down for bed'],
 ];
+
+/* ---- Cardio (heart & energy) ----
+   [INTERNAL] More easy cardio + steps is the kindest, most sustainable support
+   for her heart, cholesterol and everyday energy. Surfaced only as heart, mood,
+   energy & stamina. */
+const CARDIO_BONUS = {
+  title: 'Bonus movement 💗',
+  sub: 'Totally optional — a little extra love for your heart, mood & energy',
+  note: 'Anything easy you enjoy: a longer walk, a dance in your room, the bike, or incline stairs. 15–25 min at a pace you could still chat through. Your heart (and your head) will thank you.',
+};
+const HEART_CARDIO = {
+  title: 'Cardio for a strong heart 💗',
+  lines: [
+    'Aim for around <b>150 min of easy cardio a week</b> — it keeps your heart strong and your energy up, and your walks absolutely count.',
+    'An <b>easy, chatty pace</b> beats going flat-out — it’s kinder on you and you’ll actually keep it up.',
+    'A daily walk is the quiet hero: mood, energy and steps all in one. 🚶‍♀️',
+  ],
+};
 
 // Check-in options
 const MOODS = ['😣', '😕', '🙂', '😊', '🤩'];
