@@ -250,6 +250,7 @@ function blankLog(iso, dayOverride) {
     hips: HIP_ROUTINE.items.map(() => false),
     stretch: CRAMP_RELIEF.items.map(() => false),
     squat: SQUAT_RESET.items.map(() => false),
+    wind: WIND_DOWN.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
     cardioDone: false, cardioSkipped: false, cardioBonus: false, offerDismissed: false,
     ex: plan.ex ? plan.ex.map(freshExFromPlan) : [],
@@ -272,7 +273,7 @@ function buildLog(iso, dayOverride) {
   ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
   ['symptoms', 'habits', 'supps'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
   fresh.suppTimes = Object.assign({}, saved.suppTimes || {});
-  ['posture', 'hips', 'stretch', 'squat'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
+  ['posture', 'hips', 'stretch', 'squat', 'wind'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
   fresh.ramp = Object.assign({}, saved.ramp || {});
   if (saved.day === day) {
     if (fresh.lighter) fresh.ex = blankLog(iso, day).ex.map((e, i) => e), applyLighter(fresh, iso, day);
@@ -311,7 +312,7 @@ function isMeaningful(log) {
     (log.mood === 0 || log.mood) ||
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) || (log.supps && log.supps.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
-    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || log.cardioDone || log.cardioBonus ||
+    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || (log.wind && log.wind.some(Boolean)) || log.cardioDone || log.cardioBonus ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
     (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '' || (e.sets || []).some(s => s.done || s.w !== '' || s.r !== ''))));
 }
@@ -836,7 +837,7 @@ function renderToday() {
   }
 
   // adaptive offer (check-ins DO something — spec §11)
-  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy'].includes(s));
+  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy', 'Stressed'].includes(s));
   if (typeof day === 'number' && rough && !current.lighter && !current.offerDismissed && week !== 1) {
     parts.push(`
       <div class="card offer-card" id="adaptive-offer">
@@ -1012,6 +1013,13 @@ function renderToday() {
       <p class="hint">${esc(POSTURE_RESET.sub)}.</p>
       <div class="ex-list">${tickListHTML(POSTURE_RESET.items, current.posture, 'toggle-posture')}</div>
       <p class="hint" style="margin-top:10px">${esc(POSTURE_RESET.safety)}</p>
+    </details>`);
+  parts.push(`
+    <details class="card" ${current.wind.some(Boolean) ? 'open' : ''}>
+      <summary>🌙 ${WIND_DOWN.title}</summary>
+      <p class="hint">${esc(WIND_DOWN.sub)}.</p>
+      <div class="ex-list">${tickListHTML(WIND_DOWN.items, current.wind, 'toggle-wind')}</div>
+      <p class="hint" style="margin-top:10px">${esc(WIND_DOWN.safety)}</p>
     </details>`);
 
   // finish
@@ -1676,7 +1684,12 @@ function renderProgram() {
     </div>
     <div class="card"><h2>🧘 ${esc(POSTURE_RESET.title)}</h2><p class="hint">${esc(POSTURE_RESET.sub)}.</p>
       ${routineRows(POSTURE_RESET.items)}
-    </div>`);
+    </div>
+    <div class="card"><h2>🌙 ${esc(WIND_DOWN.title)}</h2><p class="hint">${esc(WIND_DOWN.sub)}.</p>
+      ${routineRows(WIND_DOWN.items)}
+      <p class="hint" style="margin-top:10px">${esc(WIND_DOWN.safety)}</p>
+    </div>
+    <div class="card"><h2>${esc(SLEEP_TIPS.title)}</h2><ul class="nut-list">${SLEEP_TIPS.lines.map(l => `<li>${l}</li>`).join('')}</ul></div>`);
 
   // coach notes + his note
   parts.push(`<div class="card note-card"><h2>Coach's notes</h2><p>${esc(COACH_NOTES).replace(/\n\n/g, '</p><p>')}</p></div>`);
@@ -1764,7 +1777,7 @@ function startRest(sec) {
    Mood/symptom taps can spawn an offer card higher up the page —
    scroll to it so the options are never missed. */
 function revealOffer() {
-  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy'].includes(s));
+  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy', 'Stressed'].includes(s));
   let el = document.querySelector('#adaptive-offer') || document.querySelector('#power-nudge');
   if (!el && rough) el = document.querySelector('.tier-grid'); // period week: her options ARE the menu
   if (!el) return;
@@ -1862,6 +1875,7 @@ document.addEventListener('click', e => {
   else if (a === 'toggle-hips') { const i = +t.dataset.i; current.hips[i] = !current.hips[i]; commit(); renderToday(); }
   else if (a === 'toggle-squat') { const i = +t.dataset.i; current.squat[i] = !current.squat[i]; commit(); renderToday(); }
   else if (a === 'toggle-stretch') { const i = +t.dataset.i; current.stretch[i] = !current.stretch[i]; commit(); renderToday(); }
+  else if (a === 'toggle-wind') { const i = +t.dataset.i; current.wind[i] = !current.wind[i]; commit(); renderToday(); }
   else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); revealOffer(); }
   else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); revealOffer(); }
   else if (a === 'habit') { const s = t.dataset.s; const ix = current.habits.indexOf(s); ix === -1 ? current.habits.push(s) : current.habits.splice(ix, 1); commit(); renderToday(); }

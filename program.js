@@ -391,6 +391,35 @@ const POSTURE_RESET = {
   ],
 };
 
+/* ---- Wind-down (her chill time, made restful) ----
+   [INTERNAL] High work stress + a consistent ~midnight–7am schedule (~7 h). She
+   NEEDS her own decompression time in the evening (after dinners/work) — so the
+   goal is NOT to nag her toward an earlier bedtime. It's to make that me-time the
+   restful kind (dim, offline, slow exhales) so she falls asleep faster and wakes
+   more rested — same hours, better sleep. The real circadian levers that cost her
+   no evening time: consistency (she already has it) + morning daylight. Pairs
+   with her chamomile + magnesium. */
+const WIND_DOWN = {
+  title: 'Wind-down · 4 min',
+  sub: 'Your chill time — made restful, so you drop off easier',
+  safety: 'This is YOUR time, not a chore — whenever you get it, after dinner or work, however late. Kept dim and offline, it doubles as what helps you fall asleep faster. Lovely with your chamomile & magnesium. 🍵🌙',
+  items: [
+    { name: 'Slow breaths', scheme: '× 10', hint: 'in through the nose 4 sec, out slow 6 sec — the long exhale is the magic' },
+    { name: 'Shoulder & neck melt', scheme: '× 5 slow rolls', hint: 'roll the shoulders back and down, let the desk day slide off' },
+    { name: 'Legs up the wall', scheme: '2 min', hint: 'lie down, legs resting up the wall, slow breaths — calms the whole system' },
+    { name: 'Screens down, lights low', scheme: 'last stretch of the night', hint: 'phone face-down, dim the lights, cosy pillow check 🛏️' },
+  ],
+};
+const SLEEP_TIPS = {
+  title: 'Sleep, gently 🌙',
+  lines: [
+    'Your evening wind-down time is <b>yours</b> — keep it. The win isn’t a stricter bedtime, it’s making that time the <b>restful</b> kind, so you fall asleep faster and wake up actually rested.',
+    'Your steady midnight-to-7 rhythm already helps — a <b>consistent</b> sleep and wake time matters more for how you feel than the exact hours.',
+    'Catch a little <b>daylight when you wake</b> — a few minutes by a window lifts your energy and gently anchors your body clock (this is the lever that really shifts the rhythm — no lost evening needed).',
+    'Keep the last stretch calm: <b>caffeine-free</b> (your spearmint & chamomile are perfect), lights low, screens down. On a free night, starting the wind-down a touch earlier is a lovely option — never a rule. 💛',
+  ],
+};
+
 /* ---- Daily habit chips (spec §2) ----
    vacuum hidden on period days (belly compression can aggravate cramps). */
 const TARGETS = [
@@ -398,7 +427,7 @@ const TARGETS = [
   { icon: '🥦', label: 'Fibre', detail: '~25 g' },
   { icon: '💧', label: 'Water', detail: '2.5–3 L' },
   { icon: '👟', label: 'Steps', detail: '8,000–10,000' },
-  { icon: '😴', label: 'Sleep', detail: '7.5 h +' },
+  { icon: '😴', label: 'Sleep', detail: '7–8 h · a calm wind-down helps' },
   { icon: '🌬️', label: 'Vacuum breathing', detail: '3 × 10 breaths', skipOnPeriod: true },
   { icon: '🛏️', label: 'Beauty sleep, queen style ✨', detail: 'Cosy pillow check 💤 — lower pillow, taller mornings' },
 ];
@@ -468,7 +497,7 @@ const HEART_CARDIO = {
 // Check-in options
 const MOODS = ['😣', '😕', '🙂', '😊', '🤩'];
 const MOOD_LABELS = ['Rough', 'Meh', 'Okay', 'Good', 'Amazing'];
-const SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Energized', 'Slept well', 'Slept badly'];
+const SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Stressed', 'Energized', 'Slept well', 'Slept badly'];
 
 // Training split (what the month is made of)
 const SPLIT = [
