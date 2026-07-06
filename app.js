@@ -18,6 +18,8 @@ const defaultState = () => ({
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
   suppsOff: {},             // supplement key -> true (removed from her care plan)
+  careStart: '2026-07-06',  // when repletion began — drives gentle recovery easing + recheck reminder
+  labsCleared: false,       // recheck done → ends the gentle easing early
   customMessages: [],        // Muneer's own love notes, mixed into the rotation
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
   phase1: false,            // volume bump accepted
@@ -467,7 +469,8 @@ function pickEvolutionPrompt() {
   const bests = allBests();
   const sessions = sessionDates();
 
-  if (!state.phase1 && promptAvailable('volumeBump') && weeksConsistent(4, 3)) {
+  // volume bump waits until she's out of the recovery-easing window
+  if (!state.phase1 && !recovering() && promptAvailable('volumeBump') && weeksConsistent(4, 3)) {
     return { id: 'volumeBump', emoji: '📈', title: 'Ready for a little more?', body: 'Four strong weeks in a row. Want to add one set to the first two lifts of each day (and bring Hammer Curls + Rope Pushdowns back)? One change, big payoff.', accept: 'Yes — level up', later: 'Not yet' };
   }
   if (promptAvailable('deload') && sessions.length >= 28 && (!state.lastDeload || daysBetween(state.lastDeload, todayISO()) > 63)) {
@@ -652,6 +655,16 @@ function tickListHTML(items, stateArr, action) {
 }
 
 function nowTimeLabel(d) { d = d || new Date(); let h = d.getHours(); const m = String(d.getMinutes()).padStart(2, '0'); const ap = h < 12 ? 'am' : 'pm'; h = h % 12 || 12; return `${h}:${m}${ap}`; }
+
+/* ---------- recovery easing ----------
+   [INTERNAL] While iron/vit D replete (~10 wks from careStart), real capacity
+   is lower than baseline even on good-feeling days. So the app quietly eases:
+   gentler effort hint, no PB nudges, no volume-bump prompt. The UI never says
+   why. Ends at the recheck window or as soon as labs come back good. */
+const CARE_RECHECK_DAY = 56;   // ~wk 8: surface the recheck reminder
+const CARE_EASE_DAYS = 70;     // ~wk 10: easing ends even without labs logged
+function careDay(iso) { return state.careStart ? daysBetween(state.careStart, iso || todayISO()) : Infinity; }
+function recovering(iso) { return !state.labsCleared && careDay(iso) < CARE_EASE_DAYS; }
 function activeSupps() { return SUPPLEMENTS.filter(s => !state.suppsOff[s.key]); }
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
@@ -756,6 +769,15 @@ function renderToday() {
           <button class="primary" data-action="morning-light">${esc(MORNING_LIGHT.cta)}</button>
         </div>`);
     }
+  }
+  // recheck reminder (~wk 8+): closes the "iron is only for now" loop
+  if (isToday && !state.labsCleared && careDay() >= CARE_RECHECK_DAY) {
+    parts.push(`
+      <div class="card offer-card">
+        <h2>${esc(RECHECK.title)}</h2>
+        <p class="hint">${esc(RECHECK.body)}</p>
+        <button class="primary" data-action="recheck-done">${esc(RECHECK.cta)}</button>
+      </div>`);
   }
   // period day 1–2: rest is the right call (spec §7)
   if (info && info.day <= 2 && onPeriod && day !== 'cycle-rest' && isToday) {
@@ -866,7 +888,7 @@ function renderToday() {
   const headsUp = isToday ? headacheHeadsUp(viewDate) : null;
   if (headsUp) parts.push(`<div class="phase-note"><span>💧</span><span>Heads-up: headaches often visit you around cycle day ${headsUp.day} — likely in the next day or two. Front-loading water and an iron-rich meal today really helps. 🍋</span></div>`);
   // proactive: strong-window PB flag (follicular / ovulation, training days)
-  if (typeof day === 'number' && strongWindowFor(viewDate).active) {
+  if (typeof day === 'number' && strongWindowFor(viewDate).active && !recovering(viewDate)) {
     parts.push(`<div class="overload" id="power-nudge">✨ Strong window — your energy's up. If a lift's felt close, today's a lovely day to chase a personal best. 💪</div>`);
   }
 
@@ -925,7 +947,7 @@ function renderToday() {
     }
 
     parts.push(`<div class="card"><h2>${esc(plan.title || dayLabel(day))}</h2>`);
-    if (!state.phase1 && plan.type === 'workout') parts.push(`<div class="rir-hint">${esc(RIR_HINT)}</div>`);
+    if (!state.phase1 && plan.type === 'workout') parts.push(`<div class="rir-hint">${esc(recovering(viewDate) ? RIR_HINT_GENTLE : RIR_HINT)}</div>`);
     parts.push(`<div class="ex-list">`);
     current.ex.forEach((e, i) => parts.push(exRowHTML(e, i, day)));
     parts.push(`</div>`);
@@ -1124,7 +1146,7 @@ function renderCycle() {
     const fc = strengthForecast();
     const pats = patternsDetected();
     const fcLines = [];
-    if (sw.active) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
+    if (sw.active && !recovering()) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
     if (fc) fcLines.push(`📈 At this pace, <b>${fc.target} kg ${esc(fc.name.replace(' Machine', ''))}</b> around <b>${esc(monthYear(fc.etaISO))}</b> — give or take ~${fc.bandWeeks} weeks. (Strength only, never a number on a scale.)`);
     parts.push(`
       <div class="card decode-card">
@@ -1904,6 +1926,10 @@ document.addEventListener('click', e => {
   }
   else if (a === 'cardio-bonus') { current.cardioBonus = !current.cardioBonus; commit(); renderToday(); }
   else if (a === 'morning-light') { current.morningLight = !current.morningLight; commit(); renderToday(); }
+  else if (a === 'recheck-done') {
+    state.labsCleared = true; save(); renderToday();
+    setTimeout(() => alert('Look at you, taking care of yourself 💛 If the doctor tweaks anything, you can switch pills on or off in Settings → Daily care.'), 30);
+  }
   else if (a === 'toggle-supp') { const k = t.dataset.k; if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true; save(); renderSettings(); }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
   else if (a === 'offer-gentle') { const g = 'gentle-' + (state.gentleLast === 'A' ? 'B' : 'A'); state.gentleLast = g.slice(-1); current = buildLog(viewDate, g); current.day = g; current.chosen = true; commit(); save(); renderToday(); }

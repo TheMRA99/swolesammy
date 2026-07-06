@@ -520,6 +520,17 @@ const SPLIT = [
 /* ---- Progression & evolution (spec §3 & §9) ---- */
 const PROGRESSION_RULE = 'When all sets feel comfortable at the top of the rep range → next time add 1–2 reps OR 2.5 kg. One or the other, never both.';
 const RIR_HINT = 'Leave 2–3 in the tank 💪 — finish every set knowing you had a couple more.';
+// [INTERNAL] Shown while she's repleting iron/vit D — capacity is genuinely lower
+// even on days she feels okay, so the app eases effort and doesn't push PRs. The
+// UI never says why; it just reads as "steady, comfy reps".
+const RIR_HINT_GENTLE = 'Leave 3–4 in the tank 💛 — smooth, comfy reps win. No need to chase heavy today.';
+/* [INTERNAL] Recheck reminder — closes the loop on the "iron is only for now"
+   plan. Framed as a warm GP check-in, never as labs/deficiency. Surfaces ~week 8+. */
+const RECHECK = {
+  title: '🩺 Time for a little check-in',
+  body: 'You’re a good stretch into your plan — a quick repeat blood test now shows how far you’ve come. Ask your GP for iron (ferritin), vitamin D, and a lipid check. No rush, just when you can. 💛',
+  cta: 'Recheck done — thank you 💛',
+};
 
 // Unified names so history/PBs track across days (old logs are aliased on read)
 const ALIASES = {
