@@ -252,7 +252,7 @@ function blankLog(iso, dayOverride) {
     squat: SQUAT_RESET.items.map(() => false),
     wind: WIND_DOWN.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
-    cardioDone: false, cardioSkipped: false, cardioBonus: false, offerDismissed: false,
+    cardioDone: false, cardioSkipped: false, cardioBonus: false, morningLight: false, offerDismissed: false,
     ex: plan.ex ? plan.ex.map(freshExFromPlan) : [],
   };
 }
@@ -270,7 +270,7 @@ function buildLog(iso, dayOverride) {
   const day = dayOverride !== undefined ? dayOverride : (saved && saved.day !== undefined ? saved.day : scheduledDay(iso));
   const fresh = blankLog(iso, day);
   if (!saved) return fresh;
-  ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
+  ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'morningLight', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
   ['symptoms', 'habits', 'supps'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
   fresh.suppTimes = Object.assign({}, saved.suppTimes || {});
   ['posture', 'hips', 'stretch', 'squat', 'wind'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
@@ -312,7 +312,7 @@ function isMeaningful(log) {
     (log.mood === 0 || log.mood) ||
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) || (log.supps && log.supps.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
-    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || (log.wind && log.wind.some(Boolean)) || log.cardioDone || log.cardioBonus ||
+    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || (log.wind && log.wind.some(Boolean)) || log.cardioDone || log.cardioBonus || log.morningLight ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
     (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '' || (e.sets || []).some(s => s.done || s.w !== '' || s.r !== ''))));
 }
@@ -743,6 +743,20 @@ function renderToday() {
     </div>`);
 
   // ---- proactive cards (max a couple, all kind) ----
+  // morning light — highest-leverage circadian nudge, only in the morning window
+  if (isToday) {
+    const h = new Date().getHours();
+    if (current.morningLight) {
+      if (h < 12) parts.push(`<div class="phase-note"><span>☀️</span><span>${esc(MORNING_LIGHT.done)}</span></div>`);
+    } else if (h >= 5 && h < 11) {
+      parts.push(`
+        <div class="card offer-card">
+          <h2>${esc(MORNING_LIGHT.title)}</h2>
+          <p class="hint">${esc(MORNING_LIGHT.body)}</p>
+          <button class="primary" data-action="morning-light">${esc(MORNING_LIGHT.cta)}</button>
+        </div>`);
+    }
+  }
   // period day 1–2: rest is the right call (spec §7)
   if (info && info.day <= 2 && onPeriod && day !== 'cycle-rest' && isToday) {
     parts.push(`
@@ -1889,6 +1903,7 @@ document.addEventListener('click', e => {
     commit(); renderToday();
   }
   else if (a === 'cardio-bonus') { current.cardioBonus = !current.cardioBonus; commit(); renderToday(); }
+  else if (a === 'morning-light') { current.morningLight = !current.morningLight; commit(); renderToday(); }
   else if (a === 'toggle-supp') { const k = t.dataset.k; if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true; save(); renderSettings(); }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
   else if (a === 'offer-gentle') { const g = 'gentle-' + (state.gentleLast === 'A' ? 'B' : 'A'); state.gentleLast = g.slice(-1); current = buildLog(viewDate, g); current.day = g; current.chosen = true; commit(); save(); renderToday(); }

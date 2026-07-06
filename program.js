@@ -410,6 +410,16 @@ const WIND_DOWN = {
     { name: 'Screens down, lights low', scheme: 'last stretch of the night', hint: 'phone face-down, dim the lights, cosy pillow check 🛏️' },
   ],
 };
+/* [INTERNAL] Morning daylight is the highest-leverage circadian lever and costs
+   her zero evening time — anchors her body clock, lifts daytime energy, and helps
+   natural sleepiness arrive without touching her late me-time. Shown only in the
+   morning window; a tick turns it into a small win. */
+const MORNING_LIGHT = {
+  title: 'Catch some light 🌤️',
+  body: 'A few minutes by a window or a short step outside right now sets your body clock and lifts your energy for the whole day.',
+  cta: 'Caught some light ☀️',
+  done: 'Light caught ☀️ — lovely. Your body clock says thank you 💛',
+};
 const SLEEP_TIPS = {
   title: 'Sleep, gently 🌙',
   lines: [
