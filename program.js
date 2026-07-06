@@ -495,10 +495,17 @@ const CARDIO_BONUS = {
   sub: 'Totally optional — a little extra love for your heart, mood & energy',
   note: 'Anything easy you enjoy: a longer walk, a dance in your room, the bike, or incline stairs. 15–25 min at a pace you could still chat through. Your heart (and your head) will thank you.',
 };
+/* [INTERNAL] Target raised from the generic 150 min/wk: accelerometer studies
+   (Glasgow, PLOS ONE) found South Asian adults need ~232–266 min/wk of moderate
+   activity for the same cardiometabolic benefit Europeans get at 150 — i.e.
+   roughly an extra 10–15 min/day. UI gives the number warmly, never the
+   ethnicity-risk rationale. Her 4 cardio finishers (~90 min) + daily steps
+   already carry most of it. */
 const HEART_CARDIO = {
   title: 'Cardio for a strong heart 💗',
   lines: [
-    'Aim for around <b>150 min of easy cardio a week</b> — it keeps your heart strong and your energy up, and your walks absolutely count.',
+    'Build toward about <b>4 hours of easy movement a week</b> (~240 min) — it sounds like a lot until you count it: your session finishers already cover ~90 min, and your daily walks do the rest.',
+    'The simplest way there: <b>an extra 10–15 minutes of walking a day</b> — a stop earlier on the MRT, a lunchtime loop, an evening stroll.',
     'An <b>easy, chatty pace</b> beats going flat-out — it’s kinder on you and you’ll actually keep it up.',
     'A daily walk is the quiet hero: mood, energy and steps all in one. 🚶‍♀️',
   ],
