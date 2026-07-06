@@ -706,12 +706,7 @@ function renderToday() {
         </div>
         <div class="arrow">›</div>
       </button>`
-    : `
-      <button class="cycle-chip" data-action="goto-cycle">
-        <div class="emo">🌸</div>
-        <div class="t"><b>Sync your cycle</b><span>Tap to log when your period started</span></div>
-        <div class="arrow">›</div>
-      </button>`;
+    : '';  // no period logged yet → no redundant prompt (she logs it in the Cycle tab)
   parts.push(`
     <div class="hero">
       <div class="brand">SwoleSammy</div>
