@@ -417,6 +417,11 @@ select.select {
 .cardio-row { margin-top: 13px; background: linear-gradient(120deg, var(--rose-soft), color-mix(in srgb, var(--rose) 10%, var(--surface))); }
 .cardio-row .ex-name { color: var(--rose-deep); }
 .cardio-row.done { background: var(--done-bg); }
+.cardio-fields { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px 43px; }
+.cf-label { width: 100%; font-size: 11px; font-weight: 800; color: var(--rose-deep); opacity: .85; }
+.cf-unit { display: flex; align-items: center; gap: 5px; }
+.cf-unit .mini { width: 58px; }
+.cf-unit i { font-style: normal; font-size: 11px; font-weight: 800; color: var(--muted); }
 
 .warmup-card { background: linear-gradient(135deg, var(--warm-a), var(--warm-b)); border: 1px solid var(--warm-line); }
 .warmup-card summary { color: var(--warm-text) !important; }

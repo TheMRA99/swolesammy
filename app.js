@@ -254,7 +254,7 @@ function blankLog(iso, dayOverride) {
     squat: SQUAT_RESET.items.map(() => false),
     wind: WIND_DOWN.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
-    cardioDone: false, cardioSkipped: false, cardioBonus: false, morningLight: false, offerDismissed: false,
+    cardioDone: false, cardioSkipped: false, cardioBonus: false, cardioLog: {}, morningLight: false, offerDismissed: false,
     ex: plan.ex ? plan.ex.map(freshExFromPlan) : [],
   };
 }
@@ -275,6 +275,7 @@ function buildLog(iso, dayOverride) {
   ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'morningLight', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
   ['symptoms', 'habits', 'supps'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
   fresh.suppTimes = Object.assign({}, saved.suppTimes || {});
+  fresh.cardioLog = Object.assign({}, saved.cardioLog || {});
   ['posture', 'hips', 'stretch', 'squat', 'wind'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
   fresh.ramp = Object.assign({}, saved.ramp || {});
   if (saved.day === day) {
@@ -315,6 +316,7 @@ function isMeaningful(log) {
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) || (log.supps && log.supps.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
     (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || (log.wind && log.wind.some(Boolean)) || log.cardioDone || log.cardioBonus || log.morningLight ||
+    (log.cardioLog && Object.values(log.cardioLog).some(v => v !== '' && v != null)) ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
     (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '' || (e.sets || []).some(s => s.done || s.w !== '' || s.r !== ''))));
 }
@@ -952,13 +954,29 @@ function renderToday() {
     current.ex.forEach((e, i) => parts.push(exRowHTML(e, i, day)));
     parts.push(`</div>`);
 
-    // cardio — part of the session, tickable; skipping is logged kindly, never blocks
+    // cardio — part of the session, tickable; skipping is logged kindly, never blocks.
+    // The plan text stays a suggestion — she logs her OWN incline/speed/minutes,
+    // pre-filled from her last session of this day (autonomy: it suggests, she decides).
     if (plan.cardio) {
+      const walkDay = /incline walk/i.test(plan.cardio);
+      const fields = walkDay
+        ? [['inc', '%'], ['kmh', 'km/h'], ['min', 'min']]
+        : [['lvl', 'level'], ['min', 'min']];
+      const lastCl = (() => {
+        const dates = Object.keys(state.logs).filter(d => d < viewDate).sort().reverse();
+        for (const d of dates) { const l = state.logs[d]; if (l.day === current.day && l.cardioLog && Object.values(l.cardioLog).some(v => v)) return l.cardioLog; }
+        return {};
+      })();
+      const cl = current.cardioLog || {};
       parts.push(`
         <div class="ex-row cardio-row ${current.cardioDone ? 'done' : ''}">
           <div class="top">
             <button class="check" data-action="toggle-cardio" aria-label="Cardio done">${current.cardioDone ? '✓' : ''}</button>
             <div class="ex-main"><div class="ex-name">🚶‍♀️ Cardio finisher</div><div class="ex-scheme">${esc(plan.cardio)}</div></div>
+          </div>
+          <div class="cardio-fields">
+            <span class="cf-label">Your settings — your call 💗</span>
+            ${fields.map(([k, u]) => `<span class="cf-unit"><input class="mini" inputmode="decimal" placeholder="${lastCl[k] ? esc(lastCl[k]) : u}" value="${esc(cl[k] || '')}" data-action="cardio-field" data-field="${k}" aria-label="${u}"><i>${u}</i></span>`).join('')}
           </div>
         </div>`);
     }
@@ -1902,8 +1920,8 @@ document.addEventListener('click', e => {
     // keep ticked values for unchanged rows
     const byName = {}; current.ex.forEach(x => { byName[x.name] = x; });
     rebuilt.ex = rebuilt.ex.map(x => byName[x.name] ? { ...x, ...byName[x.name] } : x);
-    ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'offerDismissed'].forEach(k => rebuilt[k] = current[k]);
-    ['symptoms', 'habits', 'posture', 'hips', 'stretch'].forEach(k => rebuilt[k] = current[k]);
+    ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'cardioLog', 'morningLight', 'suppTimes', 'offerDismissed'].forEach(k => rebuilt[k] = current[k]);
+    ['symptoms', 'habits', 'supps', 'posture', 'hips', 'stretch', 'squat', 'wind'].forEach(k => rebuilt[k] = current[k]);
     rebuilt.ramp = current.ramp;
     current = rebuilt; commit(); renderToday();
   }
@@ -2039,6 +2057,7 @@ document.addEventListener('input', e => {
     }
   }
   else if (a === 'notes') { current.notes = t.value; commit(); }
+  else if (a === 'cardio-field') { if (!current.cardioLog) current.cardioLog = {}; current.cardioLog[t.dataset.field] = t.value; commit(); }
 });
 
 document.addEventListener('change', e => {
