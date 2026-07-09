@@ -122,7 +122,7 @@ const DAYS = {
       { name: 'Pallof Press', scheme: '2×12 each side', rest: '60 sec', tag: 'core', cues: ['Press, pause, resist the twist'], note: 'Deep core — strength from the inside out.', alts: [
         { name: 'Band Anti-Rotation Hold', scheme: '3×20 sec each', tag: '✅', note: 'Same anti-rotation job, just held still.' },
         { name: 'BOSU + Med-Ball Hold', scheme: '3×30 sec', tag: '🔄', note: 'Kneel on the half-BOSU holding a ball at the chest. Fun balance challenge — trains the core a little differently.' },
-        { name: 'Suitcase Carry', scheme: '2×30 m each', tag: '✅', note: 'Hold a weight in one hand and walk tall — your core resists the lean.' },
+        { name: 'Suitcase Carry', scheme: '1×30 m each', tag: '✅', note: 'Hold a weight in one hand and walk tall — your core resists the lean.' },
       ] },
     ],
     cardio: 'Incline walk · 20–25 min · 8% incline · 5 km/h — strong heart, happy legs',
@@ -272,7 +272,7 @@ const DAYS = {
         { name: 'Incline Dumbbell Curl', scheme: '2×10', tag: '🔄', note: 'A bigger stretch on the biceps.' },
       ] },
       { name: 'Farmer\'s Carry', scheme: '2×30–40 m', rest: '90 sec', dist: true, cues: ['Flat back, proud chest', 'Heaviest dumbbells you can hold tall', 'Shoulders back, controlled steps'], note: 'Grip, core, carrying strength — a quiet confidence-builder. Variation: Suitcase Carry — weight in ONE hand, alternate sides; your core resists the lean, a lovely safe back-toughener. Log kg per hand and metres.', alts: [
-        { name: 'Suitcase Carry', scheme: '2×30–40 m each', tag: '✅', note: 'Weight in ONE hand — your core resists the lean. A lovely safe back-toughener.' },
+        { name: 'Suitcase Carry', scheme: '1×30–40 m each', tag: '✅', note: 'Weight in ONE hand — your core resists the lean. A lovely safe back-toughener.' },
         { name: 'Dumbbell Hold', scheme: '2×45–60 sec', tag: '✅', note: 'Tight on space? Just hold heavy, tall and proud.' },
         { name: 'Trap-Bar Carry', scheme: '2×40 m', tag: '🔄', note: 'If a trap bar is around — easy to load heavy.' },
       ] },
@@ -283,7 +283,6 @@ const DAYS = {
       { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'], alts: [
         { name: 'BOSU Side Plank', scheme: '2×30 sec each', tag: '🔄', note: 'Add instability when you\'re ready.' },
       ] },
-      { name: 'Vacuum Breathing', scheme: '3 rounds × 10 breaths', rest: '60 sec', tag: 'core', skipOnPeriod: true, cues: ['Exhale fully, draw the belly button in', 'Hold gently, breathe shallow'], note: 'Deep-core control — strength from the inside out.' },
     ],
     cardio: 'StairMaster · 12–15 min · steady pace — heart & stamina',
   },
@@ -302,7 +301,7 @@ function resolveScheme(scheme, week) {
 // Exercises with no external load — the app hides the kg field for these and
 // just logs reps/seconds. Matches by name so swapped-in alternatives count too.
 const BODYWEIGHT = new Set([
-  'Dead Bug', 'Bird Dog', 'Front Plank', 'Side Plank', 'Vacuum Breathing', 'Knee Tucks',
+  'Dead Bug', 'Bird Dog', 'Front Plank', 'Side Plank', 'Knee Tucks',
   'Glute Bridge', 'Glute Bridge Hold', 'Single-Leg Glute Bridge', 'Single-Leg Glute Bridge Hold',
   'Superman + Glute Squeeze', 'Superman Hold', 'Clamshells', 'Banded Clamshells',
   'Standing Hip Abduction', 'Side-Lying Adduction Raise', 'Push-Up Progression', 'Single-Leg Balance',
