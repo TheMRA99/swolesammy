@@ -15,6 +15,8 @@ const defaultState = () => ({
   periods: [],              // [{start, end|null}] sorted by start
   logs: {},                 // dateISO -> log
   pregnant: false,          // pauses all programming with a warm handover
+  onBreak: false,           // stepped away on purpose (travel/sick/life) — calm landing, no nudges
+  easeBackUntil: null,      // ISO date; while active, gentler effort + no PR/volume-bump nudges
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
   suppsOff: {},             // supplement key -> true (removed from her care plan)
@@ -471,8 +473,8 @@ function pickEvolutionPrompt() {
   const bests = allBests();
   const sessions = sessionDates();
 
-  // volume bump waits until she's out of the recovery-easing window
-  if (!state.phase1 && !recovering() && promptAvailable('volumeBump') && weeksConsistent(4, 3)) {
+  // volume bump waits until she's out of the recovery/ease-back window
+  if (!state.phase1 && !gentleMode() && promptAvailable('volumeBump') && weeksConsistent(4, 3)) {
     return { id: 'volumeBump', emoji: '📈', title: 'Ready for a little more?', body: 'Four strong weeks in a row. Want to add one set to the first two lifts of each day (and bring Hammer Curls + Rope Pushdowns back)? One change, big payoff.', accept: 'Yes — level up', later: 'Not yet' };
   }
   if (promptAvailable('deload') && sessions.length >= 28 && (!state.lastDeload || daysBetween(state.lastDeload, todayISO()) > 63)) {
@@ -667,6 +669,13 @@ const CARE_RECHECK_DAY = 56;   // ~wk 8: surface the recheck reminder
 const CARE_EASE_DAYS = 70;     // ~wk 10: easing ends even without labs logged
 function careDay(iso) { return state.careStart ? daysBetween(state.careStart, iso || todayISO()) : Infinity; }
 function recovering(iso) { return !state.labsCleared && careDay(iso) < CARE_EASE_DAYS; }
+const EASE_BACK_DAYS = 13;    // ~2 wks rebuild window after "I'm back" / manual ease-back (spec §9)
+/* Easing back in after a break (her own toggle, or a manual "ease back in" tap) —
+   same gentle treatment as recovering(): softer effort hint, no PB/volume-bump
+   nudges. Never says why beyond "easing back in". */
+function easingBack(iso) { return !!(state.easeBackUntil && (iso || todayISO()) <= state.easeBackUntil); }
+function gentleMode(iso) { return recovering(iso) || easingBack(iso); }
+function startEaseBack() { state.easeBackUntil = addDays(todayISO(), EASE_BACK_DAYS); }
 function activeSupps() { return SUPPLEMENTS.filter(s => !state.suppsOff[s.key]); }
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
@@ -745,6 +754,19 @@ function renderToday() {
     return;
   }
 
+  // on a break: her own pause, for any reason — travel, sick, life. No nudges while it's on.
+  if (state.onBreak) {
+    parts.push(`
+      <div class="card offer-card" style="text-align:center">
+        <span style="font-size:40px">🤍</span>
+        <h2 style="margin-top:8px">Taking a breather</h2>
+        <p class="hint">However long you need — nothing here is keeping score. Everything's saved and waiting for you.</p>
+        <button class="primary" data-action="break-off">I'm back 💪</button>
+      </div>`);
+    $('#tab-today').innerHTML = parts.join('');
+    return;
+  }
+
   // quote / message
   if (!currentQuote) currentQuote = dailyContent();
   parts.push(quoteCardHTML(currentQuote));
@@ -796,11 +818,12 @@ function renderToday() {
   // welcome back after a break (≥14 days) — zero guilt
   const allLogged = Object.keys(state.logs).filter(d => isMeaningful(state.logs[d])).sort();
   const lastLogged = allLogged[allLogged.length - 1];
-  if (isToday && lastLogged && daysBetween(lastLogged, todayISO()) >= 14) {
+  if (isToday && lastLogged && daysBetween(lastLogged, todayISO()) >= 14 && !easingBack()) {
     parts.push(`
       <div class="card offer-card">
         <h2>Welcome back 💛</h2>
         <p class="hint">Fresh start, zero guilt. Go about 20% lighter than your old numbers this week and next — strength comes back fast, and it comes back happier.</p>
+        <button class="primary" data-action="ease-back">Ease back in 🌱</button>
       </div>`);
   }
   // evolution engine prompt (one at a time, her choice always)
@@ -820,6 +843,10 @@ function renderToday() {
   // deload banner
   if (state.deloadUntil && viewDate <= state.deloadUntil) {
     parts.push(`<div class="phase-note"><span>🌿</span><span><b>Deload week.</b> Everything about 40% lighter, smooth and easy. You come back stronger — that's the whole trick.</span></div>`);
+  }
+  // easing back in after a break
+  if (easingBack(viewDate)) {
+    parts.push(`<div class="phase-note"><span>🌱</span><span><b>Easing back in.</b> Go about 20% lighter than your old numbers — strength comes back fast, and it comes back happier.</span></div>`);
   }
   // DOMS onboarding (first ~2 weeks of training)
   const sCount = sessionDates().length;
@@ -890,7 +917,7 @@ function renderToday() {
   const headsUp = isToday ? headacheHeadsUp(viewDate) : null;
   if (headsUp) parts.push(`<div class="phase-note"><span>💧</span><span>Heads-up: headaches often visit you around cycle day ${headsUp.day} — likely in the next day or two. Front-loading water and an iron-rich meal today really helps. 🍋</span></div>`);
   // proactive: strong-window PB flag (follicular / ovulation, training days)
-  if (typeof day === 'number' && strongWindowFor(viewDate).active && !recovering(viewDate)) {
+  if (typeof day === 'number' && strongWindowFor(viewDate).active && !gentleMode(viewDate)) {
     parts.push(`<div class="overload" id="power-nudge">✨ Strong window — your energy's up. If a lift's felt close, today's a lovely day to chase a personal best. 💪</div>`);
   }
 
@@ -949,7 +976,7 @@ function renderToday() {
     }
 
     parts.push(`<div class="card"><h2>${esc(plan.title || dayLabel(day))}</h2>`);
-    if (!state.phase1 && plan.type === 'workout') parts.push(`<div class="rir-hint">${esc(recovering(viewDate) ? RIR_HINT_GENTLE : RIR_HINT)}</div>`);
+    if (!state.phase1 && plan.type === 'workout') parts.push(`<div class="rir-hint">${esc(gentleMode(viewDate) ? RIR_HINT_GENTLE : RIR_HINT)}</div>`);
     parts.push(`<div class="ex-list">`);
     current.ex.forEach((e, i) => parts.push(exRowHTML(e, i, day)));
     parts.push(`</div>`);
@@ -1164,7 +1191,7 @@ function renderCycle() {
     const fc = strengthForecast();
     const pats = patternsDetected();
     const fcLines = [];
-    if (sw.active && !recovering()) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
+    if (sw.active && !gentleMode()) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
     if (fc) fcLines.push(`📈 At this pace, <b>${fc.target} kg ${esc(fc.name.replace(' Machine', ''))}</b> around <b>${esc(monthYear(fc.etaISO))}</b> — give or take ~${fc.bandWeeks} weeks. (Strength only, never a number on a scale.)`);
     parts.push(`
       <div class="card decode-card">
@@ -1791,6 +1818,15 @@ function renderSettings() {
            <button class="primary green" data-action="pregnant-off">We're back — resume training 💛</button>`
         : `<p class="hint">Expecting? The app steps back and hands training over to your doctor — everything here waits patiently for you.</p>
            <button class="ghost-btn" data-action="pregnant-on">I'm pregnant 🤍</button>`}
+      ${!state.pregnant ? (state.onBreak
+        ? `<p class="hint" style="margin-top:14px">You're on a break 🤍 No pressure, no clock — come back whenever.</p>
+           <button class="primary green" data-action="break-off">I'm back 💪</button>`
+        : `<p class="hint" style="margin-top:14px">Travelling, sick, or just need a minute? Step away without any guilt — nothing here keeps score.</p>
+           <button class="ghost-btn" data-action="break-on">Take a break 🤍</button>`) : ''}
+      ${!state.pregnant && !easingBack() ? `
+      <p class="hint" style="margin-top:14px">Been away a while and diving back in? Ease the effort down for a couple of weeks while your strength catches back up.</p>
+      <button class="ghost-btn" data-action="ease-back">Ease back in 🌱</button>` : ''}
+      ${!state.pregnant && easingBack() ? `<p class="hint" style="margin-top:14px">Easing back in until ${esc(shortDate(state.easeBackUntil))} 🌱 — lighter effort, no PR pressure.</p>` : ''}
     </div>
     <div class="card">
       <h2>Backup</h2>
@@ -1987,6 +2023,11 @@ document.addEventListener('click', e => {
     if (confirm('Pause training programming? All your history stays safe, and you can resume anytime.')) { state.pregnant = true; save(); render(); }
   }
   else if (a === 'pregnant-off') { state.pregnant = false; save(); render(); }
+  else if (a === 'break-on') {
+    if (confirm('Step away for a bit? Everything stays saved, and nothing here keeps score while you\'re gone.')) { state.onBreak = true; save(); render(); }
+  }
+  else if (a === 'break-off') { state.onBreak = false; startEaseBack(); save(); render(); }
+  else if (a === 'ease-back') { startEaseBack(); save(); render(); }
   else if (a === 'onboard-done') { state.onboarded = true; save(); renderToday(); }
   else if (a === 'toggle-equip') { const n = t.dataset.name; if (state.unavailable[n]) delete state.unavailable[n]; else state.unavailable[n] = true; save(); renderSettings(); }
   else if (a === 'add-message') {
