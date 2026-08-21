@@ -17,6 +17,8 @@ const defaultState = () => ({
   pregnant: false,          // pauses all programming with a warm handover
   onBreak: false,           // stepped away on purpose (travel/sick/life) — calm landing, no nudges
   easeBackUntil: null,      // ISO date; while active, gentler effort + no PR/volume-bump nudges
+  welcomeBackShownFor: null,// last-logged date the welcome-back card has already shown for → don't re-show every day
+  appOpenDates: [],         // silent 'she opened the app' log (deduped ISO dates) — decouples worth from performance
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
   suppsOff: {},             // supplement key -> true (removed from her care plan)
@@ -532,12 +534,15 @@ function randomContent() { return pickContent(Math.floor(Math.random() * 1e6)); 
 function quoteCardHTML(q) {
   const fromHim = q.type === 'muneer' || q.type === 'pickup' || q.signed;
   const isPoem = q.type.startsWith('poem');
+  const isQuran = q.type === 'quran';
+  const mark = isQuran ? '🤲' : (fromHim ? '💌' : '“');
   return `
-    <div class="quote ${fromHim ? 'from-him' : ''} ${isPoem ? 'poem' : ''}" id="quote-card">
-      <div class="mark">${fromHim ? '💌' : '“'}</div>
+    <div class="quote ${fromHim ? 'from-him' : ''} ${isPoem ? 'poem' : ''} ${isQuran ? 'quran' : ''}" id="quote-card">
+      <div class="mark">${mark}</div>
       <div class="q-text">
         <p>${esc(q.text)}</p>
         ${fromHim ? '<span class="sig">— Jaan(War) 🐯</span>' : ''}
+        ${isQuran && q.ref ? `<span class="ref">— Qur'an, ${esc(q.ref)}</span>` : ''}
       </div>
       <button class="q-new" data-action="quote-new" aria-label="Another one"><svg><use href="#i-refresh"/></svg></button>
     </div>`;
@@ -680,6 +685,16 @@ function activeSupps() { return SUPPLEMENTS.filter(s => !state.suppsOff[s.key]);
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
    and offers exact alarm times to set once. */
+// Add N minutes to a "h:mmam/pm" label. Returns the same format, or '' on parse fail.
+function addMinutesToTimeLabel(label, addMin) {
+  if (!label) return '';
+  const m = /^(\d{1,2}):(\d{2})(am|pm)$/i.exec(label);
+  if (!m) return '';
+  let h = +m[1] % 12; if (m[3].toLowerCase() === 'pm') h += 12;
+  const d = new Date(); d.setHours(h, +m[2] + addMin, 0, 0);
+  return nowTimeLabel(d);
+}
+
 function dailyCareHTML(isToday) {
   const active = activeSupps();
   if (!active.length) return '';
@@ -688,6 +703,12 @@ function dailyCareHTML(isToday) {
   const nowSlot = hr < 0 ? '' : (hr < 11 ? 'morning' : hr < 20 ? 'meal' : 'evening');
   const times = current.suppTimes || {};
   let html = `<div class="card care-card"><h2>Daily care 💊<span class="sub">Tap each as you take it — it saves the time too ✓</span></h2>`;
+  // Iron traffic-light — SA nutritionist F + Endo D convergence: dairy/tea/coffee/calcium
+  // within ~90 min slashes iron absorption. Named times, no shame.
+  if (taken.includes('iron') && times.iron) {
+    const clearUntil = addMinutesToTimeLabel(times.iron, 90);
+    if (clearUntil) html += `<div class="iron-window">☕ Hold off tea, coffee & dairy until <b>~${esc(clearUntil)}</b> so today's iron actually lands.</div>`;
+  }
   if (inPeriod(viewDate) && !state.suppsOff.iron) {
     html += `<div class="care-cycle">🍊 Period week — iron matters extra now. Pair it with a vitamin-C food (orange, lemon, tomato) and an iron-rich plate: chicken thigh, or spinach with a squeeze of lemon.</div>`;
   }
@@ -738,7 +759,6 @@ function renderToday() {
       <h1>${isToday ? `Hi ${esc(state.name)} 💕` : esc(prettyDate(viewDate))}</h1>
       <div class="date">${isToday ? esc(prettyDate(viewDate)) : 'Viewing another day'}</div>
       ${chip}
-      <div class="marquee" aria-hidden="true"><span>${'swolesammy · strongest girl I know · est. 2026 · always showing up · '.repeat(4)}</span></div>
     </div>`);
 
   // pregnancy guard (spec §8): pause all programming with a warm handover
@@ -799,7 +819,7 @@ function renderToday() {
     parts.push(`
       <div class="card offer-card">
         <h2>${esc(RECHECK.title)}</h2>
-        <p class="hint">${esc(RECHECK.body)}</p>
+        <p class="hint">${RECHECK.body}</p>
         <button class="primary" data-action="recheck-done">${esc(RECHECK.cta)}</button>
       </div>`);
   }
@@ -815,10 +835,12 @@ function renderToday() {
       parts.push(`<div class="phase-note"><span>💛</span><span>If period pain regularly flattens you, that's common — and very treatable. Worth mentioning to your doctor sometime, no rush. <button class="link-btn" data-action="prompt-accept" data-id="painInfo">ok 💛</button></span></div>`);
     }
   }
-  // welcome back after a break (≥14 days) — zero guilt
+  // welcome back after a break (≥14 days) — zero guilt, cap at once per gap
   const allLogged = Object.keys(state.logs).filter(d => isMeaningful(state.logs[d])).sort();
   const lastLogged = allLogged[allLogged.length - 1];
-  if (isToday && lastLogged && daysBetween(lastLogged, todayISO()) >= 14 && !easingBack()) {
+  const welcomeBackShownFor = state.welcomeBackShownFor;
+  if (isToday && lastLogged && daysBetween(lastLogged, todayISO()) >= 14 && !easingBack() && welcomeBackShownFor !== lastLogged) {
+    state.welcomeBackShownFor = lastLogged; save();
     parts.push(`
       <div class="card offer-card">
         <h2>Welcome back 💛</h2>
@@ -901,13 +923,23 @@ function renderToday() {
     }
   }
 
-  // adaptive offer (check-ins DO something — spec §11)
+  // adaptive offer — she doesn't need to confess a bad day to be offered care
+  // (Psychologist G: 3+ sessions this week OR Monday auto-surfaces the lighter option)
   const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy', 'Stressed'].includes(s));
-  if (typeof day === 'number' && rough && !current.lighter && !current.offerDismissed && week !== 1) {
+  const weekSessionCount = (() => { let n = 0; for (let i = 0; i < 7; i++) { const l = state.logs[addDays(todayISO(), -i)]; if (l && isSession(l)) n++; } return n; })();
+  const isMonday = new Date(viewDate + 'T00:00:00').getDay() === 1;
+  // Week 4 (luteal): energy is often unpredictable — soft-surface the lighter option (Coach H).
+  const autoOffer = isToday && !rough && (weekSessionCount >= 3 || isMonday || week === 4);
+  if (typeof day === 'number' && (rough || autoOffer) && !current.lighter && !current.offerDismissed && week !== 1) {
+    const hint = rough
+      ? 'Rough days still count. Pick whatever feels kind:'
+      : (week === 4 ? 'Wind-down week — energy tends to dip a touch. Softer today is totally on the table:'
+        : isMonday ? 'Fresh week — sometimes a softer start feels best. Totally your call:'
+        : 'You\'ve been showing up all week — kind to yourself if you want it easier today:');
     parts.push(`
       <div class="card offer-card" id="adaptive-offer">
         <h2>Want today a little lighter? 💗</h2>
-        <p class="hint">Rough days still count. Pick whatever feels kind:</p>
+        <p class="hint">${esc(hint)}</p>
         <button class="primary" data-action="lighter">Same workout, one set less everywhere</button>
         <button class="ghost-btn" data-action="offer-gentle">Switch to a gentle session</button>
         <button class="link-btn" data-action="offer-no">I'm okay — full session 💪</button>
@@ -917,7 +949,8 @@ function renderToday() {
   const headsUp = isToday ? headacheHeadsUp(viewDate) : null;
   if (headsUp) parts.push(`<div class="phase-note"><span>💧</span><span>Heads-up: headaches often visit you around cycle day ${headsUp.day} — likely in the next day or two. Front-loading water and an iron-rich meal today really helps. 🍋</span></div>`);
   // proactive: strong-window PB flag (follicular / ovulation, training days)
-  if (typeof day === 'number' && strongWindowFor(viewDate).active && !gentleMode(viewDate)) {
+  const roughToday = current.mood !== null && current.mood !== undefined && current.mood <= 1;
+  if (typeof day === 'number' && strongWindowFor(viewDate).active && !gentleMode(viewDate) && !roughToday) {
     parts.push(`<div class="overload" id="power-nudge">✨ Strong window — your energy's up. If a lift's felt close, today's a lovely day to chase a personal best. 💪</div>`);
   }
 
@@ -1015,6 +1048,11 @@ function renderToday() {
           <ul class="warmup-list">${plan.burnout.items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
         </details>`);
     }
+    // Post-lift plate prompt on lower-body days (coach H + sleep C convergence).
+    // Silent, no numbers — pairs iron-friendly protein with something bright green.
+    if (typeof day === 'number' && (day === 1 || day === 3)) {
+      parts.push(`<div class="post-plate">🍽️ Post-lift plate: a palm of protein + something bright green. A squeeze of lemon on the veg helps the iron land. 💛</div>`);
+    }
     parts.push(`</div>`);
   }
 
@@ -1044,8 +1082,8 @@ function renderToday() {
       <button class="chip-toggle habit ${current.cardioBonus ? 'on' : ''}" data-action="cardio-bonus">${current.cardioBonus ? '✓ Moved my body — lovely 💗' : 'I got some movement in 💗'}</button>
     </div>`);
 
-  // first-session welcome (one-time, skippable) — sits right under the check-in
-  if (isToday && !state.onboarded) {
+  // first-session welcome — retires on tap OR after 2 completed sessions (UX: don't cling)
+  if (isToday && !state.onboarded && sessionDates().length < 2) {
     parts.push(`
       <div class="card offer-card onboard">
         <h2>Welcome, gorgeous 💪💕</h2>
@@ -1191,8 +1229,16 @@ function renderCycle() {
     const fc = strengthForecast();
     const pats = patternsDetected();
     const fcLines = [];
-    if (sw.active && !gentleMode()) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
-    if (fc) fcLines.push(`📈 At this pace, <b>${fc.target} kg ${esc(fc.name.replace(' Machine', ''))}</b> around <b>${esc(monthYear(fc.etaISO))}</b> — give or take ~${fc.bandWeeks} weeks. (Strength only, never a number on a scale.)`);
+    // Psychologist G: future-tense praise becomes a debt on rough days.
+    // Gate forward-projection copy behind mood ≥ Okay; use retrospective on rough/meh days.
+    const todaysMood = (state.logs[todayISO()] || {}).mood;
+    const roughMoodToday = todaysMood !== null && todaysMood !== undefined && todaysMood <= 1;
+    if (sw.active && !gentleMode() && !roughMoodToday) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
+    if (fc && !roughMoodToday) fcLines.push(`📈 At this pace, <b>${fc.target} kg ${esc(fc.name.replace(' Machine', ''))}</b> around <b>${esc(monthYear(fc.etaISO))}</b> — give or take ~${fc.bandWeeks} weeks. (Strength only, never a number on a scale.)`);
+    if (roughMoodToday) {
+      const doneThisMonth = Object.keys(state.logs).filter(d => monthKey(d) === monthKey(todayISO()) && isShowedUp(state.logs[d])).length;
+      if (doneThisMonth) fcLines.push(`💛 You showed up <b>${doneThisMonth} time${doneThisMonth === 1 ? '' : 's'}</b> this month. That’s the whole story.`);
+    }
     parts.push(`
       <div class="card decode-card">
         <h2>Your Month, Decoded 🌙<span class="sub">Your body, explained back to you — from your own data</span></h2>
@@ -1804,6 +1850,7 @@ function renderSettings() {
           <div class="gym-name"><b>${s.emoji} ${esc(s.name)}</b><span>${esc(s.why)}</span></div>
           <button class="switch ${state.suppsOff[s.key] ? 'off' : 'on'}" data-action="toggle-supp" data-k="${esc(s.key)}">${state.suppsOff[s.key] ? 'Off' : 'On'}</button>
         </div>`).join('')}
+      <p class="hint" style="margin-top:14px">💚 <b>Halal note:</b> a lot of capsules use gelatin — look for “halal”, “vegetarian capsule”, or “HMC-certified” on the bottle. Solgar, Nature's Own vegetarian range, and Nutrivein have halal-friendly options in Singapore.</p>
     </div>
     <div class="card">
       <h2>Love notes 💌<span class="sub">Add your own — they mix into her daily messages, signed Jaan(War).</span></h2>
@@ -2161,6 +2208,14 @@ document.querySelectorAll('.nav-btn').forEach(b => {
 
 /* ---------- boot ---------- */
 applyTheme();
+// silent app-open log (kindness rule: presence counts, not just performance)
+if (!Array.isArray(state.appOpenDates)) state.appOpenDates = [];
+if (!state.appOpenDates.includes(todayISO())) {
+  state.appOpenDates.push(todayISO());
+  // keep it bounded — 400 days is plenty of runway for any narrative use
+  if (state.appOpenDates.length > 400) state.appOpenDates = state.appOpenDates.slice(-400);
+  save();
+}
 currentQuote = dailyContent();
 render();
 const splash = $('#splash');

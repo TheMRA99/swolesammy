@@ -149,8 +149,27 @@ const CONTENT = [
   { type: 'poem_sweet', phase: 'any', signed: true, text: 'Softly, fiercely, daily —\nthat is how mountains move,\nand how you became\nthe strongest gentle thing I know.' },
   { type: 'poem_sweet', phase: 'gentle', text: 'Rest, love. The iron isn\'t going anywhere,\nand neither is the woman you\'re becoming.\nShe\'s patient. She\'s sure. She\'s you.' },
   { type: 'poem_sweet', phase: 'gentle', signed: true, text: 'On the heavy days, lean on me.\nI was built a little sturdy\non purpose — for exactly\nthe weeks you feel light.' },
+
+  /* ---------- Quran — gentle, reassuring reminders 🤲 ----------
+     Sahih International translations. Attribution: surah name + verse.
+     Selected for reassurance, strength through hardship, patience, and worth —
+     never doctrinal, never prescriptive, always kind. */
+  { type: 'quran', phase: 'any', text: '“So verily, with hardship comes ease. Verily, with hardship comes ease.”', ref: 'Ash-Sharh 94:5–6' },
+  { type: 'quran', phase: 'any', text: '“Allah does not burden a soul beyond that it can bear.”', ref: 'Al-Baqarah 2:286' },
+  { type: 'quran', phase: 'gentle', text: '“Indeed, Allah is with those who are patient.”', ref: 'Al-Baqarah 2:153' },
+  { type: 'quran', phase: 'any', text: '“So remember Me — I will remember you.”', ref: 'Al-Baqarah 2:152' },
+  { type: 'quran', phase: 'gentle', text: '“Your Lord has not forsaken you, nor is He displeased.”', ref: 'Ad-Duha 93:3' },
+  { type: 'quran', phase: 'gentle', text: '“Do not despair of the mercy of Allah.”', ref: 'Az-Zumar 39:53' },
+  { type: 'quran', phase: 'hype', text: '“And whoever puts their trust in Allah — He will be sufficient for them.”', ref: 'At-Talaq 65:3' },
+  { type: 'quran', phase: 'any', text: '“And He found you lost, and guided you. And He found you in need, and made you self-sufficient.”', ref: 'Ad-Duha 93:7–8' },
+  { type: 'quran', phase: 'any', text: '“Perhaps you dislike a thing and it is good for you.”', ref: 'Al-Baqarah 2:216' },
+  { type: 'quran', phase: 'gentle', text: '“And whoever fears Allah — He will make a way out for them.”', ref: 'At-Talaq 65:2' },
+  { type: 'quran', phase: 'any', text: '“Verily, in the remembrance of Allah do hearts find rest.”', ref: 'Ar-Ra\'d 13:28' },
+  { type: 'quran', phase: 'hype', text: '“And that there is not for a person except that [good] for which they strive.”', ref: 'An-Najm 53:39' },
+  { type: 'quran', phase: 'any', text: '“Indeed, my Lord is near and responsive.”', ref: 'Hud 11:61' },
+  { type: 'quran', phase: 'gentle', text: '“Allah intends for you ease, and does not intend for you hardship.”', ref: 'Al-Baqarah 2:185' },
 ];
 
-/* Rotation weights — more of his corny, romantic lines surface now:
-   ~32% affirmations · ~33% Muneer + pickup · ~20% lovely lines · ~15% funny poems */
-const CONTENT_WEIGHTS = { affirmation: 32, muneer: 20, pickup: 13, poem_sweet: 20, poem_funny: 15 };
+/* Rotation weights — Muneer's lines still lead; Quran surfaces gently.
+   ~30% affirmations · ~30% Muneer+pickup · ~18% poems · ~10% Quran · ~12% funny */
+const CONTENT_WEIGHTS = { affirmation: 30, muneer: 18, pickup: 12, poem_sweet: 18, poem_funny: 12, quran: 10 };

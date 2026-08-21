@@ -534,7 +534,7 @@ const RIR_HINT_GENTLE = 'Leave 3–4 in the tank 💛 — smooth, comfy reps win
    plan. Framed as a warm GP check-in, never as labs/deficiency. Surfaces ~week 8+. */
 const RECHECK = {
   title: '🩺 Time for a little check-in',
-  body: 'You’re a good stretch into your plan — a quick repeat blood test now shows how far you’ve come. Ask your GP for iron (ferritin), vitamin D, and a lipid check. No rush, just when you can. 💛',
+  body: 'You’re a good stretch into your plan — a quick repeat blood test now shows how far you’ve come. Ask your GP for <b>iron (ferritin + transferrin saturation), vitamin D, and a lipid check</b>. If your last thyroid check was a while ago, it’s a lovely one to add. No rush, just when you can. 💛',
   cta: 'Recheck done — thank you 💛',
 };
 

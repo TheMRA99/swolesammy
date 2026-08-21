@@ -231,6 +231,9 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .quote.poem .q-text p { white-space: pre-line; font-size: 16px; line-height: 1.55; }
 .quote .sig { display: block; margin-top: 6px; font-family: var(--font-script); font-weight: 700; font-size: 20px; color: var(--rose-deep); }
 .quote.from-him { border: 1.5px solid color-mix(in srgb, var(--rose) 45%, transparent); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--rose) 7%, var(--surface))); }
+.quote.quran { border: 1.5px solid color-mix(in srgb, var(--lilac) 42%, transparent); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--lilac) 8%, var(--surface))); }
+.quote.quran .mark { color: color-mix(in srgb, var(--lilac) 78%, var(--text)); font-size: 24px; }
+.quote .ref { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .02em; font-style: normal; }
 .quote .q-new {
   border: none; background: var(--surface-2); color: var(--rose-deep); cursor: pointer;
   width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none;
@@ -787,6 +790,19 @@ details.card[open] > summary { margin-bottom: 12px; }
   border: 1px solid color-mix(in srgb, var(--p-menstrual) 30%, transparent);
   border-radius: var(--r-md); padding: 10px 12px; margin-bottom: 12px;
   font-size: 12.5px; font-weight: 600; line-height: 1.45; color: var(--text);
+}
+.iron-window {
+  background: color-mix(in srgb, var(--warm-a) 92%, transparent);
+  border: 1px solid var(--warm-line);
+  border-radius: var(--r-md); padding: 10px 12px; margin-bottom: 12px;
+  font-size: 12.5px; font-weight: 700; line-height: 1.45; color: var(--warm-text);
+}
+.iron-window b { color: var(--warm-text); font-weight: 900; }
+.post-plate {
+  margin-top: 12px; padding: 10px 12px; border-radius: var(--r-md);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--p-follicular) 12%, var(--surface)), color-mix(in srgb, var(--p-follicular) 5%, var(--surface)));
+  border: 1px solid color-mix(in srgb, var(--p-follicular) 22%, transparent);
+  font-size: 12.5px; font-weight: 700; line-height: 1.45; color: var(--text);
 }
 .care-slot { padding: 11px 0; border-top: 1px solid var(--line); }
 .care-slot:first-of-type { border-top: none; padding-top: 2px; }
