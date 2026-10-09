@@ -234,6 +234,66 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .quote.quran { border: 1.5px solid color-mix(in srgb, var(--lilac) 42%, transparent); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--lilac) 8%, var(--surface))); }
 .quote.quran .mark { color: color-mix(in srgb, var(--lilac) 78%, var(--text)); font-size: 24px; }
 .quote .ref { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .02em; font-style: normal; }
+
+/* ---------- birthday mode 🎂 ---------- */
+.quote.birthday {
+  border: 1.5px solid color-mix(in srgb, var(--coral) 60%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--coral) 10%, var(--surface)), color-mix(in srgb, var(--lilac) 10%, var(--surface)));
+}
+.quote.birthday .mark { font-size: 26px; filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--coral) 40%, transparent)); }
+.hero.birthday {
+  background:
+    radial-gradient(140% 130% at 100% 0%, color-mix(in srgb, var(--coral) 22%, transparent), transparent 55%),
+    radial-gradient(120% 120% at 0% 100%, color-mix(in srgb, var(--lilac) 24%, transparent), transparent 60%),
+    linear-gradient(135deg, var(--hero-a) 0%, var(--hero-b) 52%, var(--hero-c) 100%);
+  box-shadow: var(--shadow), 0 0 0 1px color-mix(in srgb, var(--coral) 25%, transparent);
+}
+.hero.birthday h1 { background: linear-gradient(120deg, var(--rose-deep), var(--coral) 55%, var(--lilac)); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.bday-countdown {
+  position: relative; z-index: 1;
+  margin-top: 14px; padding: 10px 14px;
+  background: color-mix(in srgb, var(--coral) 18%, var(--hero-chip));
+  backdrop-filter: blur(6px);
+  border-radius: 14px;
+  font-size: 13px; font-weight: 800; color: var(--rose-deep);
+  text-align: center; letter-spacing: .01em;
+}
+
+/* Confetti — soft, randomized, respects reduced-motion */
+.confetti { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.confetti::before, .confetti::after {
+  content: ''; position: absolute; inset: -10% -5%;
+  background-image:
+    radial-gradient(circle at 10% 12%, var(--coral) 2px, transparent 3px),
+    radial-gradient(circle at 85% 20%, var(--lilac) 2.5px, transparent 3.5px),
+    radial-gradient(circle at 25% 60%, color-mix(in srgb, var(--rose) 85%, var(--coral)) 2px, transparent 3px),
+    radial-gradient(circle at 70% 72%, color-mix(in srgb, var(--lilac) 70%, var(--rose)) 2px, transparent 3px),
+    radial-gradient(circle at 50% 35%, var(--coral) 1.8px, transparent 2.8px),
+    radial-gradient(circle at 92% 85%, var(--lilac) 2px, transparent 3px),
+    radial-gradient(circle at 15% 88%, color-mix(in srgb, var(--rose) 60%, white) 2px, transparent 3px);
+  background-size: 420px 420px;
+  opacity: .55; animation: confetti-drift 18s linear infinite;
+}
+.confetti::after { animation-duration: 24s; animation-direction: reverse; opacity: .32; background-position: 50% 50%; }
+@keyframes confetti-drift {
+  from { transform: translate3d(0, -8%, 0); }
+  to { transform: translate3d(0, 8%, 0); }
+}
+@media (prefers-reduced-motion: reduce) { .confetti::before, .confetti::after { animation: none; } }
+
+/* Full-width birthday day-of card */
+.birthday-card {
+  text-align: center;
+  background:
+    radial-gradient(140% 90% at 50% -20%, color-mix(in srgb, var(--coral) 20%, transparent), transparent 60%),
+    linear-gradient(160deg, color-mix(in srgb, var(--coral) 8%, var(--surface)), color-mix(in srgb, var(--lilac) 10%, var(--surface)));
+  border: 1.5px solid color-mix(in srgb, var(--coral) 45%, transparent);
+}
+.birthday-card .bday-emoji { font-size: 36px; letter-spacing: .08em; margin-bottom: 4px; }
+.birthday-card h2 { font-family: var(--font-display); font-weight: 700; color: var(--rose-deep); font-size: 24px; letter-spacing: -.015em; }
+.birthday-card p { font-size: 14.5px; line-height: 1.55; font-weight: 500; margin: 10px 0; color: var(--text); }
+.birthday-card p b { color: var(--rose-deep); font-weight: 800; }
+.birthday-card .sig { display: block; margin-top: 10px; font-family: var(--font-script); font-weight: 700; font-size: 22px; color: var(--rose-deep); }
 .quote .q-new {
   border: none; background: var(--surface-2); color: var(--rose-deep); cursor: pointer;
   width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none;

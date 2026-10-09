@@ -168,8 +168,33 @@ const CONTENT = [
   { type: 'quran', phase: 'hype', text: '“And that there is not for a person except that [good] for which they strive.”', ref: 'An-Najm 53:39' },
   { type: 'quran', phase: 'any', text: '“Indeed, my Lord is near and responsive.”', ref: 'Hud 11:61' },
   { type: 'quran', phase: 'gentle', text: '“Allah intends for you ease, and does not intend for you hardship.”', ref: 'Al-Baqarah 2:185' },
+
+  /* ---------- 🎂 Birthday week — only surface during her festive window ----------
+     Mix of Muneer's own birthday notes + warm affirmations. No age, no new-year-new-you.
+     Just celebration, softness, and love. */
+  { type: 'birthday_muneer', phase: 'birthday', text: 'Happy birthday, Jaan 💕 I’m just so lucky the universe put you on 13 October. The whole year, honestly — but today especially.' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'Every year with you is my favourite year so far. Then the next one comes and ruins the record. 🎂' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'You don’t need a workout today. You need cake, and me, and probably a nap. In that order. 🎂💕' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'If I could gift-wrap how proud I am of you, you’d be unwrapping all week. 🎁' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'Birthday rule: today you’re not allowed to do a single thing you don’t want to. (Non-negotiable. I made the app.) 💌' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'Thirteen is my new favourite number — because that’s the day the world got you. 🎂' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'The best plot twist in my life was being there when you blew out candles. May we get a lifetime of them. 🕯️' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'Birthday week agenda: I spoil you, you let me. That’s it. That’s the itinerary. 💐' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'You are the softest strongest thing in my life and today the whole app is just here to say that. 🎉' },
+  { type: 'birthday_muneer', phase: 'birthday', text: 'Alhamdulillah for every single day the universe gave you — and gave me the chance to know you. 🤲💕' },
+
+  /* Birthday affirmations (not from Muneer) */
+  { type: 'birthday', phase: 'birthday', text: 'Today the only rep that matters is one deep breath and a quiet smile — you earned both. 🎂' },
+  { type: 'birthday', phase: 'birthday', text: 'A whole year of being you — gentle, strong, patient, becoming. That deserves confetti. 🎉' },
+  { type: 'birthday', phase: 'birthday', text: 'This is YOUR week. The weights can wait. The world will wait. Celebrate. 💐' },
+  { type: 'birthday', phase: 'birthday', text: 'May this year bring you softer mornings, stronger afternoons, and sleep that actually arrives on time. 🤍' },
+  { type: 'birthday', phase: 'birthday', text: 'You being here, soft heart and all, is the actual gift. 💕' },
+  { type: 'birthday', phase: 'birthday', text: 'A year wiser, a year warmer, a year more entirely you. 🎂' },
+  { type: 'birthday', phase: 'birthday', text: 'Make a wish — the kind you don’t say out loud. The universe listens when you’re this loved. 🕯️' },
 ];
 
 /* Rotation weights — Muneer's lines still lead; Quran surfaces gently.
-   ~30% affirmations · ~30% Muneer+pickup · ~18% poems · ~10% Quran · ~12% funny */
-const CONTENT_WEIGHTS = { affirmation: 30, muneer: 18, pickup: 12, poem_sweet: 18, poem_funny: 12, quran: 10 };
+   ~30% affirmations · ~30% Muneer+pickup · ~18% poems · ~10% Quran · ~12% funny
+   Birthday types only exist in the birthday pool (phase: 'birthday'); their weights
+   dominate inside that pool but never show outside her festive window. */
+const CONTENT_WEIGHTS = { affirmation: 30, muneer: 18, pickup: 12, poem_sweet: 18, poem_funny: 12, quran: 10, birthday_muneer: 55, birthday: 35 };

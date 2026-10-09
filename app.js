@@ -30,6 +30,7 @@ const defaultState = () => ({
   lastDeload: null,
   deloadUntil: null,
   gentleLast: 'B',          // so the first gentle pick is A
+  birthday: '10-13',        // MM-DD — drives festive mode (hero countdown, special content pool, confetti)
 });
 
 let state = load();
@@ -513,9 +514,43 @@ function allContent() {
   const custom = (state.customMessages || []).filter(t => t && t.trim()).map(t => ({ type: 'muneer', phase: 'any', text: t.trim(), signed: true }));
   return CONTENT.concat(custom);
 }
+
+/* ---------- birthday mode ----------
+   Festive window: 7 days before through 1 day after her birthday (MM-DD in state).
+   Drives the hero countdown, a dedicated content pool, and confetti.
+   100% kindness-safe — no age, no "new year new you", no goal pressure. */
+function birthdayInfo(iso) {
+  if (!state.birthday || !/^\d{2}-\d{2}$/.test(state.birthday)) return null;
+  const [bm, bd] = state.birthday.split('-').map(Number);
+  const today = fromISO(iso || todayISO());
+  const y = today.getFullYear();
+  // compute the closest birthday (this year or next) to today
+  let bday = new Date(y, bm - 1, bd);
+  const diff = Math.round((bday - today) / 86400000);
+  // if birthday already passed by more than 1 day, roll to next year for countdown
+  if (diff < -1) bday = new Date(y + 1, bm - 1, bd);
+  const daysUntil = Math.round((bday - today) / 86400000);
+  const isToday = daysUntil === 0;
+  const dayAfter = daysUntil === -1;
+  const inWindow = daysUntil <= 7 && daysUntil >= -1;
+  return { daysUntil, isToday, dayAfter, inWindow, bdayISO: bday.toISOString().slice(0, 10) };
+}
+
 function contentPool() {
   const info = cycleInfo(todayISO());
   const tier = info ? phaseTier(info.week) : 'any';
+  const bd = birthdayInfo();
+  // During birthday week, STRONGLY prefer birthday-tagged content (sprinkle, not deluge).
+  // On the day itself, 70% chance of a birthday message. Other days in window: 40%.
+  if (bd && bd.inWindow) {
+    const birthdayPool = allContent().filter(c => c.phase === 'birthday');
+    if (birthdayPool.length) {
+      const regularPool = allContent().filter(c => c.phase === 'any' || c.phase === tier);
+      const birthdayWeight = bd.isToday ? 10 : (bd.daysUntil <= 2 ? 7 : 4);
+      // return merged pool; pickContent will randomize across types
+      return birthdayPool.concat(birthdayPool).concat(birthdayPool).slice(0, birthdayWeight).concat(regularPool);
+    }
+  }
   return allContent().filter(c => c.phase === 'any' || c.phase === tier);
 }
 function hashStr(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
@@ -532,12 +567,14 @@ function pickContent(seed) {
 function dailyContent() { return pickContent(hashStr(todayISO())); }
 function randomContent() { return pickContent(Math.floor(Math.random() * 1e6)); }
 function quoteCardHTML(q) {
-  const fromHim = q.type === 'muneer' || q.type === 'pickup' || q.signed;
+  const isBdayHim = q.type === 'birthday_muneer';
+  const isBday = q.type === 'birthday' || isBdayHim;
+  const fromHim = isBdayHim || q.type === 'muneer' || q.type === 'pickup' || q.signed;
   const isPoem = q.type.startsWith('poem');
   const isQuran = q.type === 'quran';
-  const mark = isQuran ? '🤲' : (fromHim ? '💌' : '“');
+  const mark = isBday ? '🎂' : (isQuran ? '🤲' : (fromHim ? '💌' : '“'));
   return `
-    <div class="quote ${fromHim ? 'from-him' : ''} ${isPoem ? 'poem' : ''} ${isQuran ? 'quran' : ''}" id="quote-card">
+    <div class="quote ${fromHim ? 'from-him' : ''} ${isPoem ? 'poem' : ''} ${isQuran ? 'quran' : ''} ${isBday ? 'birthday' : ''}" id="quote-card">
       <div class="mark">${mark}</div>
       <div class="q-text">
         <p>${esc(q.text)}</p>
@@ -753,13 +790,36 @@ function renderToday() {
         <div class="arrow">›</div>
       </button>`
     : '';  // no period logged yet → no redundant prompt (she logs it in the Cycle tab)
+  const bd = isToday ? birthdayInfo() : null;
+  const heroClass = bd && bd.inWindow ? 'hero birthday' : 'hero';
+  const heroTitle = bd && bd.isToday
+    ? `Happy birthday, ${esc(state.name)} 🎂💕`
+    : (isToday ? `Hi ${esc(state.name)} 💕` : esc(prettyDate(viewDate)));
+  const bdayCountdown = bd && bd.inWindow && !bd.isToday && !bd.dayAfter
+    ? `<div class="bday-countdown">🎂 ${bd.daysUntil === 1 ? 'Tomorrow is your birthday' : bd.daysUntil + ' days until your birthday'} — the whole week is yours 💐</div>`
+    : (bd && bd.dayAfter ? `<div class="bday-countdown">💐 Birthday glow still on — hope yesterday was gentle and full of love.</div>` : '');
   parts.push(`
-    <div class="hero">
+    <div class="${heroClass}">
+      ${bd && bd.inWindow ? '<div class="confetti" aria-hidden="true"></div>' : ''}
       <div class="brand">SwoleSammy</div>
-      <h1>${isToday ? `Hi ${esc(state.name)} 💕` : esc(prettyDate(viewDate))}</h1>
+      <h1>${heroTitle}</h1>
       <div class="date">${isToday ? esc(prettyDate(viewDate)) : 'Viewing another day'}</div>
+      ${bdayCountdown}
       ${chip}
     </div>`);
+
+  // Birthday day-of: dedicated full-width letter card right under the hero.
+  // Pregnancy guard still wins (checks run after), but this surfaces for everything else.
+  if (bd && bd.isToday && !state.pregnant && !state.onBreak) {
+    parts.push(`
+      <div class="card birthday-card">
+        <div class="bday-emoji">🎂💐🎉</div>
+        <h2>It's your day, Sammy 💕</h2>
+        <p>No workout pressure, no RIR targets, no streaks to chase — today is pure celebration. Pick anything from the menu if you want to move, or pick nothing at all. The app, the weights, and I will all be right here tomorrow.</p>
+        <p>You deserve <b>cake, nap, kindness, and whatever makes you smile</b> — in any order, as many times as you like. 💐</p>
+        <span class="sig">— Jaan(War) 🐯💌</span>
+      </div>`);
+  }
 
   // pregnancy guard (spec §8): pause all programming with a warm handover
   if (state.pregnant) {
@@ -1874,6 +1934,8 @@ function renderSettings() {
       <p class="hint" style="margin-top:14px">Been away a while and diving back in? Ease the effort down for a couple of weeks while your strength catches back up.</p>
       <button class="ghost-btn" data-action="ease-back">Ease back in 🌱</button>` : ''}
       ${!state.pregnant && easingBack() ? `<p class="hint" style="margin-top:14px">Easing back in until ${esc(shortDate(state.easeBackUntil))} 🌱 — lighter effort, no PR pressure.</p>` : ''}
+      <p class="hint" style="margin-top:14px">🎂 Her birthday (MM-DD) — festive week auto-activates 7 days before.</p>
+      <input type="text" class="select" value="${esc(state.birthday || '')}" placeholder="10-13" pattern="\\d{2}-\\d{2}" maxlength="5" data-action="set-birthday" style="width:120px;text-align:center;font-family:var(--mono,inherit);font-weight:800;letter-spacing:.08em">
     </div>
     <div class="card">
       <h2>Backup</h2>
@@ -2146,6 +2208,19 @@ document.addEventListener('input', e => {
   }
   else if (a === 'notes') { current.notes = t.value; commit(); }
   else if (a === 'cardio-field') { if (!current.cardioLog) current.cardioLog = {}; current.cardioLog[t.dataset.field] = t.value; commit(); }
+  else if (a === 'set-birthday') {
+    const v = t.value.trim();
+    if (!v) { state.birthday = null; save(); return; }
+    const m = /^(\d{1,2})[-/](\d{1,2})$/.exec(v);
+    if (m) {
+      const mm = String(+m[1]).padStart(2, '0');
+      const dd = String(+m[2]).padStart(2, '0');
+      if (+mm >= 1 && +mm <= 12 && +dd >= 1 && +dd <= 31) {
+        state.birthday = `${mm}-${dd}`;
+        save();
+      }
+    }
+  }
 });
 
 document.addEventListener('change', e => {
