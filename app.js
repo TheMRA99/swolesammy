@@ -527,13 +527,15 @@ function birthdayInfo(iso) {
   // compute the closest birthday (this year or next) to today
   let bday = new Date(y, bm - 1, bd);
   const diff = Math.round((bday - today) / 86400000);
-  // if birthday already passed by more than 1 day, roll to next year for countdown
-  if (diff < -1) bday = new Date(y + 1, bm - 1, bd);
+  // if birthday passed by more than the afterglow window (6 days), roll to next year
+  if (diff < -6) bday = new Date(y + 1, bm - 1, bd);
   const daysUntil = Math.round((bday - today) / 86400000);
   const isToday = daysUntil === 0;
-  const dayAfter = daysUntil === -1;
-  const inWindow = daysUntil <= 7 && daysUntil >= -1;
-  return { daysUntil, isToday, dayAfter, inWindow, bdayISO: bday.toISOString().slice(0, 10) };
+  const dayAfter = daysUntil === -1;              // the "yesterday" state (special copy)
+  const afterglow = daysUntil <= -2 && daysUntil >= -6; // the softer rest-of-week glow
+  // 7 days before through 6 days after — the full "birthday week"
+  const inWindow = daysUntil <= 7 && daysUntil >= -6;
+  return { daysUntil, isToday, dayAfter, afterglow, inWindow, bdayISO: bday.toISOString().slice(0, 10) };
 }
 
 function contentPool() {
@@ -795,9 +797,20 @@ function renderToday() {
   const heroTitle = bd && bd.isToday
     ? `Happy birthday, ${esc(state.name)} 🎂💕`
     : (isToday ? `Hi ${esc(state.name)} 💕` : esc(prettyDate(viewDate)));
-  const bdayCountdown = bd && bd.inWindow && !bd.isToday && !bd.dayAfter
-    ? `<div class="bday-countdown">🎂 ${bd.daysUntil === 1 ? 'Tomorrow is your birthday' : bd.daysUntil + ' days until your birthday'} — the whole week is yours 💐</div>`
-    : (bd && bd.dayAfter ? `<div class="bday-countdown">💐 Birthday glow still on — hope yesterday was gentle and full of love.</div>` : '');
+  // Hero chip copy by position in the birthday week
+  let bdayCountdownText = '';
+  if (bd && bd.inWindow && !bd.isToday) {
+    if (bd.daysUntil > 0) {
+      bdayCountdownText = `🎂 ${bd.daysUntil === 1 ? 'Tomorrow is your birthday' : bd.daysUntil + ' days until your birthday'} — the whole week is yours 💐`;
+    } else if (bd.dayAfter) {
+      bdayCountdownText = '💐 Birthday glow still on — hope yesterday was gentle and full of love.';
+    } else if (bd.afterglow) {
+      // Days -2 to -6 — soft "still your week" copy
+      const d = Math.abs(bd.daysUntil);
+      bdayCountdownText = `✨ Still your birthday week — ${d === 2 ? 'two days in' : d + ' days in'}, keep soaking it up 💐`;
+    }
+  }
+  const bdayCountdown = bdayCountdownText ? `<div class="bday-countdown">${bdayCountdownText}</div>` : '';
   parts.push(`
     <div class="${heroClass}">
       ${bd && bd.inWindow ? '<div class="confetti" aria-hidden="true"></div>' : ''}
