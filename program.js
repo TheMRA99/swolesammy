@@ -159,7 +159,7 @@ const DAYS = {
         { name: 'Bent-Over Rear Delt Raise', scheme: '2×15', tag: '✅', note: 'Chest on an incline bench to protect your back. Same muscle.' },
         { name: 'Face Pull', scheme: '2×15', tag: '✅', note: 'Interchangeable rear-delt work.' },
       ] },
-      { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging'], note: 'The hourglass maker — shoulder width frames everything.', alts: [
+      { name: 'Dumbbell Lateral Raise', scheme: '3–4×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging', 'A 4th set when energy\'s good — the shoulders love the frequency'], note: 'The hourglass maker — shoulder width frames everything.', alts: [
         { name: 'Cable Lateral Raise', scheme: '3×12 each', tag: '✅', note: 'Constant tension — many find it even better.' },
         { name: 'Machine Lateral Raise', scheme: '3×12', tag: '✅', note: 'Guided path if your gym has one.' },
         { name: 'Leaning Lateral Raise', scheme: '3×12 each', tag: '🔄', note: 'Lean away from a support for a bigger range.' },
@@ -260,7 +260,7 @@ const DAYS = {
         { name: 'Arnold Press', scheme: '3×10', tag: '🔄', note: 'Rotational press — more front-delt.' },
         { name: 'Landmine Press', scheme: '3×10 each', tag: '🔄', note: 'A shoulder-friendly angle if shoulders feel cranky.' },
       ] },
-      { name: 'Dumbbell Lateral Raise', scheme: '3×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'], alts: [
+      { name: 'Dumbbell Lateral Raise', scheme: '3–4×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging', 'A 4th set when energy\'s good'], alts: [
         { name: 'Cable Lateral Raise', scheme: '3×12 each', tag: '✅', note: 'Constant tension — many find it even better.' },
         { name: 'Machine Lateral Raise', scheme: '3×12', tag: '✅', note: 'Guided path if your gym has one.' },
         { name: 'Leaning Lateral Raise', scheme: '3×12 each', tag: '🔄', note: 'Lean away from a support for a bigger range.' },
@@ -426,6 +426,16 @@ const MORNING_LIGHT = {
   body: 'A few minutes by a window or a short step outside right now sets your body clock and lifts your energy for the whole day.',
   cta: 'Caught some light ☀️',
   done: 'Light caught ☀️ — lovely. Your body clock says thank you 💛',
+};
+/* [INTERNAL] Post-dinner walk is one of the highest-leverage invisible levers
+   for body composition (post-meal glucose disposal ~30%, insulin sensitivity,
+   NEAT), especially relevant for PCOS. Framed purely as "digestion + calm
+   wind-down" — never NEAT, never calories, never burn. Fires 7–10pm window. */
+const AFTER_DINNER_WALK = {
+  title: 'After-dinner wander 🌙',
+  body: '10 easy minutes outside (or around the house) after your main meal — it settles digestion, softens the day, and sets up calmer sleep.',
+  cta: 'Done — lovely walk ✓',
+  done: 'Walked after dinner ✓ — gentle on the system 💛',
 };
 const SLEEP_TIPS = {
   title: 'Sleep, gently 🌙',

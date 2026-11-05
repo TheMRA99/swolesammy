@@ -261,7 +261,7 @@ function blankLog(iso, dayOverride) {
     squat: SQUAT_RESET.items.map(() => false),
     wind: WIND_DOWN.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
-    cardioDone: false, cardioSkipped: false, cardioBonus: false, cardioLog: {}, morningLight: false, offerDismissed: false,
+    cardioDone: false, cardioSkipped: false, cardioBonus: false, cardioLog: {}, morningLight: false, dinnerWalk: false, offerDismissed: false,
     ex: plan.ex ? plan.ex.map(freshExFromPlan) : [],
   };
 }
@@ -279,7 +279,7 @@ function buildLog(iso, dayOverride) {
   const day = dayOverride !== undefined ? dayOverride : (saved && saved.day !== undefined ? saved.day : scheduledDay(iso));
   const fresh = blankLog(iso, day);
   if (!saved) return fresh;
-  ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'morningLight', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
+  ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'morningLight', 'dinnerWalk', 'offerDismissed'].forEach(k => { if (saved[k] !== undefined) fresh[k] = saved[k]; });
   ['symptoms', 'habits', 'supps'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
   fresh.suppTimes = Object.assign({}, saved.suppTimes || {});
   fresh.cardioLog = Object.assign({}, saved.cardioLog || {});
@@ -322,7 +322,7 @@ function isMeaningful(log) {
     (log.mood === 0 || log.mood) ||
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) || (log.supps && log.supps.length) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
-    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || (log.wind && log.wind.some(Boolean)) || log.cardioDone || log.cardioBonus || log.morningLight ||
+    (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || (log.wind && log.wind.some(Boolean)) || log.cardioDone || log.cardioBonus || log.morningLight || log.dinnerWalk ||
     (log.cardioLog && Object.values(log.cardioLog).some(v => v !== '' && v != null)) ||
     (log.ramp && Object.keys(log.ramp).some(k => (log.ramp[k] || []).some(Boolean))) ||
     (log.ex && log.ex.some(e => e.done || e.weight !== '' || e.reps !== '' || (e.sets || []).some(s => s.done || s.w !== '' || s.r !== ''))));
@@ -961,6 +961,17 @@ function renderToday() {
           <h2>${esc(MORNING_LIGHT.title)}</h2>
           <p class="hint">${esc(MORNING_LIGHT.body)}</p>
           <button class="primary" data-action="morning-light">${esc(MORNING_LIGHT.cta)}</button>
+        </div>`);
+    }
+    // After-dinner wander — 7-10pm window, same ✓/done pattern as morning light
+    if (current.dinnerWalk) {
+      if (h >= 19) parts.push(`<div class="phase-note"><span>🌙</span><span>${esc(AFTER_DINNER_WALK.done)}</span></div>`);
+    } else if (h >= 19 && h < 22) {
+      parts.push(`
+        <div class="card offer-card">
+          <h2>${esc(AFTER_DINNER_WALK.title)}</h2>
+          <p class="hint">${esc(AFTER_DINNER_WALK.body)}</p>
+          <button class="primary" data-action="dinner-walk">${esc(AFTER_DINNER_WALK.cta)}</button>
         </div>`);
     }
   }
@@ -2163,7 +2174,7 @@ document.addEventListener('click', e => {
     // keep ticked values for unchanged rows
     const byName = {}; current.ex.forEach(x => { byName[x.name] = x; });
     rebuilt.ex = rebuilt.ex.map(x => byName[x.name] ? { ...x, ...byName[x.name] } : x);
-    ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'cardioLog', 'morningLight', 'suppTimes', 'offerDismissed'].forEach(k => rebuilt[k] = current[k]);
+    ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'cardioLog', 'morningLight', 'dinnerWalk', 'suppTimes', 'offerDismissed'].forEach(k => rebuilt[k] = current[k]);
     ['symptoms', 'habits', 'supps', 'posture', 'hips', 'stretch', 'squat', 'wind'].forEach(k => rebuilt[k] = current[k]);
     rebuilt.ramp = current.ramp;
     current = rebuilt; commit(); renderToday();
@@ -2187,6 +2198,7 @@ document.addEventListener('click', e => {
   }
   else if (a === 'cardio-bonus') { current.cardioBonus = !current.cardioBonus; commit(); renderToday(); }
   else if (a === 'morning-light') { current.morningLight = !current.morningLight; commit(); renderToday(); }
+  else if (a === 'dinner-walk') { current.dinnerWalk = !current.dinnerWalk; commit(); renderToday(); }
   else if (a === 'recheck-done') {
     state.labsCleared = true; save(); renderToday();
     setTimeout(() => alert('Look at you, taking care of yourself 💛 If the doctor tweaks anything, you can switch pills on or off in Settings → Daily care.'), 30);
