@@ -172,6 +172,10 @@ const DAYS = {
         { name: 'Bird Dog', scheme: '2×10 each side', tag: '✅', note: 'Same anti-extension core, on all fours.' },
         { name: 'Hollow Body Hold', scheme: '2×20 sec', tag: '🔄', note: 'Isometric version — bend the knees to make it easier.' },
       ] },
+      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging'], note: 'Grip + shoulder opener — a lovely full-body stretch at the end.', alts: [
+        { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
+        { name: 'DB Hold', scheme: '2×30 sec each hand', tag: '✅', note: 'Heavy dumbbell held tall — same grip benefit at home.' },
+      ] },
     ],
     cardio: 'Bike · 20–25 min · steady, chatty pace — heart & stamina',
   },
@@ -283,6 +287,10 @@ const DAYS = {
       { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'], alts: [
         { name: 'BOSU Side Plank', scheme: '2×30 sec each', tag: '🔄', note: 'Add instability when you\'re ready.' },
       ] },
+      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging'], note: 'Grip + shoulder opener — a lovely finisher after all that pressing.', alts: [
+        { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
+        { name: 'DB Hold', scheme: '2×30 sec each hand', tag: '✅', note: 'Heavy dumbbell held tall — same grip benefit at home.' },
+      ] },
     ],
     cardio: 'StairMaster · 12–15 min · steady pace — heart & stamina',
   },
@@ -301,7 +309,7 @@ function resolveScheme(scheme, week) {
 // Exercises with no external load — the app hides the kg field for these and
 // just logs reps/seconds. Matches by name so swapped-in alternatives count too.
 const BODYWEIGHT = new Set([
-  'Dead Bug', 'Bird Dog', 'Front Plank', 'Side Plank', 'Knee Tucks',
+  'Dead Bug', 'Bird Dog', 'Front Plank', 'Side Plank', 'Knee Tucks', 'Dead Hang', 'Band-Assisted Dead Hang',
   'Glute Bridge', 'Glute Bridge Hold', 'Single-Leg Glute Bridge', 'Single-Leg Glute Bridge Hold',
   'Superman + Glute Squeeze', 'Superman Hold', 'Clamshells', 'Banded Clamshells',
   'Standing Hip Abduction', 'Side-Lying Adduction Raise', 'Push-Up Progression', 'Single-Leg Balance',
@@ -492,7 +500,7 @@ const CARE_ALARMS = [
 const CARDIO_BONUS = {
   title: 'Bonus movement 💗',
   sub: 'Totally optional — a little extra love for your heart, mood & energy',
-  note: 'Anything easy you enjoy: a longer walk, a dance in your room, the bike, or incline stairs. 15–25 min at a pace you could still chat through. Your heart (and your head) will thank you.',
+  note: 'Anything easy you enjoy: an outdoor walk, a dance in your room, the bike, or incline stairs. 15–25 min at a pace you could still chat through. Your heart (and your head) will thank you.',
 };
 /* [INTERNAL] Target raised from the generic 150 min/wk: accelerometer studies
    (Glasgow, PLOS ONE) found South Asian adults need ~232–266 min/wk of moderate
