@@ -294,6 +294,43 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .birthday-card p { font-size: 14.5px; line-height: 1.55; font-weight: 500; margin: 10px 0; color: var(--text); }
 .birthday-card p b { color: var(--rose-deep); font-weight: 800; }
 .birthday-card .sig { display: block; margin-top: 10px; font-family: var(--font-script); font-weight: 700; font-size: 22px; color: var(--rose-deep); }
+
+/* ---------- Return Mode (council v2, Nov 2026) ----------
+   One soft card replaces Today after a 45+ day gap. Three chips: walk / stretch / rest.
+   Never gates — "show full day" reveals the normal Today for that session. */
+.return-card {
+  text-align: center;
+  background:
+    radial-gradient(130% 80% at 50% -10%, color-mix(in srgb, var(--lilac) 18%, transparent), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--rose) 5%, var(--surface)), color-mix(in srgb, var(--lilac) 6%, var(--surface)));
+  border: 1.5px solid color-mix(in srgb, var(--lilac) 32%, transparent);
+  padding: 22px 18px;
+}
+.return-card .return-mark { font-size: 38px; margin-bottom: 4px; opacity: .9; }
+.return-card h2 { font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: -.01em; color: var(--text); margin: 0 0 6px; }
+.return-card .hint { font-size: 14px; line-height: 1.55; font-weight: 500; color: var(--muted); max-width: 32ch; margin: 0 auto 16px; }
+.return-chips { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 6px; }
+.return-chip {
+  display: flex; align-items: center; gap: 12px; justify-content: flex-start;
+  padding: 14px 18px; border-radius: 14px; border: 1.5px solid var(--card-border);
+  background: var(--surface); cursor: pointer; font-family: inherit;
+  font-size: 15px; font-weight: 700; color: var(--text); text-align: left;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--rose) 8%, transparent);
+  transition: transform .15s, box-shadow .15s, background .2s;
+}
+.return-chip:first-child { background: linear-gradient(120deg, color-mix(in srgb, var(--p-follicular) 14%, var(--surface)), var(--surface)); border-color: color-mix(in srgb, var(--p-follicular) 35%, transparent); font-size: 16px; }
+.return-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 10px color-mix(in srgb, var(--rose) 14%, transparent); }
+.return-chip.on { background: linear-gradient(120deg, color-mix(in srgb, var(--p-follicular) 24%, var(--surface)), color-mix(in srgb, var(--lilac) 10%, var(--surface))); border-color: var(--p-follicular); }
+.return-chip span { flex: 1; }
+.return-expand { display: block; margin: 12px auto 0; color: var(--muted); font-size: 12.5px; font-weight: 600; opacity: .72; }
+.return-muneer {
+  text-align: center;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rose) 6%, var(--surface)), color-mix(in srgb, var(--lilac) 8%, var(--surface)));
+  border: 1.5px solid color-mix(in srgb, var(--rose) 22%, transparent);
+}
+.return-muneer .mark { font-size: 24px; opacity: .85; margin-bottom: 4px; }
+.return-muneer p { font-family: var(--font-display); font-style: italic; font-weight: 500; font-size: 16px; line-height: 1.5; margin: 6px 0; color: var(--text); }
+.return-muneer .sig { display: block; margin-top: 8px; font-family: var(--font-script); font-weight: 700; font-size: 20px; color: var(--rose-deep); }
 .quote .q-new {
   border: none; background: var(--surface-2); color: var(--rose-deep); cursor: pointer;
   width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none;

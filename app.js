@@ -31,6 +31,8 @@ const defaultState = () => ({
   deloadUntil: null,
   gentleLast: 'B',          // so the first gentle pick is A
   birthday: '10-13',        // MM-DD — drives festive mode (hero countdown, special content pool, confetti)
+  returnModeExpandedOn: null, // ISO date she tapped "show full day" during Return Mode; keeps full UI for that day
+  returnModeStartedOn: null,  // ISO date Return Mode first activated this stretch — anchors 5-wk ease-back + "it's been a while" frame
 });
 
 let state = load();
@@ -568,6 +570,15 @@ function pickContent(seed) {
 }
 function dailyContent() { return pickContent(hashStr(todayISO())); }
 function randomContent() { return pickContent(Math.floor(Math.random() * 1e6)); }
+/* Muneer line for Return Mode card — biased toward gentle + reassuring tones.
+   Falls back to any muneer line if the pool is thin. */
+function pickReturnMuneer() {
+  const pool = allContent().filter(c => c.type === 'muneer' && (c.phase === 'gentle' || c.phase === 'any'));
+  if (!pool.length) return null;
+  // Deterministic by date so she sees the same note all day, different notes across days
+  const idx = hashStr('return-' + todayISO()) % pool.length;
+  return pool[idx].text;
+}
 function quoteCardHTML(q) {
   const isBdayHim = q.type === 'birthday_muneer';
   const isBday = q.type === 'birthday' || isBdayHim;
@@ -713,13 +724,40 @@ const CARE_RECHECK_DAY = 56;   // ~wk 8: surface the recheck reminder
 const CARE_EASE_DAYS = 70;     // ~wk 10: easing ends even without labs logged
 function careDay(iso) { return state.careStart ? daysBetween(state.careStart, iso || todayISO()) : Infinity; }
 function recovering(iso) { return !state.labsCleared && careDay(iso) < CARE_EASE_DAYS; }
-const EASE_BACK_DAYS = 13;    // ~2 wks rebuild window after "I'm back" / manual ease-back (spec §9)
+const EASE_BACK_DAYS = 34;    // ~5 wks (council v2: physio + detraining + psych converged on 5-wk window for long gaps)
 /* Easing back in after a break (her own toggle, or a manual "ease back in" tap) —
    same gentle treatment as recovering(): softer effort hint, no PB/volume-bump
    nudges. Never says why beyond "easing back in". */
 function easingBack(iso) { return !!(state.easeBackUntil && (iso || todayISO()) <= state.easeBackUntil); }
-function gentleMode(iso) { return recovering(iso) || easingBack(iso); }
+function gentleMode(iso) { return recovering(iso) || easingBack(iso) || inReturnMode(iso); }
 function startEaseBack() { state.easeBackUntil = addDays(todayISO(), EASE_BACK_DAYS); }
+
+/* ---------- Return Mode ----------
+   Council v2 (Nov 2026): after ~45+ days away, the regular Today tab reads as
+   a dashboard of "what you abandoned." Return Mode replaces it with a single
+   soft card (3 chips: Walk / Stretch / Rest) and suppresses the continuity-coded
+   surfaces (PB Hall, forecasts, date strip, deload banner, stale cycle chip,
+   lingering birthday mode). She can tap "show full day" to reveal the normal
+   Today for that session — never gated, just default-collapsed.
+   Threshold: 45 days (kindness reviewer's gentler line).
+   Auto-ends when: easeBackUntil expires (5 wks of logging), OR she manually
+   dismisses from Settings. */
+const RETURN_MODE_DAYS = 45;
+function daysSinceLastMeaningfulLog() {
+  // Look at logs BEFORE today — otherwise tapping a Return Mode chip immediately
+  // ejects her from the gentle re-entry UI by making today "the most recent log".
+  const today = todayISO();
+  const logged = Object.keys(state.logs).filter(d => d < today && isMeaningful(state.logs[d])).sort();
+  const last = logged[logged.length - 1];
+  if (!last) return null;  // never logged → not a "return", a first-start
+  return daysBetween(last, today);
+}
+function inReturnMode(iso) {
+  if (iso && iso !== todayISO()) return false;  // only applies to Today
+  const gap = daysSinceLastMeaningfulLog();
+  return gap !== null && gap >= RETURN_MODE_DAYS;
+}
+function returnModeExpandedToday() { return state.returnModeExpandedOn === todayISO(); }
 function activeSupps() { return SUPPLEMENTS.filter(s => !state.suppsOff[s.key]); }
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
@@ -746,7 +784,7 @@ function dailyCareHTML(isToday) {
   // within ~90 min slashes iron absorption. Named times, no shame.
   if (taken.includes('iron') && times.iron) {
     const clearUntil = addMinutesToTimeLabel(times.iron, 90);
-    if (clearUntil) html += `<div class="iron-window">☕ Hold off tea, coffee & dairy until <b>~${esc(clearUntil)}</b> so today's iron actually lands.</div>`;
+    if (clearUntil) html += `<div class="iron-window">🫖 Hold off tea, milk & yogurt until <b>~${esc(clearUntil)}</b> so today's iron actually lands.</div>`;
   }
   if (inPeriod(viewDate) && !state.suppsOff.iron) {
     html += `<div class="care-cycle">🍊 Period week — iron matters extra now. Pair it with a vitamin-C food (orange, lemon, tomato) and an iron-rich plate: chicken thigh, or spinach with a squeeze of lemon.</div>`;
@@ -792,7 +830,13 @@ function renderToday() {
         <div class="arrow">›</div>
       </button>`
     : '';  // no period logged yet → no redundant prompt (she logs it in the Cycle tab)
-  const bd = isToday ? birthdayInfo() : null;
+  const inReturn = inReturnMode(viewDate);
+  const returnExpanded = inReturn && returnModeExpandedToday();
+  // Return Mode suppresses: stale cycle chip (if period log >45d old), birthday countdown debris, date-strip scroll.
+  // Kept: hero greeting, Muneer note (via special pool), Return Mode card itself.
+  const chipSuppressed = inReturn && info && info.day > 45;  // cycle chip is stale
+  const chipFinal = chipSuppressed ? '' : chip;
+  const bd = isToday && !inReturn ? birthdayInfo() : null;  // kill lingering birthday debris in Return Mode
   const heroClass = bd && bd.inWindow ? 'hero birthday' : 'hero';
   const heroTitle = bd && bd.isToday
     ? `Happy birthday, ${esc(state.name)} 🎂💕`
@@ -818,7 +862,7 @@ function renderToday() {
       <h1>${heroTitle}</h1>
       <div class="date">${isToday ? esc(prettyDate(viewDate)) : 'Viewing another day'}</div>
       ${bdayCountdown}
-      ${chip}
+      ${chipFinal}
     </div>`);
 
   // Birthday day-of: dedicated full-width letter card right under the hero.
@@ -856,6 +900,39 @@ function renderToday() {
         <p class="hint">However long you need — nothing here is keeping score. Everything's saved and waiting for you.</p>
         <button class="primary" data-action="break-off">I'm back 💪</button>
       </div>`);
+    $('#tab-today').innerHTML = parts.join('');
+    return;
+  }
+
+  // RETURN MODE: 45+ days since last meaningful log. Replace Today with one soft card.
+  // She can tap "show full day" to reveal the rest (that choice sticks for today only).
+  if (inReturn && !returnExpanded) {
+    if (!state.returnModeStartedOn) { state.returnModeStartedOn = todayISO(); save(); }
+    const cycleRestLogged = current.day === 'cycle-rest' || current.day === 'walk' || current.day === 'stretch';
+    const restDoneToday = cycleRestLogged && (current.completed || current.chosen);
+    parts.push(`
+      <div class="card return-card">
+        <div class="return-mark">🤍</div>
+        <h2>Hey. Glad you opened this.</h2>
+        <p class="hint">It's been a while — and that's okay. No catching up, no plan to follow today. Just pick what feels right in this moment.</p>
+        <div class="return-chips">
+          <button class="return-chip" data-action="return-walk">🚶‍♀️<span>A gentle walk</span></button>
+          <button class="return-chip" data-action="return-stretch">🌙<span>A couple of stretches</span></button>
+          <button class="return-chip ${restDoneToday ? 'on' : ''}" data-action="return-rest">🤍<span>${restDoneToday ? "Today's rest counts 💛" : 'Just resting today'}</span></button>
+        </div>
+        <button class="link-btn return-expand" data-action="return-expand">show full day ›</button>
+      </div>`);
+    // Soft Muneer note — only surfaces in Return Mode. Pulls from the regular muneer pool
+    // but we give it a dedicated warm frame so it reads as "a note from him for this moment".
+    const muneerForReturn = pickReturnMuneer();
+    if (muneerForReturn) {
+      parts.push(`
+        <div class="card return-muneer">
+          <div class="mark">💌</div>
+          <p>${esc(muneerForReturn)}</p>
+          <span class="sig">— Jaan(War) 🐯</span>
+        </div>`);
+    }
     $('#tab-today').innerHTML = parts.join('');
     return;
   }
@@ -1666,7 +1743,15 @@ function renderProgress() {
   }
   parts.push(`</div>`);
 
-  // hall of fame (milestones)
+  // hall of fame (milestones) — soft-archive during Return Mode: those old numbers
+  // read as debt, not motivation, after a long gap. Let her un-hide when ready.
+  if (inReturnMode()) {
+    parts.push(`<details class="card"><summary>Past chapter — tap when you're ready to peek 💛</summary>
+      <p class="hint" style="margin-top:10px">Your lifts and milestones are saved, waiting. We're resting them while you find your rhythm again.</p>
+    </details>`);
+    $('#tab-progress').innerHTML = parts.join('');
+    return;
+  }
   const bests = allBests();
   const shortLift = n => n.replace(' Machine', '');
   parts.push(`<div class="card"><h2>Hall of Fame 🏆<span class="sub">Measured against one person only: past you</span></h2><div class="fame-grid">`);
@@ -2150,6 +2235,30 @@ document.addEventListener('click', e => {
   }
   else if (a === 'break-off') { state.onBreak = false; startEaseBack(); save(); render(); }
   else if (a === 'ease-back') { startEaseBack(); save(); render(); }
+  // Return Mode actions (council v2): tapping any of these logs the day as completed
+  // and starts a 5-week ease-back the first time she engages. The "rest" path is
+  // affirmative — the kindness reviewer flagged that a rest tap needs its own
+  // "today's rest counts" state, not silent absence.
+  else if (a === 'return-walk') {
+    current = buildLog(viewDate, 'walk'); current.day = 'walk'; current.completed = true; current.chosen = true;
+    if (!state.easeBackUntil) startEaseBack();
+    commit(); save(); renderToday();
+  }
+  else if (a === 'return-stretch') {
+    current = buildLog(viewDate, 'stretch'); current.day = 'stretch'; current.completed = true; current.chosen = true;
+    if (!state.easeBackUntil) startEaseBack();
+    commit(); save(); renderToday();
+  }
+  else if (a === 'return-rest') {
+    current = buildLog(viewDate, 'cycle-rest'); current.day = 'cycle-rest'; current.completed = true; current.chosen = true;
+    if (!state.easeBackUntil) startEaseBack();
+    commit(); save(); renderToday();
+  }
+  else if (a === 'return-expand') {
+    state.returnModeExpandedOn = todayISO(); save();
+    if (!state.easeBackUntil) startEaseBack();
+    renderToday(); window.scrollTo(0, 0);
+  }
   else if (a === 'onboard-done') { state.onboarded = true; save(); renderToday(); }
   else if (a === 'toggle-equip') { const n = t.dataset.name; if (state.unavailable[n]) delete state.unavailable[n]; else state.unavailable[n] = true; save(); renderSettings(); }
   else if (a === 'add-message') {

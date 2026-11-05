@@ -454,13 +454,13 @@ const TARGETS = [
    The app TRACKS her plan — it never prescribes doses. */
 const CARE_SLOTS = [
   { key: 'morning', icon: '🌅', label: 'Wake up · empty tummy',
-    tip: 'Iron soaks in best on an empty tummy with a splash of vitamin C (orange or lemon). Hold off tea, coffee & dairy for about an hour around it.' },
+    tip: 'Iron soaks in best on an empty tummy with a splash of vitamin C (orange or lemon). Hold off tea, milk & yogurt for ~90 min after — a chai with breakfast is lovely, just a little after the iron, not alongside it.' },
   { key: 'anchor', icon: '💗', label: 'Same time, every day',
     tip: 'Pick one daily anchor you’ll never miss — brushing your teeth is a good one — and keep it steady. Consistency is the whole game here.' },
   { key: 'meal', icon: '🍽️', label: 'With your biggest meal',
     tip: 'These two need a little fat to absorb — take them with your fattiest meal of the day. They buddy up nicely.' },
-  { key: 'evening', icon: '🌙', label: 'Before bed',
-    tip: 'Winds the body down for sleep and eases restless legs. Keep it a few hours after your morning iron.' },
+  { key: 'evening', icon: '🌙', label: '~90 min before bed',
+    tip: 'Taking it a little before you actually wind down lets it sink in — deeper sleep, calmer legs. Keep it hours after your morning iron.' },
   { key: 'sips', icon: '🍵', label: 'Cosy sips · your rituals',
     tip: 'Spearmint in the afternoon (a lovely one for cycle balance), chamomile in the evening to wind down. Keep them a little away from your morning iron and you’re golden.' },
 ];
