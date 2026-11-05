@@ -159,7 +159,7 @@ const DAYS = {
         { name: 'Bent-Over Rear Delt Raise', scheme: '2×15', tag: '✅', note: 'Chest on an incline bench to protect your back. Same muscle.' },
         { name: 'Face Pull', scheme: '2×15', tag: '✅', note: 'Interchangeable rear-delt work.' },
       ] },
-      { name: 'Dumbbell Lateral Raise', scheme: '3–4×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging', 'A 4th set when energy\'s good — the shoulders love the frequency'], note: 'The hourglass maker — shoulder width frames everything.', alts: [
+      { name: 'Dumbbell Lateral Raise', scheme: '4×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging'], note: 'The hourglass maker — shoulder width frames everything.', alts: [
         { name: 'Cable Lateral Raise', scheme: '3×12 each', tag: '✅', note: 'Constant tension — many find it even better.' },
         { name: 'Machine Lateral Raise', scheme: '3×12', tag: '✅', note: 'Guided path if your gym has one.' },
         { name: 'Leaning Lateral Raise', scheme: '3×12 each', tag: '🔄', note: 'Lean away from a support for a bigger range.' },
@@ -260,7 +260,7 @@ const DAYS = {
         { name: 'Arnold Press', scheme: '3×10', tag: '🔄', note: 'Rotational press — more front-delt.' },
         { name: 'Landmine Press', scheme: '3×10 each', tag: '🔄', note: 'A shoulder-friendly angle if shoulders feel cranky.' },
       ] },
-      { name: 'Dumbbell Lateral Raise', scheme: '3–4×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging', 'A 4th set when energy\'s good'], alts: [
+      { name: 'Dumbbell Lateral Raise', scheme: '4×12', rest: '60 sec', cues: ['Slight lean forward', 'Lead with the elbows', 'No swinging'], alts: [
         { name: 'Cable Lateral Raise', scheme: '3×12 each', tag: '✅', note: 'Constant tension — many find it even better.' },
         { name: 'Machine Lateral Raise', scheme: '3×12', tag: '✅', note: 'Guided path if your gym has one.' },
         { name: 'Leaning Lateral Raise', scheme: '3×12 each', tag: '🔄', note: 'Lean away from a support for a bigger range.' },
@@ -284,8 +284,8 @@ const DAYS = {
         { name: 'Dead Bug', scheme: '3×10 each side', tag: '✅', note: 'Anti-extension option if wrists or shoulders complain.' },
         { name: 'Stability Ball Plank', scheme: '3×30 sec', tag: '🔄', note: 'Forearms on a ball — harder.' },
       ] },
-      { name: 'Side Plank', scheme: '2×30 sec each side', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted'], alts: [
-        { name: 'BOSU Side Plank', scheme: '2×30 sec each', tag: '🔄', note: 'Add instability when you\'re ready.' },
+      { name: 'Side Plank', scheme: '4×30 sec', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted', 'Alternate sides — left, right, left, right'], note: 'One set per side, four sets total.', alts: [
+        { name: 'BOSU Side Plank', scheme: '4×30 sec', tag: '🔄', note: 'Add instability when you\'re ready. Alternate sides.' },
       ] },
       { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging'], note: 'Grip + shoulder opener — a lovely finisher after all that pressing.', alts: [
         { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
@@ -427,22 +427,15 @@ const MORNING_LIGHT = {
   cta: 'Caught some light ☀️',
   done: 'Light caught ☀️ — lovely. Your body clock says thank you 💛',
 };
-/* [INTERNAL] Post-dinner walk is one of the highest-leverage invisible levers
-   for body composition (post-meal glucose disposal ~30%, insulin sensitivity,
-   NEAT), especially relevant for PCOS. Framed purely as "digestion + calm
-   wind-down" — never NEAT, never calories, never burn. Fires 7–10pm window. */
-const AFTER_DINNER_WALK = {
-  title: 'After-dinner wander 🌙',
-  body: '10 easy minutes outside (or around the house) after your main meal — it settles digestion, softens the day, and sets up calmer sleep.',
-  cta: 'Done — lovely walk ✓',
-  done: 'Walked after dinner ✓ — gentle on the system 💛',
-};
+// [INTERNAL] Post-dinner walk relocated to SLEEP_TIPS as a one-line practice
+// on the Plan tab — no longer a daily proactive nudge, per user feedback.
 const SLEEP_TIPS = {
   title: 'Sleep, gently 🌙',
   lines: [
     'Your evening wind-down time is <b>yours</b> — keep it. The win isn’t a stricter bedtime, it’s making that time the <b>restful</b> kind, so you fall asleep faster and wake up actually rested.',
     'Your steady midnight-to-7 rhythm already helps — a <b>consistent</b> sleep and wake time matters more for how you feel than the exact hours.',
     'Catch a little <b>daylight when you wake</b> — a few minutes by a window lifts your energy and gently anchors your body clock (this is the lever that really shifts the rhythm — no lost evening needed).',
+    'An <b>after-dinner wander</b> — 10 easy minutes outside or around the house after your main meal — settles digestion and sets up calmer sleep. 🌙',
     'Keep the last stretch calm: <b>caffeine-free</b> (your spearmint & chamomile are perfect), lights low, screens down. On a free night, starting the wind-down a touch earlier is a lovely option — never a rule. 💛',
   ],
 };
