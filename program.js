@@ -541,13 +541,6 @@ const RIR_HINT = 'Leave 2–3 in the tank 💪 — finish every set knowing you 
 // even on days she feels okay, so the app eases effort and doesn't push PRs. The
 // UI never says why; it just reads as "steady, comfy reps".
 const RIR_HINT_GENTLE = 'Leave 3–4 in the tank 💛 — smooth, comfy reps win. No need to chase heavy today.';
-/* [INTERNAL] Recheck reminder — closes the loop on the "iron is only for now"
-   plan. Framed as a warm GP check-in, never as labs/deficiency. Surfaces ~week 8+. */
-const RECHECK = {
-  title: '🩺 Time for a little check-in',
-  body: 'You’re a good stretch into your plan — a quick repeat blood test now shows how far you’ve come. Ask your GP for <b>iron (ferritin + transferrin saturation), vitamin D, and a lipid check</b>. If your last thyroid check was a while ago, it’s a lovely one to add. No rush, just when you can. 💛',
-  cta: 'Recheck done — thank you 💛',
-};
 
 // Unified names so history/PBs track across days (old logs are aliased on read)
 const ALIASES = {
@@ -575,12 +568,12 @@ const MILESTONES = [
    [INTERNAL] rationale (insulin response, deficiency stats) stays out of UI. */
 const NUTRITION = {
   calories: {
-    title: 'Fuel, not famine',
+    title: 'Eat like you train',
     lines: [
-      'A gentle working range of about <b>1,500–1,750 kcal</b> — never below 1,500.',
-      'This is recomposition, not dieting: <b>don\'t chase fat loss, chase strength.</b>',
-      'Judge it by rising lifts and how you feel — never by a daily scale.',
-      'Don\'t lift fully fasted — a small bite 60–90 min before (yogurt + banana, toast + eggs) makes sessions feel better.',
+      'Enough food to lift strong, every day — <b>never less</b>. Hungry tomorrow means a weaker session tomorrow.',
+      'This isn\'t a diet. It\'s giving your muscles what they\'ve earned.',
+      'The honest measure is in here: your lifts rising, your mood steady, your period arriving kindly. 💛',
+      'Don\'t lift on empty — a small bite 60–90 min before (yogurt + banana, toast + eggs) makes sessions feel better.',
     ],
   },
   principles: {

@@ -22,8 +22,7 @@ const defaultState = () => ({
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
   suppsOff: {},             // supplement key -> true (removed from her care plan)
-  careStart: '2026-07-06',  // when repletion began — drives gentle recovery easing + recheck reminder
-  labsCleared: false,       // recheck done → ends the gentle easing early
+  careStart: '2026-07-06',  // when repletion began — drives gentle recovery easing
   customMessages: [],        // Muneer's own love notes, mixed into the rotation
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
   phase1: false,            // volume bump accepted
@@ -32,7 +31,6 @@ const defaultState = () => ({
   gentleLast: 'B',          // so the first gentle pick is A
   birthday: '10-13',        // MM-DD — drives festive mode (hero countdown, special content pool, confetti)
   returnModeExpandedOn: null, // ISO date she tapped "show full day" during Return Mode; keeps full UI for that day
-  returnModeStartedOn: null,  // ISO date Return Mode first activated this stretch — anchors 5-wk ease-back + "it's been a while" frame
 });
 
 let state = load();
@@ -719,11 +717,10 @@ function nowTimeLabel(d) { d = d || new Date(); let h = d.getHours(); const m = 
    [INTERNAL] While iron/vit D replete (~10 wks from careStart), real capacity
    is lower than baseline even on good-feeling days. So the app quietly eases:
    gentler effort hint, no PB nudges, no volume-bump prompt. The UI never says
-   why. Ends at the recheck window or as soon as labs come back good. */
-const CARE_RECHECK_DAY = 56;   // ~wk 8: surface the recheck reminder
-const CARE_EASE_DAYS = 70;     // ~wk 10: easing ends even without labs logged
+   why. Ends ~wk 10 from careStart. */
+const CARE_EASE_DAYS = 70;     // ~wk 10: easing ends
 function careDay(iso) { return state.careStart ? daysBetween(state.careStart, iso || todayISO()) : Infinity; }
-function recovering(iso) { return !state.labsCleared && careDay(iso) < CARE_EASE_DAYS; }
+function recovering(iso) { return careDay(iso) < CARE_EASE_DAYS; }
 const EASE_BACK_DAYS = 34;    // ~5 wks (council v2: physio + detraining + psych converged on 5-wk window for long gaps)
 /* Easing back in after a break (her own toggle, or a manual "ease back in" tap) —
    same gentle treatment as recovering(): softer effort hint, no PB/volume-bump
@@ -907,7 +904,6 @@ function renderToday() {
   // RETURN MODE: 45+ days since last meaningful log. Replace Today with one soft card.
   // She can tap "show full day" to reveal the rest (that choice sticks for today only).
   if (inReturn && !returnExpanded) {
-    if (!state.returnModeStartedOn) { state.returnModeStartedOn = todayISO(); save(); }
     const cycleRestLogged = current.day === 'cycle-rest' || current.day === 'walk' || current.day === 'stretch';
     const restDoneToday = cycleRestLogged && (current.completed || current.chosen);
     parts.push(`
@@ -2178,10 +2174,6 @@ document.addEventListener('click', e => {
   }
   else if (a === 'cardio-bonus') { current.cardioBonus = !current.cardioBonus; commit(); renderToday(); }
   else if (a === 'morning-light') { current.morningLight = !current.morningLight; commit(); renderToday(); }
-  else if (a === 'recheck-done') {
-    state.labsCleared = true; save(); renderToday();
-    setTimeout(() => alert('Look at you, taking care of yourself 💛 If the doctor tweaks anything, you can switch pills on or off in Settings → Daily care.'), 30);
-  }
   else if (a === 'toggle-supp') { const k = t.dataset.k; if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true; save(); renderSettings(); }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
   else if (a === 'offer-gentle') { const g = 'gentle-' + (state.gentleLast === 'A' ? 'B' : 'A'); state.gentleLast = g.slice(-1); current = buildLog(viewDate, g); current.day = g; current.chosen = true; commit(); save(); renderToday(); }
