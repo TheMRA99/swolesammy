@@ -546,6 +546,32 @@ const SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Stressed', 'E
 // Symptoms that surface the "want today lighter?" offer
 const ROUGH_SYMPTOMS = ['Cramps', 'Headache', 'Low energy', 'Stressed', 'Slept badly'];
 
+/* ---- Headache diary (Nov 2026) ----
+   [INTERNAL] A record for her doctor while the headache tablet / pill question is
+   worked out. Opens only when she ticks "Headache"; every field optional. Fields
+   mirror a standard neurologist headache diary (strength, duration, location,
+   character, associated features, triggers, acute meds + response) so the doctor
+   can tell migraine from tension-type and spot painkiller overuse. "Shaky /
+   trembling" is also a known tablet side effect worth surfacing. No trend verdicts
+   in UI — preventives take 6–8+ weeks; summaries are plain counts "for your doctor". */
+const HEADACHE_FORM = {
+  sev: { label: 'How strong', opts: [['1', 'Mild · could carry on'], ['2', 'Medium · slowed me down'], ['3', 'Strong · had to stop']] },
+  dur: { label: 'How long', opts: ['Under 1 h', '1–4 h', '4–12 h', 'Most of the day', 'Still going'] },
+  with: { label: 'Along with it', multi: true, opts: ['Nausea', 'Vomited', 'Shaky / trembling', 'Dizzy', 'Light hurt', 'Noise hurt', 'Zigzags or spots in vision', 'Tingling or numbness', 'Stiff neck', 'Worse when moving'] },
+  meds: { label: 'Took something', multi: true, opts: ['Nothing', 'Paracetamol', 'Ibuprofen', 'Something else'] },
+  helped: { label: 'Did it help?', opts: ['Yes', 'A bit', 'Not really'] },
+  start: { label: 'When it started', opts: ['Woke up with it', 'Morning', 'Afternoon', 'Evening', 'Night'] },
+  where: { label: 'Where', multi: true, opts: ['One side', 'Both sides', 'Forehead', 'Behind the eyes', 'Back of head / neck'] },
+  feel: { label: 'Felt like', multi: true, opts: ['Throbbing', 'Tight / pressing', 'Stabbing'] },
+  trig: { label: 'Might have set it off', multi: true, opts: ['Short sleep', 'Skipped a meal', 'Low on water', 'Long screen day', 'Stress', 'Heat / sun', 'Pill taken late', 'After training'] },
+};
+const HEADACHE_MAIN = ['sev', 'dur', 'with', 'meds'];
+const HEADACHE_MORE = ['start', 'where', 'feel', 'trig'];
+const HEADACHE_SEV = { 1: 'Mild', 2: 'Medium', 3: 'Strong' };
+// [INTERNAL] Only these two prompt one calm "call your doctor if it's new" line —
+// sudden new numbness or a stiff neck can need same-day care. No warning lists.
+const HEADACHE_CHECK_IN = ['Tingling or numbness', 'Stiff neck'];
+
 // Training split (what the month is made of)
 const SPLIT = [
   ['Glutes & lower body', 40],

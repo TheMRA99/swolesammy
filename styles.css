@@ -913,6 +913,21 @@ details.card[open] > summary { margin-bottom: 12px; }
 .chip-toggle .t-time { font-weight: 800; font-size: .92em; opacity: .82; margin-left: 1px; }
 .bonus-card .chip-toggle.habit { margin-top: 2px; }
 
+/* headache diary */
+.ha-panel { margin-top: 12px; padding: 12px 12px 14px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line); }
+.ha-head { font-weight: 800; font-size: 14px; color: var(--text); }
+.ha-head span { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 2px; }
+.ha-note { margin: 10px 0 0; font-size: 12.5px; font-weight: 700; line-height: 1.45; color: var(--rose-deep); }
+.ha-more { margin-top: 12px; }
+.ha-more summary { font-size: 12.5px; font-weight: 800; color: var(--rose-deep); cursor: pointer; list-style: none; }
+.ha-more summary::-webkit-details-marker { display: none; }
+.ha-panel .notes { margin-top: 0; }
+.ha-month { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.ha-month:first-of-type { border-top: none; }
+.ha-month span { color: var(--muted); font-weight: 700; text-align: right; }
+.ha-entry { padding: 9px 0; border-top: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; font-weight: 600; }
+.ha-entry i { color: var(--muted); }
+
 /* ---------- interaction polish ---------- */
 ::selection { background: color-mix(in srgb, var(--rose) 28%, transparent); }
 :focus-visible { outline: 2.5px solid var(--rose); outline-offset: 2px; border-radius: 6px; }

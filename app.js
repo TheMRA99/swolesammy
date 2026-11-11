@@ -261,8 +261,12 @@ function blankLog(iso, dayOverride) {
     wind: WIND_DOWN.items.map(() => false),
     ramp: {}, swaps: {}, lighter: false, chosen: false,
     cardioDone: false, cardioSkipped: false, cardioBonus: false, cardioLog: {}, morningLight: false, offerDismissed: false,
+    headache: null,
     ex: plan.ex ? plan.ex.map(freshExFromPlan) : [],
   };
+}
+function hasHeadacheData(h) {
+  return !!h && Object.keys(h).some(k => Array.isArray(h[k]) ? h[k].length : !!(h[k] && String(h[k]).trim()));
 }
 function applySwaps(fresh, swaps, day) {
   Object.keys(swaps || {}).forEach(orig => {
@@ -282,6 +286,7 @@ function buildLog(iso, dayOverride) {
   ['symptoms', 'habits', 'supps'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = saved[k].slice(); });
   fresh.suppTimes = Object.assign({}, saved.suppTimes || {});
   fresh.cardioLog = Object.assign({}, saved.cardioLog || {});
+  if (saved.headache) fresh.headache = JSON.parse(JSON.stringify(saved.headache));
   ['posture', 'hips', 'stretch', 'squat', 'wind'].forEach(k => { if (Array.isArray(saved[k])) fresh[k] = fresh[k].map((v, i) => !!saved[k][i]); });
   fresh.ramp = Object.assign({}, saved.ramp || {});
   if (saved.day === day) {
@@ -320,6 +325,7 @@ function isMeaningful(log) {
     (log.notes && log.notes.trim()) ||
     (log.mood === 0 || log.mood) ||
     (log.symptoms && log.symptoms.length) || (log.habits && log.habits.length) || (log.supps && log.supps.length) ||
+    hasHeadacheData(log.headache) ||
     (log.posture && log.posture.some(Boolean)) || (log.hips && log.hips.some(Boolean)) ||
     (log.stretch && log.stretch.some(Boolean)) || (log.squat && log.squat.some(Boolean)) || (log.wind && log.wind.some(Boolean)) || log.cardioDone || log.cardioBonus || log.morningLight ||
     (log.cardioLog && Object.values(log.cardioLog).some(v => v !== '' && v != null)) ||
@@ -771,6 +777,32 @@ function addMinutesToTimeLabel(label, addMin) {
   return nowTimeLabel(d);
 }
 
+/* Headache details — only shown while the Headache chip is on. */
+function haChipsHTML(f) {
+  const spec = HEADACHE_FORM[f];
+  const val = (current.headache || {})[f];
+  return `<div class="section-label">${esc(spec.label)}</div><div class="chips">${spec.opts.map(o => {
+    const [v, label] = Array.isArray(o) ? o : [o, o];
+    const on = spec.multi ? (val || []).includes(v) : val === v;
+    return `<button class="chip-toggle ${on ? 'on' : ''}" data-action="ha" data-f="${f}" data-v="${esc(v)}">${esc(label)}</button>`;
+  }).join('')}</div>`;
+}
+function headachePanelHTML() {
+  const h = current.headache || {};
+  const tookSomething = (h.meds || []).some(m => m !== 'Nothing');
+  const checkIn = (h.with || []).some(w => HEADACHE_CHECK_IN.includes(w));
+  const moreFilled = HEADACHE_MORE.some(f => Array.isArray(h[f]) ? h[f].length : h[f]);
+  return `<div class="ha-panel">
+      <div class="ha-head">🤍 About this headache<span>All optional — a quick record for your doctor</span></div>
+      ${HEADACHE_MAIN.map(haChipsHTML).join('')}
+      ${tookSomething ? haChipsHTML('helped') : ''}
+      ${checkIn ? `<p class="ha-note">New or different from your usual headaches? Give your doctor a call the same day — always worth it. 💛</p>` : ''}
+      <details class="ha-more" ${moreFilled ? 'open' : ''}><summary>More details ›</summary>${HEADACHE_MORE.map(haChipsHTML).join('')}</details>
+      <div class="section-label">Anything else</div>
+      <textarea class="notes" rows="2" data-action="ha-notes" placeholder="e.g. started at my desk, eased after a nap and water…">${esc(h.notes || '')}</textarea>
+    </div>`;
+}
+
 function dailyCareHTML(isToday) {
   const active = activeSupps();
   if (!active.length) return '';
@@ -923,6 +955,7 @@ function renderToday() {
           <button class="return-chip ${restDoneToday ? 'on' : ''}" data-action="return-rest">🤍<span>${restDoneToday ? "Today's rest counts 💛" : 'Just resting today'}</span></button>
         </div>
         <button class="link-btn return-expand" data-action="return-expand">show full day ›</button>
+        <button class="link-btn return-expand" data-action="return-headache">🤍 log a headache</button>
       </div>`);
     // Soft Muneer note — only surfaces in Return Mode. Pulls from the regular muneer pool
     // but we give it a dedicated warm frame so it reads as "a note from him for this moment".
@@ -1210,6 +1243,7 @@ function renderToday() {
       </div>
       <div class="section-label">Symptoms</div>
       <div class="chips">${SYMPTOMS.map(s => `<button class="chip-toggle ${current.symptoms.includes(s) ? 'on' : ''}" data-action="symptom" data-s="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+      ${current.symptoms.includes('Headache') ? headachePanelHTML() : ''}
       <div class="section-label">Daily targets</div>
       <div class="chips">${TARGETS.filter(t => showVacuumChip || !t.skipOnPeriod).map(t => `<button class="chip-toggle habit ${current.habits.includes(t.label) ? 'on' : ''}" data-action="habit" data-s="${esc(t.label)}" title="${esc(t.detail)}">${t.icon} ${esc(t.label)}</button>`).join('')}</div>
       ${!showVacuumChip ? '<p class="hint" style="margin-top:8px">Vacuum breathing takes the week off during your period 🌙</p>' : ''}
@@ -1549,6 +1583,79 @@ function moodByPhase() {
   });
   return [1, 2, 3, 4].map(w => sums[w][1] ? { w, emoji: MOODS[Math.round(sums[w][0] / sums[w][1])], n: sums[w][1] } : { w, emoji: '·', n: 0 });
 }
+/* Headache diary — plain record for her doctor (Progress tab + copy-to-share). */
+function headacheEntries() {
+  return Object.keys(state.logs)
+    .filter(d => (state.logs[d].symptoms || []).includes('Headache'))
+    .sort().reverse()
+    .map(d => ({ d, h: state.logs[d].headache || {}, info: cycleInfo(d), period: inPeriod(d) }));
+}
+function headacheDetailBits(h) {
+  const list = (f, prefix) => (h[f] && h[f].length) ? [`${prefix}${h[f].join(', ').toLowerCase()}`] : [];
+  const meds = (h.meds || []).filter(m => m !== 'Nothing');
+  return [
+    ...(h.sev ? [HEADACHE_SEV[h.sev]] : []),
+    ...(h.dur ? [h.dur] : []),
+    ...(h.start ? [`started: ${h.start.toLowerCase()}`] : []),
+    ...list('where', ''),
+    ...list('feel', ''),
+    ...list('with', 'with: '),
+    ...list('trig', 'possible triggers: '),
+    ...(meds.length ? [`took: ${meds.join(', ').toLowerCase()}${h.helped ? ` (helped: ${h.helped.toLowerCase()})` : ''}`] : (h.meds || []).includes('Nothing') ? ['took nothing'] : []),
+  ];
+}
+function headacheDayLabel(e) {
+  return `${shortDateW(e.d)}${e.info ? ` · cycle day ${e.info.day}` : ''}${e.period ? ' (period)' : ''}`;
+}
+function headacheMonths(entries) {
+  const by = {};
+  entries.forEach(e => {
+    const mk = monthKey(e.d);
+    const m = by[mk] || (by[mk] = { mk, days: 0, strong: 0, meds: 0, vomited: 0 });
+    m.days++;
+    if (e.h.sev === '3') m.strong++;
+    if ((e.h.meds || []).some(x => x !== 'Nothing')) m.meds++;
+    if ((e.h.with || []).includes('Vomited')) m.vomited++;
+  });
+  return Object.values(by).sort((a, b) => a.mk < b.mk ? 1 : -1).slice(0, 6);
+}
+function headacheMonthText(m) {
+  return `${m.days} headache day${m.days === 1 ? '' : 's'}${m.strong ? ` · ${m.strong} strong` : ''}${m.meds ? ` · painkillers on ${m.meds}` : ''}${m.vomited ? ` · vomited on ${m.vomited}` : ''}`;
+}
+function eveningTabletStart() {
+  return Object.keys(state.logs).sort().find(d => (state.logs[d].supps || []).includes('evetab')) || null;
+}
+function headacheDiaryHTML() {
+  const entries = headacheEntries();
+  if (!entries.length) return '';
+  const tabStart = eveningTabletStart();
+  return `<div class="card"><h2>Headache diary 🤍<span class="sub">A plain record for your doctor — your notes, no verdicts</span></h2>
+      ${headacheMonths(entries).map(m => `<div class="ha-month"><b>${esc(monthYear(m.mk + '-01'))}</b><span>${esc(headacheMonthText(m))}</span></div>`).join('')}
+      ${tabStart ? `<p class="hint" style="margin-top:10px">Evening tablet first ticked on ${esc(shortDate(tabStart))}.</p>` : ''}
+      <details class="prev-notes"><summary>All entries (${entries.length}) ↓</summary>
+        ${entries.slice(0, 90).map(e => {
+          const bits = headacheDetailBits(e.h);
+          return `<div class="ha-entry"><b>${esc(headacheDayLabel(e))}</b>${bits.length ? `<br>${esc(bits.join(' · '))}` : ''}${e.h.notes && e.h.notes.trim() ? `<br><i>“${esc(e.h.notes.trim())}”</i>` : ''}</div>`;
+        }).join('')}
+      </details>
+      <button class="ghost-btn" data-action="share-headaches" style="margin-top:12px">📋 Copy for my doctor</button>
+    </div>`;
+}
+function buildHeadacheText() {
+  const entries = headacheEntries();
+  const tabStart = eveningTabletStart();
+  const lines = [`Headache diary — ${state.name || 'Sammy'}`, `(from my tracker app · ${prettyDate(todayISO())})`, '', 'Monthly summary'];
+  headacheMonths(entries).forEach(m => lines.push(`- ${monthYear(m.mk + '-01')}: ${headacheMonthText(m)}`));
+  if (tabStart) lines.push('', `Evening tablet first ticked: ${shortDate(tabStart)}`);
+  lines.push('', 'Entries (newest first)');
+  entries.forEach(e => {
+    const bits = headacheDetailBits(e.h);
+    const note = e.h.notes && e.h.notes.trim() ? ` · notes: ${e.h.notes.trim()}` : '';
+    lines.push(`- ${headacheDayLabel(e)}${bits.length ? ': ' + bits.join(' · ') : ''}${note}`);
+  });
+  return lines.join('\n');
+}
+
 function headachePattern() {
   const days = [];
   Object.keys(state.logs).forEach(d => {
@@ -1743,6 +1850,7 @@ function renderProgress() {
     parts.push(`<details class="card"><summary>Past chapter — tap when you're ready to peek 💛</summary>
       <p class="hint" style="margin-top:10px">Your lifts and milestones are saved, waiting. We're resting them while you find your rhythm again.</p>
     </details>`);
+    parts.push(headacheDiaryHTML());
     $('#tab-progress').innerHTML = parts.join('');
     return;
   }
@@ -1799,6 +1907,7 @@ function renderProgress() {
     if (hd) parts.push(`<p class="hint" style="margin-top:10px">Headaches tend to visit you around cycle day ${hd}. The app gives you a heads-up when it's close — water and regular meals genuinely help. 💛</p>`);
     parts.push(`</div>`);
   }
+  parts.push(headacheDiaryHTML());
 
   parts.push(`<button class="primary" data-action="share">💌 Share an update</button>`);
 
@@ -2157,7 +2266,7 @@ document.addEventListener('click', e => {
     // keep ticked values for unchanged rows
     const byName = {}; current.ex.forEach(x => { byName[x.name] = x; });
     rebuilt.ex = rebuilt.ex.map(x => byName[x.name] ? { ...x, ...byName[x.name] } : x);
-    ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'cardioLog', 'morningLight', 'suppTimes', 'offerDismissed'].forEach(k => rebuilt[k] = current[k]);
+    ['notes', 'completed', 'mood', 'lighter', 'chosen', 'cardioDone', 'cardioSkipped', 'cardioBonus', 'cardioLog', 'morningLight', 'suppTimes', 'offerDismissed', 'headache'].forEach(k => rebuilt[k] = current[k]);
     ['symptoms', 'habits', 'supps', 'posture', 'hips', 'stretch', 'squat', 'wind'].forEach(k => rebuilt[k] = current[k]);
     rebuilt.ramp = current.ramp;
     current = rebuilt; commit(); renderToday();
@@ -2168,7 +2277,34 @@ document.addEventListener('click', e => {
   else if (a === 'toggle-stretch') { const i = +t.dataset.i; current.stretch[i] = !current.stretch[i]; commit(); renderToday(); }
   else if (a === 'toggle-wind') { const i = +t.dataset.i; current.wind[i] = !current.wind[i]; commit(); renderToday(); }
   else if (a === 'mood') { const i = +t.dataset.i; current.mood = current.mood === i ? null : i; commit(); renderToday(); revealOffer(); }
-  else if (a === 'symptom') { const s = t.dataset.s; const ix = current.symptoms.indexOf(s); ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1); commit(); renderToday(); revealOffer(); }
+  else if (a === 'symptom') {
+    const s = t.dataset.s; const ix = current.symptoms.indexOf(s);
+    ix === -1 ? current.symptoms.push(s) : current.symptoms.splice(ix, 1);
+    commit(); renderToday();
+    // ticking Headache opens its details panel right here — don't scroll her away from it
+    if (!(s === 'Headache' && ix === -1)) revealOffer();
+  }
+  else if (a === 'ha') {
+    const f = t.dataset.f, v = t.dataset.v, spec = HEADACHE_FORM[f];
+    const h = current.headache = current.headache || {};
+    if (spec.multi) {
+      let arr = Array.isArray(h[f]) ? h[f] : [];
+      if (arr.includes(v)) arr = arr.filter(x => x !== v);
+      else if (f === 'meds') arr = v === 'Nothing' ? ['Nothing'] : arr.filter(x => x !== 'Nothing').concat(v);
+      else arr = arr.concat(v);
+      h[f] = arr;
+      if (f === 'meds' && !arr.some(m => m !== 'Nothing')) delete h.helped;
+    } else {
+      h[f] = h[f] === v ? '' : v;
+    }
+    commit(); renderToday();
+  }
+  else if (a === 'share-headaches') {
+    const text = buildHeadacheText();
+    if (navigator.share) { navigator.share({ title: 'Headache diary', text }).catch(() => {}); }
+    else if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => alert('Headache diary copied — paste it into a message or show it at your appointment 🤍')); }
+    else { prompt('Copy your headache diary:', text); }
+  }
   else if (a === 'habit') { const s = t.dataset.s; const ix = current.habits.indexOf(s); ix === -1 ? current.habits.push(s) : current.habits.splice(ix, 1); commit(); renderToday(); }
   else if (a === 'supp') {
     const k = t.dataset.k;
@@ -2255,6 +2391,13 @@ document.addEventListener('click', e => {
     if (!state.easeBackUntil) startEaseBack();
     renderToday(); window.scrollTo(0, 0);
   }
+  else if (a === 'return-headache') {
+    // logging a headache isn't "coming back to training" — no ease-back trigger
+    state.returnModeExpandedOn = todayISO(); save();
+    if (!current.symptoms.includes('Headache')) current.symptoms.push('Headache');
+    commit(); renderToday();
+    const p = document.querySelector('.ha-panel'); if (p) p.scrollIntoView({ block: 'center' });
+  }
   else if (a === 'onboard-done') { state.onboarded = true; save(); renderToday(); }
   else if (a === 'toggle-equip') { const n = t.dataset.name; if (state.unavailable[n]) delete state.unavailable[n]; else state.unavailable[n] = true; save(); renderSettings(); }
   else if (a === 'add-message') {
@@ -2325,6 +2468,7 @@ document.addEventListener('input', e => {
     }
   }
   else if (a === 'notes') { current.notes = t.value; commit(); }
+  else if (a === 'ha-notes') { current.headache = current.headache || {}; current.headache.notes = t.value; commit(); }
   else if (a === 'cardio-field') { if (!current.cardioLog) current.cardioLog = {}; current.cardioLog[t.dataset.field] = t.value; commit(); }
   else if (a === 'set-birthday') {
     const v = t.value.trim();
