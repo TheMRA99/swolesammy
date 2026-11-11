@@ -82,6 +82,11 @@ const DAY_TAGLINES = {
      cues[], avoid?, note?, tag ('core'?), ramp?: true (1–2 lighter feel sets first),
      alts?: [{name, scheme, note}] — equipment substitutions (spec §10) }
    Default rest where unstated: 60–90 sec (90 on big lifts, 60 on isolation). */
+// [INTERNAL] Council v3 (Nov 2026, amitriptyline): standing up from the floor or a
+// reclined machine is where a head-rush is likeliest (orthostatic dip + low ferritin
+// + thal trait). One shared, permanent good-form cue on the last floor move of each
+// day and the reclined machines — never framed around medication.
+const RISE_SLOW = 'Up slowly — sit a breath before you stand';
 const DAYS = {
   1: {
     warmup: [
@@ -92,7 +97,7 @@ const DAYS = {
       'Hip abduction machine · 1 × 15–20 · very light & slow — wake the side-glutes up',
     ],
     ex: [
-      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8–10', 3: '3×8 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Chin tucked, ribs down', 'Drive through heels to full lockout', '1-sec squeeze at the top', 'Exhale as you lift'], avoid: 'Don\'t arch the lower back at the top.', note: 'Your main shape-builder.', alts: [
+      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8–10', 3: '3×8 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Chin tucked, ribs down', 'Drive through heels to full lockout', '1-sec squeeze at the top', 'Exhale as you lift', RISE_SLOW], avoid: 'Don\'t arch the lower back at the top.', note: 'Your main shape-builder.', alts: [
         { name: 'Glute Bridge', scheme: '3×12', tag: '✅', note: 'Floor version — shorter range, very back-friendly.' },
         { name: 'Single-Leg Hip Thrust', scheme: '3×10 each', tag: '🔄', note: 'Bodyweight or light — extra glute focus, evens out the sides.' },
         { name: 'Cable Pull-Through', scheme: '3×12', tag: '🔄', note: 'Rope between the legs, hinge and squeeze to stand. Keep it light.' },
@@ -115,7 +120,7 @@ const DAYS = {
         { name: 'Glute Bridge + Cushion Squeeze', scheme: '2×15', tag: '✅', note: 'Squeeze a cushion between the knees through the bridge.' },
         { name: 'Side-Lying Adduction Raise', scheme: '2×12 each side', tag: '✅', note: 'Small slow range is perfect.' },
       ] },
-      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Hard glute squeeze at the top', '1-sec pause'], note: 'Glute-focused and spine-friendly — all the burn, none of the lower-back load.', alts: [
+      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Hard glute squeeze at the top', '1-sec pause', RISE_SLOW], note: 'Glute-focused and spine-friendly — all the burn, none of the lower-back load.', alts: [
         { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', tag: '🔄', note: 'Harder — one leg, 1-sec pause at the top.' },
         { name: 'Cable Kickback', scheme: '2×15 each leg', tag: '✅', note: 'Standing, slow, squeeze the glute.' },
       ] },
@@ -168,7 +173,7 @@ const DAYS = {
         { name: 'Reverse Crunch', scheme: '3×12', tag: '✅', note: 'Knees to chest, lift the hips a touch. Lower-ab focus.' },
         { name: 'Hanging Knee Raise', scheme: '3×12', tag: '🔄', note: 'A progression once your grip allows — more challenging.' },
       ] },
-      { name: 'Dead Bug', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Lower back gently pressed down', 'Slow opposite arm + leg'], alts: [
+      { name: 'Dead Bug', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Lower back gently pressed down', 'Slow opposite arm + leg', RISE_SLOW], alts: [
         { name: 'Bird Dog', scheme: '2×10 each side', tag: '✅', note: 'Same anti-extension core, on all fours.' },
         { name: 'Hollow Body Hold', scheme: '2×20 sec', tag: '🔄', note: 'Isometric version — bend the knees to make it easier.' },
       ] },
@@ -189,7 +194,7 @@ const DAYS = {
       'Hip abduction machine · 1 × 15–20 · very light & slow',
     ],
     ex: [
-      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8', 3: '3×8 heavier', 4: '3×8' }, rest: '90 sec', ramp: true, cues: ['Same beautiful form as Day 1', 'Exhale as you lift'], note: 'Heaviest hip thrust day of the week.', alts: [
+      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8', 3: '3×8 heavier', 4: '3×8' }, rest: '90 sec', ramp: true, cues: ['Same beautiful form as Day 1', 'Exhale as you lift', RISE_SLOW], note: 'Heaviest hip thrust day of the week.', alts: [
         { name: 'Glute Bridge', scheme: '3×12', tag: '✅', note: 'Floor version — shorter range, very back-friendly.' },
         { name: 'Single-Leg Hip Thrust', scheme: '3×10 each', tag: '🔄', note: 'Bodyweight or light — extra glute focus, evens out the sides.' },
         { name: 'Cable Pull-Through', scheme: '3×12', tag: '🔄', note: 'Rope between the legs, hinge and squeeze to stand. Keep it light.' },
@@ -199,7 +204,7 @@ const DAYS = {
         { name: 'Step-Up', scheme: '3×10 each', tag: '✅', note: 'Onto a bench, drive through the heel. Great for glutes and balance.' },
         { name: 'Split Squat', scheme: '3×10 each', tag: '✅', note: 'Both feet on the floor — easier if the elevated foot bugs you, still excellent.' },
       ] },
-      { name: 'Leg Press', scheme: '2×12', rest: '90 sec', ramp: true, cues: ['Feet high and shoulder-width', 'Drive through the heels', 'Exhale on the push'], alts: [
+      { name: 'Leg Press', scheme: '2×12', rest: '90 sec', ramp: true, cues: ['Feet high and shoulder-width', 'Drive through the heels', 'Exhale on the push', RISE_SLOW], alts: [
         { name: 'Goblet Squat', scheme: '3×12', tag: '✅', note: 'Hold a dumbbell at the chest, upright torso — very back-friendly.' },
         { name: 'Hack Squat Machine', scheme: '3×12', tag: '✅', note: 'Similar to the leg press, a touch more quad.' },
         { name: 'Heel-Elevated DB Squat', scheme: '3×12', tag: '🔄', note: 'Heels on a small plate — more quad emphasis.' },
@@ -218,7 +223,7 @@ const DAYS = {
         { name: 'Single-Leg Glute Bridge Hold', scheme: '2×20 sec each', tag: '🔄', note: 'Harder — one leg at a time.' },
         { name: 'Superman Hold', scheme: '2×30 sec', tag: '✅', note: 'Floor-based — same glute + back isometric, zero equipment.' },
       ] },
-      { name: 'Bird Dog', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Slow and balanced', 'Hips stay level'], alts: [
+      { name: 'Bird Dog', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Slow and balanced', 'Hips stay level', RISE_SLOW], alts: [
         { name: 'Dead Bug', scheme: '2×10 each side', tag: '✅', note: 'Interchangeable anti-extension core.' },
         { name: 'Plank Shoulder Taps', scheme: '2×10 each side', tag: '🔄', note: 'Anti-rotation in a plank position.' },
       ] },
@@ -284,7 +289,7 @@ const DAYS = {
         { name: 'Dead Bug', scheme: '3×10 each side', tag: '✅', note: 'Anti-extension option if wrists or shoulders complain.' },
         { name: 'Stability Ball Plank', scheme: '3×30 sec', tag: '🔄', note: 'Forearms on a ball — harder.' },
       ] },
-      { name: 'Side Plank', scheme: '4×30 sec', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted', 'Alternate sides — left, right, left, right'], note: 'One set per side, four sets total.', alts: [
+      { name: 'Side Plank', scheme: '4×30 sec', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted', 'Alternate sides — left, right, left, right', RISE_SLOW], note: 'One set per side, four sets total.', alts: [
         { name: 'BOSU Side Plank', scheme: '4×30 sec', tag: '🔄', note: 'Add instability when you\'re ready. Alternate sides.' },
       ] },
       { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging'], note: 'Grip + shoulder opener — a lovely finisher after all that pressing.', alts: [
@@ -332,7 +337,7 @@ const GENTLE = {
     ex: [
       { name: 'Leg Press', scheme: '2×12', rest: '90 sec', cues: ['Light and smooth'] },
       { name: 'Seated Cable Row', scheme: '2×12', rest: '90 sec', cues: ['Easy weight, tall chest'] },
-      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Slow, glutes doing the work'] },
+      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Slow, glutes doing the work', RISE_SLOW] },
     ],
     cardio: 'Walk · 15 min · easy',
   },
@@ -349,7 +354,7 @@ const CRAMP_RELIEF = {
     { name: 'Supine Twist', scheme: '30 sec', hint: 'each side' },
     { name: 'Happy Baby', scheme: '30–45 sec', hint: '' },
     { name: 'Reclined Butterfly', scheme: '60 sec', hint: 'hand on belly, soft breaths' },
-    { name: 'Slow Belly Breathing', scheme: '× 10', hint: 'in 4 sec, out 6 sec' },
+    { name: 'Slow Belly Breathing', scheme: '× 10', hint: 'in 4 sec, out 6 sec — then roll to your side and sit a moment before you get up' },
   ],
 };
 
@@ -413,7 +418,7 @@ const WIND_DOWN = {
   items: [
     { name: 'Slow breaths', scheme: '× 10', hint: 'in through the nose 4 sec, out slow 6 sec — the long exhale is the magic' },
     { name: 'Shoulder & neck melt', scheme: '× 5 slow rolls', hint: 'roll the shoulders back and down, let the desk day slide off' },
-    { name: 'Legs up the wall', scheme: '2 min', hint: 'lie down, legs resting up the wall, slow breaths — calms the whole system' },
+    { name: 'Legs up the wall', scheme: '2 min', hint: 'lie down, legs resting up the wall, slow breaths — calms the whole system. Roll to your side and sit a moment before you get up' },
     { name: 'Screens down, lights low', scheme: 'last stretch of the night', hint: 'phone face-down, dim the lights, cosy pillow check 🛏️' },
   ],
 };
@@ -471,7 +476,7 @@ const CARE_SLOTS = [
   { key: 'meal', icon: '🍽️', label: 'With your biggest meal',
     tip: 'These two need a little fat to absorb — take them with your fattiest meal of the day. They buddy up nicely.' },
   { key: 'evening', icon: '🌙', label: '~90 min before bed',
-    tip: 'Taking it a little before you actually wind down lets it sink in — deeper sleep, calmer legs. Keep it hours after your morning iron.' },
+    tip: 'Taking it a little before you actually wind down lets it sink in for deeper sleep. Keep it hours after your morning iron.' },
   { key: 'sips', icon: '🍵', label: 'Cosy sips · your rituals',
     tip: 'Spearmint in the afternoon (a lovely one for cycle balance), chamomile in the evening to wind down. Keep them a little away from your morning iron and you’re golden.' },
 ];
@@ -484,7 +489,19 @@ const SUPPLEMENTS = [
   { key: 'bc', slot: 'anchor', emoji: '💗', name: 'Birth control', why: 'keep it steady — same time daily' },
   { key: 'vitd', slot: 'meal', emoji: '☀️', name: 'Vitamin D3', why: 'energy, strong muscles & bones' },
   { key: 'omega3', slot: 'meal', emoji: '🐟', name: 'Omega-3', why: 'a happy heart and all-over glow' },
-  { key: 'magnesium', slot: 'evening', emoji: '🌙', name: 'Magnesium', why: 'deeper sleep & calmer legs' },
+  { key: 'magnesium', slot: 'evening', emoji: '🌙', name: 'Magnesium', why: 'deeper, cosier sleep' },
+  /* [INTERNAL] Council v3 (Nov 2026): low-dose amitriptyline for headache prevention.
+     • Opt-in (optIn → off until SHE switches it on in Settings) — her prescription,
+       her choice. Never named, never its drug class, in UI.
+     • Train BEFORE the dose: sedation + orthostatic dips peak ~2–6 h after.
+       Its slot tip + alarm row only show while it's on, so they vanish if she
+       stops or switches medication.
+     • No clash with iron / Mg / D3 / omega-3 / teas. Appetite effects are never
+       surfaced. Magnesium no longer promises "calmer legs": tricyclics can
+       worsen restless legs, and that should reach her doctor, not be self-treated. */
+  { key: 'evetab', slot: 'evening', emoji: '🤍', name: 'Evening tablet', why: 'your doctor’s plan for calmer head days', optIn: true,
+    tip: 'Gym night? Lift first, tablet once you’re home. Same time each night is the trick.',
+    alarm: ['your doctor’s time', 'Evening tablet — after training, once you’re home'] },
   { key: 'spearmint', slot: 'sips', emoji: '🌿', name: 'Spearmint tea', why: 'afternoon · lovely for cycle balance' },
   { key: 'chamomile', slot: 'sips', emoji: '🍵', name: 'Chamomile tea', why: 'evening · winds you down for sleep' },
 ];
@@ -518,6 +535,7 @@ const HEART_CARDIO = {
     'The simplest way there: <b>an extra 10–15 minutes of walking a day</b> — a stop earlier on the MRT, a lunchtime loop, an evening stroll.',
     'An <b>easy, chatty pace</b> beats going flat-out — it’s kinder on you and you’ll actually keep it up.',
     'A daily walk is the quiet hero: mood, energy and steps all in one. 🚶‍♀️',
+    'Outdoors, pick the cooler, shadier ends of the day — water in hand, sunscreen on. ☀️💧',
   ],
 };
 
@@ -525,6 +543,8 @@ const HEART_CARDIO = {
 const MOODS = ['😣', '😕', '🙂', '😊', '🤩'];
 const MOOD_LABELS = ['Rough', 'Meh', 'Okay', 'Good', 'Amazing'];
 const SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Stressed', 'Energized', 'Slept well', 'Slept badly'];
+// Symptoms that surface the "want today lighter?" offer
+const ROUGH_SYMPTOMS = ['Cramps', 'Headache', 'Low energy', 'Stressed', 'Slept badly'];
 
 // Training split (what the month is made of)
 const SPLIT = [
@@ -618,7 +638,7 @@ const NUTRITION = {
 // Expected timeline (motivation screens — process-framed)
 const TIMELINE = [
   ['Months 1–2', 'Standing taller, feeling stronger, habits clicking'],
-  ['Months 3–4', 'Clothes start agreeing with you · arms say hello'],
+  ['Months 3–4', 'Weights climbing, stairs feel easy · arms say hello'],
   ['Months 5–6', 'Shoulder lines, back shape, core waking up'],
   ['Months 8–12', 'The athletic look settles in for good'],
 ];

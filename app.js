@@ -22,6 +22,7 @@ const defaultState = () => ({
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
   suppsOff: {},             // supplement key -> true (removed from her care plan)
+  suppsOn: {},              // opt-in items (optIn: true) -> true once she switches them on
   careStart: '2026-07-06',  // when repletion began — drives gentle recovery easing
   customMessages: [],        // Muneer's own love notes, mixed into the rotation
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
@@ -755,7 +756,8 @@ function inReturnMode(iso) {
   return gap !== null && gap >= RETURN_MODE_DAYS;
 }
 function returnModeExpandedToday() { return state.returnModeExpandedOn === todayISO(); }
-function activeSupps() { return SUPPLEMENTS.filter(s => !state.suppsOff[s.key]); }
+function suppOn(s) { return s.optIn ? !!(state.suppsOn || {})[s.key] : !state.suppsOff[s.key]; }
+function activeSupps() { return SUPPLEMENTS.filter(suppOn); }
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
    and offers exact alarm times to set once. */
@@ -774,7 +776,10 @@ function dailyCareHTML(isToday) {
   if (!active.length) return '';
   const taken = current.supps || [];
   const hr = isToday ? new Date().getHours() : -1;
-  const nowSlot = hr < 0 ? '' : (hr < 11 ? 'morning' : hr < 20 ? 'meal' : 'evening');
+  // Evening tablet goes AFTER training — so don't flag the evening slot as "now"
+  // while a gym session is still planned and unfinished (her 7–10pm window).
+  const holdEvening = active.some(s => s.key === 'evetab') && typeof current.day === 'number' && !current.completed && hr < 22;
+  const nowSlot = hr < 0 ? '' : (hr < 11 ? 'morning' : hr < 20 ? 'meal' : holdEvening ? '' : 'evening');
   const times = current.suppTimes || {};
   let html = `<div class="card care-card"><h2>Daily care 💊<span class="sub">Tap each as you take it — it saves the time too ✓</span></h2>`;
   // Iron traffic-light — SA nutritionist F + Endo D convergence: dairy/tea/coffee/calcium
@@ -793,12 +798,13 @@ function dailyCareHTML(isToday) {
     html += `<div class="care-slot ${now ? 'now' : ''}">
       <div class="care-when">${slot.icon} ${esc(slot.label)}${now ? ' <b>· now</b>' : ''}</div>
       <div class="chips">${items.map(s => { const on = taken.includes(s.key); return `<button class="chip-toggle habit ${on ? 'on' : ''}" data-action="supp" data-k="${esc(s.key)}" title="${esc(s.why)}">${s.emoji} ${esc(s.name)}${on ? ` <span class="t-time">✓${times[s.key] ? ' ' + esc(times[s.key]) : ''}</span>` : ''}</button>`; }).join('')}</div>
-      <div class="care-tip">${esc(slot.tip)}</div>
+      <div class="care-tip">${esc([slot.tip, ...items.filter(s => s.tip).map(s => s.tip)].join(' '))}</div>
     </div>`;
   });
+  const alarms = CARE_ALARMS.concat(active.filter(s => s.alarm).map(s => s.alarm));
   html += `<details class="care-guide"><summary>Best times &amp; phone alarms ⏰</summary>
     <p class="hint" style="margin-top:8px">This app lives fully on your phone, so it can't buzz you on its own — the surest nudge is to set these as alarms once in your Clock app 💛</p>
-    <div class="alarm-list">${CARE_ALARMS.map(([t, d]) => `<div class="alarm-row"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>
+    <div class="alarm-list">${alarms.map(([t, d]) => `<div class="alarm-row"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>
     <p class="care-foot">${esc(CARE_NOTE)}</p>
   </details></div>`;
   return html;
@@ -963,7 +969,7 @@ function renderToday() {
   // (After-dinner wander moved to Plan tab · Sleep section — one-line practice,
   //  not a daily nudge, per user feedback: don't add proactive cards here.)
   // Recheck proactive removed per user request — her doctor is her doctor,
-  // the app shouldn't nag the lab booking. Opt-in "mark done" remains in Settings.
+  // the app shouldn't nag the lab booking.
   // period day 1–2: rest is the right call (spec §7)
   if (info && info.day <= 2 && onPeriod && day !== 'cycle-rest' && isToday) {
     parts.push(`
@@ -1066,7 +1072,8 @@ function renderToday() {
 
   // adaptive offer — she doesn't need to confess a bad day to be offered care
   // (Psychologist G: 3+ sessions this week OR Monday auto-surfaces the lighter option)
-  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy', 'Stressed'].includes(s));
+  // 'Slept badly' covers groggy mornings (council v3) without a new symptom chip.
+  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ROUGH_SYMPTOMS.includes(s));
   const weekSessionCount = (() => { let n = 0; for (let i = 0; i < 7; i++) { const l = state.logs[addDays(todayISO(), -i)]; if (l && isSession(l)) n++; } return n; })();
   const isMonday = new Date(viewDate + 'T00:00:00').getDay() === 1;
   // Week 4 (luteal): energy is often unpredictable — soft-surface the lighter option (Coach H).
@@ -1173,7 +1180,7 @@ function renderToday() {
         <div class="ex-row cardio-row ${current.cardioDone ? 'done' : ''}">
           <div class="top">
             <button class="check" data-action="toggle-cardio" aria-label="Cardio done">${current.cardioDone ? '✓' : ''}</button>
-            <div class="ex-main"><div class="ex-name">🚶‍♀️ Cardio finisher</div><div class="ex-scheme">${esc(plan.cardio)}</div></div>
+            <div class="ex-main"><div class="ex-name">🚶‍♀️ Cardio finisher</div><div class="ex-scheme">${esc(plan.cardio)} · ease off for the last 2 min</div></div>
           </div>
           <div class="cardio-fields">
             <span class="cf-label">Your settings — your call 💗</span>
@@ -1993,7 +2000,7 @@ function renderSettings() {
       ${SUPPLEMENTS.map(s => `
         <div class="gym-row">
           <div class="gym-name"><b>${s.emoji} ${esc(s.name)}</b><span>${esc(s.why)}</span></div>
-          <button class="switch ${state.suppsOff[s.key] ? 'off' : 'on'}" data-action="toggle-supp" data-k="${esc(s.key)}">${state.suppsOff[s.key] ? 'Off' : 'On'}</button>
+          <button class="switch ${suppOn(s) ? 'on' : 'off'}" data-action="toggle-supp" data-k="${esc(s.key)}">${suppOn(s) ? 'On' : 'Off'}</button>
         </div>`).join('')}
       <p class="hint" style="margin-top:14px">💚 <b>Halal note:</b> a lot of capsules use gelatin — look for “halal”, “vegetarian capsule”, or “HMC-certified” on the bottle. Solgar, Nature's Own vegetarian range, and Nutrivein have halal-friendly options in Singapore.</p>
     </div>
@@ -2061,7 +2068,7 @@ function startRest(sec) {
    Mood/symptom taps can spawn an offer card higher up the page —
    scroll to it so the options are never missed. */
 function revealOffer() {
-  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ['Cramps', 'Headache', 'Low energy', 'Stressed'].includes(s));
+  const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ROUGH_SYMPTOMS.includes(s));
   let el = document.querySelector('#adaptive-offer') || document.querySelector('#power-nudge');
   if (!el && rough) el = document.querySelector('.tier-grid'); // period week: her options ARE the menu
   if (!el) return;
@@ -2174,7 +2181,13 @@ document.addEventListener('click', e => {
   }
   else if (a === 'cardio-bonus') { current.cardioBonus = !current.cardioBonus; commit(); renderToday(); }
   else if (a === 'morning-light') { current.morningLight = !current.morningLight; commit(); renderToday(); }
-  else if (a === 'toggle-supp') { const k = t.dataset.k; if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true; save(); renderSettings(); }
+  else if (a === 'toggle-supp') {
+    const k = t.dataset.k;
+    const s = SUPPLEMENTS.find(x => x.key === k);
+    const bag = s && s.optIn ? (state.suppsOn = state.suppsOn || {}) : state.suppsOff;
+    if (bag[k]) delete bag[k]; else bag[k] = true;
+    save(); renderSettings();
+  }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
   else if (a === 'offer-gentle') { const g = 'gentle-' + (state.gentleLast === 'A' ? 'B' : 'A'); state.gentleLast = g.slice(-1); current = buildLog(viewDate, g); current.day = g; current.chosen = true; commit(); save(); renderToday(); }
   else if (a === 'offer-no') { current.offerDismissed = true; commit(); renderToday(); }
