@@ -2,14 +2,23 @@
    SWOLESAMMY — editorial × soft feminine
    Fraunces (serif) + Nunito (body) + Anton (display block)
    Light + dark (warm plum) themes via CSS variables.
+
+   Colour rule: two base colours set the mood, one accent from the
+   opposite temperature makes it pop.
+     • Blush  — the mood: backgrounds, cards
+     • Berry  — the companion: text, headings, buttons, selected chips
+                (--rose / --coral / --rose-deep)
+     • Jade   — the one cool accent, used ONLY for wins: ticked sets,
+                done rows, habit & pill ticks, logged days (--accent)
+   The four cycle-phase colours are data, not decoration — kept as-is.
    =========================================================== */
 
 :root {
   --bg-a: #fdf3f6;
-  --bg-b: #f3ecfa;
+  --bg-b: #f9e9ef;
   --blob-a: #fcd2e1;
-  --blob-b: #e6d6f8;
-  --blob-c: #ffe0c9;
+  --blob-b: #f7dbe5;
+  --blob-c: #fbe2e9;
   --surface: #ffffff;
   --surface-2: #fdf3f6;
   --field: #ffffff;
@@ -22,12 +31,14 @@
   --lilac: #b39ddb;
   --coral: #f2849b;
   --glow-rose: 0 10px 26px -8px color-mix(in srgb, var(--rose) 52%, transparent);
-  --hero-a: #fbd9e5; --hero-b: #f3e0f4; --hero-c: #e4d9f6;
+  --hero-a: #fbd9e5; --hero-b: #f9e3ea; --hero-c: #f4d2de;
   --hero-text: #7c5a6c;
   --hero-chip: rgba(255, 255, 255, .72);
   --warm-a: #fff7ef; --warm-b: #fdeee4; --warm-line: #f6dfc8; --warm-text: #8a5c33;
-  --done-bg: #eaf6ef;
-  --done-text: #93a89c;
+  --accent: #22856a;
+  --accent-2: #2fa182;
+  --done-bg: #e4f3ed;
+  --done-text: #7e9c8f;
   --check-border: #ecd3dc;
   --ring-track: #f6e3ea;
   --nav-bg: rgba(255, 255, 255, .88);
@@ -56,7 +67,7 @@ html[data-theme="dark"] {
   --bg-a: #261b22;
   --bg-b: #1f1721;
   --blob-a: #48283b;
-  --blob-b: #362a48;
+  --blob-b: #3e2536;
   --blob-c: #45303c;
   --surface: #322431;
   --surface-2: #3c2b38;
@@ -68,14 +79,16 @@ html[data-theme="dark"] {
   --rose-deep: #f0a4bc;
   --rose-soft: #4a3140;
   --lilac: #c4b0e8;
-  --hero-a: #4a2f3f; --hero-b: #41304b; --hero-c: #342a47;
+  --hero-a: #4a2f3f; --hero-b: #432a3a; --hero-c: #3a2433;
   --hero-text: #d9b6c6;
   --coral: #ef93ab;
   --glow-rose: 0 10px 26px -10px color-mix(in srgb, var(--rose) 42%, transparent);
   --hero-chip: rgba(50, 36, 49, .82);
   --warm-a: #43332a; --warm-b: #3b2c24; --warm-line: #5c4434; --warm-text: #eec99d;
-  --done-bg: #2b4337;
-  --done-text: #9dbfab;
+  --accent: #2f9a7c;
+  --accent-2: #3bb08f;
+  --done-bg: #2d3835;
+  --done-text: #9cc7b4;
   --check-border: #5a4250;
   --ring-track: #46343f;
   --nav-bg: rgba(38, 27, 34, .9);
@@ -153,7 +166,7 @@ body[data-tab="settings"] #tab-settings { display: block; }
 }
 .hero::before {
   content: ''; position: absolute; left: -58px; bottom: -74px; width: 208px; height: 208px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--lilac) 52%, transparent), transparent 68%);
+  background: radial-gradient(circle, color-mix(in srgb, var(--rose-deep) 30%, transparent), transparent 68%);
   border-radius: 50%; pointer-events: none;
 }
 .hero::after {
@@ -209,7 +222,7 @@ body[data-tab="settings"] #tab-settings { display: block; }
 }
 .day-hero .big span {
   display: block;
-  background: linear-gradient(100deg, var(--coral) 0%, var(--rose) 42%, var(--lilac) 100%);
+  background: linear-gradient(100deg, var(--coral) 0%, var(--rose) 42%, var(--rose-deep) 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent; -webkit-text-fill-color: transparent;
 }
@@ -231,8 +244,8 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .quote.poem .q-text p { white-space: pre-line; font-size: 16px; line-height: 1.55; }
 .quote .sig { display: block; margin-top: 6px; font-family: var(--font-script); font-weight: 700; font-size: 20px; color: var(--rose-deep); }
 .quote.from-him { border: 1.5px solid color-mix(in srgb, var(--rose) 45%, transparent); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--rose) 7%, var(--surface))); }
-.quote.quran { border: 1.5px solid color-mix(in srgb, var(--lilac) 42%, transparent); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--lilac) 8%, var(--surface))); }
-.quote.quran .mark { color: color-mix(in srgb, var(--lilac) 78%, var(--text)); font-size: 24px; }
+.quote.quran { border: 1.5px solid color-mix(in srgb, var(--rose-deep) 32%, transparent); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--rose-deep) 6%, var(--surface))); }
+.quote.quran .mark { color: color-mix(in srgb, var(--rose-deep) 78%, var(--text)); font-size: 24px; }
 .quote .ref { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .02em; font-style: normal; }
 
 /* ---------- birthday mode 🎂 ---------- */
@@ -301,9 +314,9 @@ body[data-tab="settings"] #tab-settings { display: block; }
 .return-card {
   text-align: center;
   background:
-    radial-gradient(130% 80% at 50% -10%, color-mix(in srgb, var(--lilac) 18%, transparent), transparent 55%),
-    linear-gradient(160deg, color-mix(in srgb, var(--rose) 5%, var(--surface)), color-mix(in srgb, var(--lilac) 6%, var(--surface)));
-  border: 1.5px solid color-mix(in srgb, var(--lilac) 32%, transparent);
+    radial-gradient(130% 80% at 50% -10%, color-mix(in srgb, var(--rose) 14%, transparent), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--rose) 5%, var(--surface)), color-mix(in srgb, var(--rose-deep) 5%, var(--surface)));
+  border: 1.5px solid color-mix(in srgb, var(--rose) 28%, transparent);
   padding: 22px 18px;
 }
 .return-card .return-mark { font-size: 38px; margin-bottom: 4px; opacity: .9; }
@@ -318,14 +331,14 @@ body[data-tab="settings"] #tab-settings { display: block; }
   box-shadow: 0 1px 3px color-mix(in srgb, var(--rose) 8%, transparent);
   transition: transform .15s, box-shadow .15s, background .2s;
 }
-.return-chip:first-child { background: linear-gradient(120deg, color-mix(in srgb, var(--p-follicular) 14%, var(--surface)), var(--surface)); border-color: color-mix(in srgb, var(--p-follicular) 35%, transparent); font-size: 16px; }
+.return-chip:first-child { background: linear-gradient(120deg, color-mix(in srgb, var(--rose) 12%, var(--surface)), var(--surface)); border-color: color-mix(in srgb, var(--rose) 32%, transparent); font-size: 16px; }
 .return-chip:hover { transform: translateY(-1px); box-shadow: 0 4px 10px color-mix(in srgb, var(--rose) 14%, transparent); }
-.return-chip.on { background: linear-gradient(120deg, color-mix(in srgb, var(--p-follicular) 24%, var(--surface)), color-mix(in srgb, var(--lilac) 10%, var(--surface))); border-color: var(--p-follicular); }
+.return-chip.on { background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 18%, var(--surface)), var(--done-bg)); border-color: var(--accent); }
 .return-chip span { flex: 1; }
 .return-expand { display: block; margin: 12px auto 0; color: var(--muted); font-size: 12.5px; font-weight: 600; opacity: .72; }
 .return-muneer {
   text-align: center;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--rose) 6%, var(--surface)), color-mix(in srgb, var(--lilac) 8%, var(--surface)));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--rose) 6%, var(--surface)), color-mix(in srgb, var(--rose-deep) 6%, var(--surface)));
   border: 1.5px solid color-mix(in srgb, var(--rose) 22%, transparent);
 }
 .return-muneer .mark { font-size: 24px; opacity: .85; margin-bottom: 4px; }
@@ -444,7 +457,7 @@ select.select {
   transition: transform .12s, background .2s, border-color .2s;
 }
 .check:active { transform: scale(.85); }
-.ex-row.done > .top .check, .ramp-row.done .check { background: var(--p-follicular); border-color: var(--p-follicular); animation: pop .25s ease; }
+.ex-row.done > .top .check, .ramp-row.done .check { background: var(--accent); border-color: var(--accent); animation: pop .25s ease; }
 @keyframes pop { 50% { transform: scale(1.18); } }
 
 .ex-main { flex: 1; min-width: 0; cursor: pointer; }
@@ -511,7 +524,7 @@ select.select {
 .set-row .mini { flex: 1; width: auto; min-width: 0; }
 .set-row .setx { color: var(--muted); font-weight: 800; flex: none; }
 .set-row .check { width: 30px; height: 30px; flex: none; }
-.set-row.done .check { background: var(--p-follicular); border-color: var(--p-follicular); }
+.set-row.done .check { background: var(--accent); border-color: var(--accent); }
 .copy-sets { align-self: flex-start; border: none; background: none; color: var(--rose-deep); font-family: inherit; font-weight: 800; font-size: 12px; cursor: pointer; padding: 4px 2px; }
 
 .cardio-row { margin-top: 13px; background: linear-gradient(120deg, var(--rose-soft), color-mix(in srgb, var(--rose) 10%, var(--surface))); }
@@ -563,7 +576,7 @@ select.select {
   border-radius: 999px; padding: 7px 13px; cursor: pointer; transition: all .15s;
 }
 .chip-toggle.on { background: linear-gradient(120deg, var(--rose), var(--coral)); border-color: transparent; color: #fff; box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--rose) 58%, transparent); }
-.chip-toggle.habit.on { background: linear-gradient(120deg, var(--p-follicular), #84cda6); border-color: transparent; box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--p-follicular) 55%, transparent); }
+.chip-toggle.habit.on { background: linear-gradient(120deg, var(--accent), var(--accent-2)); border-color: transparent; box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--accent) 55%, transparent); }
 .section-label { font-size: 11.5px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; }
 .section-label:first-child { margin-top: 0; }
 
@@ -597,7 +610,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   transition: transform .12s, box-shadow .2s;
 }
 .finish:hover { box-shadow: 0 14px 32px -8px color-mix(in srgb, var(--rose) 62%, transparent); }
-.finish.is-done { background: linear-gradient(120deg, #6fbb93, #54a87e); }
+.finish.is-done { background: linear-gradient(120deg, var(--accent-2), var(--accent)); }
 .finish:active { transform: scale(.98); }
 
 /* hearts + rest pill */
@@ -650,8 +663,8 @@ details.card[open] > summary { margin-bottom: 12px; }
 .cal-cell.period { background: var(--rose-soft); color: var(--rose-deep); font-weight: 900; }
 .cal-cell.period.p-start { background: var(--rose); color: #fff; }
 .cal-cell.pred::after { content: ''; position: absolute; inset: 0; border-radius: 12px; border: 1.5px dashed var(--rose); opacity: .6; }
-.cal-cell.today { outline: 2.5px solid var(--lilac); outline-offset: -2.5px; }
-.cal-cell .dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--p-follicular); }
+.cal-cell.today { outline: 2.5px solid var(--rose-deep); outline-offset: -2.5px; }
+.cal-cell .dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
 
 .ph-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 700; gap: 10px; }
 .ph-row:last-child { border-bottom: none; }
@@ -665,7 +678,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 }
 .stat b {
   font-family: var(--font-block); font-size: 26px; font-weight: 400; display: block; line-height: 1.05; letter-spacing: .01em;
-  background: linear-gradient(120deg, var(--rose) 0%, var(--lilac) 100%);
+  background: linear-gradient(120deg, var(--rose) 0%, var(--rose-deep) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;
 }
 .stat span { font-size: 9.5px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
@@ -699,7 +712,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .fame span { font-size: 11px; font-weight: 700; color: var(--muted); }
 .fame .d { color: var(--rose-deep); font-weight: 800; }
 .fame .bar { height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--text) 10%, transparent); overflow: hidden; margin: 6px 0 2px; }
-.fame .bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--lilac)); }
+.fame .bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--coral), var(--rose-deep)); }
 
 .pr-grid { display: flex; flex-direction: column; gap: 8px; }
 .pr-row { display: flex; align-items: center; gap: 11px; background: var(--surface-2); border-radius: var(--r-md); padding: 10px 13px; }
@@ -709,7 +722,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .pr-row .d { font-size: 11px; color: var(--muted); font-weight: 700; }
 
 /* Your Month, Decoded (intelligence layer) */
-.decode-card { background: linear-gradient(150deg, var(--surface), color-mix(in srgb, var(--lilac) 9%, var(--surface))); border: 1px solid color-mix(in srgb, var(--lilac) 30%, transparent); }
+.decode-card { background: linear-gradient(150deg, var(--surface), color-mix(in srgb, var(--rose) 7%, var(--surface))); border: 1px solid color-mix(in srgb, var(--rose) 24%, transparent); }
 .decode-phase { display: flex; gap: 13px; align-items: flex-start; }
 .decode-phase .emo { font-size: 30px; line-height: 1; margin-top: 2px; }
 .decode-phase .dtext b { font-size: 15px; }
@@ -739,7 +752,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .sess .title { font-weight: 800; font-size: 15px; }
 .sess .meta { color: var(--muted); font-size: 12.5px; font-weight: 700; margin-top: 2px; }
 .sess .note { color: var(--muted); font-size: 13px; font-style: italic; margin-top: 6px; font-weight: 600; }
-.sess .ok { color: #54a87e; font-weight: 900; }
+.sess .ok { color: var(--accent); font-weight: 900; }
 
 .pill { font-size: 10.5px; font-weight: 900; padding: 3px 10px; border-radius: 999px; color: #fff; letter-spacing: .03em; }
 .pill-menstrual  { background: var(--p-menstrual); }
@@ -763,7 +776,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .split-row .lbl { display: flex; justify-content: space-between; margin-bottom: 4px; }
 .split-row .lbl span:last-child { color: var(--rose-deep); }
 .split-row .bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
-.split-row .bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--rose), var(--lilac)); }
+.split-row .bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--coral), var(--rose-deep)); }
 
 .rota { display: flex; align-items: stretch; flex-wrap: wrap; gap: 6px; }
 .rota-step { background: var(--surface-2); border-radius: 12px; padding: 9px 10px; flex: 1; min-width: 86px; }
@@ -832,7 +845,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   flex: none; border: none; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 13px;
   width: 52px; padding: 8px 0; border-radius: 999px; transition: all .15s;
 }
-.switch.on { background: var(--p-follicular); color: #fff; }
+.switch.on { background: var(--rose-deep); color: #fff; }
 .switch.off { background: var(--surface-2); color: var(--muted); }
 
 .msg-row { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 12px; padding: 9px 12px; margin-top: 8px; font-size: 13px; font-weight: 600; }
@@ -848,7 +861,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 }
 .primary:hover { box-shadow: 0 13px 30px -7px color-mix(in srgb, var(--rose) 60%, transparent); }
 .primary:active { transform: scale(.985); }
-.primary.green { background: linear-gradient(120deg, #6fbb93, #54a87e); box-shadow: 0 8px 20px -6px rgba(111, 187, 147, .5); }
+.primary.green { background: linear-gradient(120deg, var(--accent-2), var(--accent)); box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--accent) 50%, transparent); }
 .ghost-btn {
   display: block; width: 100%; text-align: center; padding: 14px; border-radius: var(--r-md); border: none;
   background: var(--rose-soft); color: var(--rose-deep); font-weight: 800; font-size: 14.5px; cursor: pointer;

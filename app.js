@@ -1467,7 +1467,7 @@ function renderCycle() {
       <div class="legend">
         <span><i style="background:var(--rose)"></i>Period</span>
         <span><i class="legend-pred"></i>Expected</span>
-        <span><i style="background:var(--p-follicular)"></i>Logged day</span>
+        <span><i style="background:var(--accent)"></i>Logged day</span>
       </div>
     </div>`);
 
