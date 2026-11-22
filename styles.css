@@ -19,11 +19,12 @@
   --blob-a: #fcd2e1;
   --blob-b: #f7dbe5;
   --blob-c: #fbe2e9;
-  --surface: #ffffff;
+  --surface: #fffafb;
   --surface-2: #fdf3f6;
-  --field: #ffffff;
+  --field: #fffafb;
   --text: #432c39;
-  --muted: #91697e;
+  --muted: #86607a;
+  --on-pop: #ffffff;
   --line: #f3dde6;
   --rose: #d96d8c;
   --rose-deep: #b14c6e;
@@ -36,7 +37,7 @@
   --hero-chip: rgba(255, 255, 255, .72);
   --warm-a: #fff7ef; --warm-b: #fdeee4; --warm-line: #f6dfc8; --warm-text: #8a5c33;
   --accent: #22856a;
-  --accent-2: #2fa182;
+  --accent-2: #1d7a60;
   --done-bg: #e4f3ed;
   --done-text: #7e9c8f;
   --check-border: #ecd3dc;
@@ -85,8 +86,9 @@ html[data-theme="dark"] {
   --glow-rose: 0 10px 26px -10px color-mix(in srgb, var(--rose) 42%, transparent);
   --hero-chip: rgba(50, 36, 49, .82);
   --warm-a: #43332a; --warm-b: #3b2c24; --warm-line: #5c4434; --warm-text: #eec99d;
-  --accent: #2f9a7c;
-  --accent-2: #3bb08f;
+  --accent: #4cc59d;
+  --accent-2: #5fd0aa;
+  --on-pop: #2a1823;
   --done-bg: #2d3835;
   --done-text: #9cc7b4;
   --check-border: #5a4250;
@@ -453,7 +455,7 @@ select.select {
 .check {
   flex: none; width: 32px; height: 32px; border-radius: 50%;
   border: 2px solid var(--check-border); background: var(--field); cursor: pointer;
-  color: #fff; font-size: 15px; font-weight: 800; display: grid; place-items: center;
+  color: var(--on-pop); font-size: 15px; font-weight: 800; display: grid; place-items: center;
   transition: transform .12s, background .2s, border-color .2s;
 }
 .check:active { transform: scale(.85); }
@@ -575,7 +577,7 @@ select.select {
   font-family: inherit; font-weight: 800; font-size: 12.5px;
   border-radius: 999px; padding: 7px 13px; cursor: pointer; transition: all .15s;
 }
-.chip-toggle.on { background: linear-gradient(120deg, var(--rose), var(--coral)); border-color: transparent; color: #fff; box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--rose) 58%, transparent); }
+.chip-toggle.on { background: linear-gradient(120deg, var(--rose), var(--coral)); border-color: transparent; color: var(--on-pop); box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--rose) 58%, transparent); }
 .chip-toggle.habit.on { background: linear-gradient(120deg, var(--accent), var(--accent-2)); border-color: transparent; box-shadow: 0 5px 13px -5px color-mix(in srgb, var(--accent) 55%, transparent); }
 .section-label { font-size: 11.5px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; }
 .section-label:first-child { margin-top: 0; }
@@ -605,7 +607,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .finish {
   width: 100%; padding: 17px; border: none; border-radius: var(--r-lg);
   background: linear-gradient(125deg, var(--coral) 0%, var(--rose) 58%, var(--rose-deep) 100%);
-  color: #fff; font-size: 16px; font-weight: 800; cursor: pointer;
+  color: var(--on-pop); font-size: 16px; font-weight: 800; cursor: pointer;
   box-shadow: var(--glow-rose); font-family: inherit; margin: 2px 0 8px;
   transition: transform .12s, box-shadow .2s;
 }
@@ -845,7 +847,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   flex: none; border: none; cursor: pointer; font-family: inherit; font-weight: 800; font-size: 13px;
   width: 52px; padding: 8px 0; border-radius: 999px; transition: all .15s;
 }
-.switch.on { background: var(--rose-deep); color: #fff; }
+.switch.on { background: var(--rose-deep); color: var(--on-pop); }
 .switch.off { background: var(--surface-2); color: var(--muted); }
 
 .msg-row { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border-radius: 12px; padding: 9px 12px; margin-top: 8px; font-size: 13px; font-weight: 600; }
@@ -855,7 +857,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .field span { display: block; font-size: 12px; font-weight: 800; color: var(--muted); margin: 0 0 6px 6px; text-transform: uppercase; letter-spacing: .07em; }
 .primary {
   width: 100%; padding: 15px; border: none; border-radius: var(--r-md);
-  background: linear-gradient(125deg, var(--coral) 0%, var(--rose) 58%, var(--rose-deep) 100%); color: #fff; font-weight: 800; font-size: 15px;
+  background: linear-gradient(125deg, var(--coral) 0%, var(--rose) 58%, var(--rose-deep) 100%); color: var(--on-pop); font-weight: 800; font-size: 15px;
   cursor: pointer; font-family: inherit; margin-bottom: 10px; box-shadow: var(--glow-rose);
   transition: transform .12s, box-shadow .2s;
 }
@@ -892,7 +894,7 @@ details.card[open] > summary { margin-bottom: 12px; }
   border-radius: 16px; transition: color .2s, background .2s;
 }
 .nav-btn svg { width: 22px; height: 22px; }
-.nav-btn.active { color: #fff; background: linear-gradient(125deg, var(--rose), var(--coral)); box-shadow: 0 6px 15px -7px color-mix(in srgb, var(--rose) 62%, transparent); }
+.nav-btn.active { color: var(--on-pop); background: linear-gradient(125deg, var(--rose), var(--coral)); box-shadow: 0 6px 15px -7px color-mix(in srgb, var(--rose) 62%, transparent); }
 
 /* ---------- daily care (supplements & pills) ---------- */
 .care-cycle {
