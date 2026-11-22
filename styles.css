@@ -1,52 +1,59 @@
 /* ===========================================================
    SWOLESAMMY — editorial × soft feminine
    Fraunces (serif) + Nunito (body) + Anton (display block)
-   Light + dark (warm plum) themes via CSS variables.
+   Dark only — "Black Plum & Peony".
 
-   Colour rule: two base colours set the mood, one accent from the
-   opposite temperature makes it pop.
-     • Blush  — the mood: backgrounds, cards
-     • Berry  — the companion: text, headings, buttons, selected chips
-                (--rose / --coral / --rose-deep)
-     • Jade   — the one cool accent, used ONLY for wins: ticked sets,
-                done rows, habit & pill ticks, logged days (--accent)
-   The four cycle-phase colours are data, not decoration — kept as-is.
+   [INTERNAL] Colour reasoning (D:\Code\COLOR-RULES.md, "pair and pop"):
+   she mostly opens this late — after work, around the gym, at wind-down —
+   so the palette is warm, intimate and calm, never clinical. That's the
+   guide's monochrome-warm exception ("now you want to stay"):
+     • Anchor  — Black Plum backgrounds/cards (never pure black). Plum reads
+                 as depth, calm and quiet luxury; easy on eyes at night.
+     • Neutral — Pearl-rose text (never pure white): soft, warm, readable.
+     • Mid     — Dusty rose (--rose-deep): labels, links, switches. Quiet.
+     • Pop     — Peony (--rose / --accent): the ONE luminous colour, only on
+                 the main button, active tab, selected chips and ticks/wins.
+                 Affection + energy without alarm. Text on it is plum.
+   No green or orange in the chrome (Muneer dislikes both). The four
+   cycle-phase colours are data, not decoration — kept as-is.
+   All text pairs checked ≥ 4.5:1 (WCAG AA).
    =========================================================== */
 
 :root {
-  --bg-a: #fdf3f6;
-  --bg-b: #f9e9ef;
-  --blob-a: #fcd2e1;
-  --blob-b: #f7dbe5;
-  --blob-c: #fbe2e9;
-  --surface: #fffafb;
-  --surface-2: #fdf3f6;
-  --field: #fffafb;
-  --text: #432c39;
-  --muted: #86607a;
-  --on-pop: #ffffff;
-  --line: #f3dde6;
-  --rose: #d96d8c;
-  --rose-deep: #b14c6e;
-  --rose-soft: #f7dee7;
-  --lilac: #b39ddb;
-  --coral: #f2849b;
-  --glow-rose: 0 10px 26px -8px color-mix(in srgb, var(--rose) 52%, transparent);
-  --hero-a: #fbd9e5; --hero-b: #f9e3ea; --hero-c: #f4d2de;
-  --hero-text: #7c5a6c;
-  --hero-chip: rgba(255, 255, 255, .72);
-  --warm-a: #fff7ef; --warm-b: #fdeee4; --warm-line: #f6dfc8; --warm-text: #8a5c33;
-  --accent: #22856a;
-  --accent-2: #1d7a60;
-  --done-bg: #e4f3ed;
-  --done-text: #7e9c8f;
-  --check-border: #ecd3dc;
-  --ring-track: #f6e3ea;
-  --nav-bg: rgba(255, 255, 255, .88);
-  --shadow: 0 1px 2px rgba(140, 80, 105, .05), 0 14px 36px -8px rgba(185, 120, 150, .22);
-  --shadow-sm: 0 1px 2px rgba(140, 80, 105, .04), 0 8px 20px -6px rgba(185, 120, 150, .14);
-  --card-border: rgba(217, 109, 140, .10);
-  --card-top: rgba(255, 255, 255, .62);
+  --bg-a: #23161f;
+  --bg-b: #1a1017;
+  --blob-a: #4a1f3c;
+  --blob-b: #2f1729;
+  --blob-c: #3a1a31;
+  --surface: #2b1c27;
+  --surface-2: #352230;
+  --field: #22151e;
+  --text: #f8edf2;
+  --muted: #c7a9b8;
+  --on-pop: #1c0f18;
+  --line: #46303f;
+  --rose: #ff7aa8;
+  --rose-deep: #e0a3b8;
+  --rose-soft: #4a2a40;
+  --lilac: #c4b0e8;
+  --coral: #ff99bb;
+  --glow-rose: 0 10px 26px -10px color-mix(in srgb, var(--rose) 45%, transparent);
+  --hero-a: #45203b; --hero-b: #371a31; --hero-c: #2b1527;
+  --hero-text: #dcb6c7;
+  --hero-chip: rgba(43, 28, 39, .82);
+  --warm-a: #3a2532; --warm-b: #32202c; --warm-line: #573a4c; --warm-text: #f2c6d6;
+  --accent: #ff7aa8;
+  --accent-2: #ff99bb;
+  --done-bg: #33202e;
+  --done-text: #a98a9a;
+  --check-border: #5b3f51;
+  --ring-track: #432c3c;
+  --nav-bg: rgba(26, 16, 23, .9);
+  --shadow: 0 12px 32px rgba(8, 2, 6, .5);
+  --shadow-sm: 0 4px 14px rgba(8, 2, 6, .38);
+  --card-border: rgba(255, 122, 168, .10);
+  --card-top: rgba(255, 236, 244, .04);
+  color-scheme: dark;
   accent-color: var(--rose);
   --r-lg: 26px;
   --r-md: 16px;
@@ -64,41 +71,6 @@
 body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
 .tab-title, .card h2, .hero h1, details.card > summary, .story { letter-spacing: -.015em; }
 
-html[data-theme="dark"] {
-  --bg-a: #261b22;
-  --bg-b: #1f1721;
-  --blob-a: #48283b;
-  --blob-b: #3e2536;
-  --blob-c: #45303c;
-  --surface: #322431;
-  --surface-2: #3c2b38;
-  --field: #281c26;
-  --text: #f6e7ee;
-  --muted: #d9b8c9;
-  --line: #4d3845;
-  --rose: #e684a3;
-  --rose-deep: #f0a4bc;
-  --rose-soft: #4a3140;
-  --lilac: #c4b0e8;
-  --hero-a: #4a2f3f; --hero-b: #432a3a; --hero-c: #3a2433;
-  --hero-text: #d9b6c6;
-  --coral: #ef93ab;
-  --glow-rose: 0 10px 26px -10px color-mix(in srgb, var(--rose) 42%, transparent);
-  --hero-chip: rgba(50, 36, 49, .82);
-  --warm-a: #43332a; --warm-b: #3b2c24; --warm-line: #5c4434; --warm-text: #eec99d;
-  --accent: #4cc59d;
-  --accent-2: #5fd0aa;
-  --on-pop: #2a1823;
-  --done-bg: #2d3835;
-  --done-text: #9cc7b4;
-  --check-border: #5a4250;
-  --ring-track: #46343f;
-  --nav-bg: rgba(38, 27, 34, .9);
-  --shadow: 0 12px 32px rgba(0, 0, 0, .45);
-  --shadow-sm: 0 4px 14px rgba(0, 0, 0, .35);
-  --card-border: rgba(230, 132, 163, .12);
-  --card-top: rgba(255, 255, 255, .05);
-}
 body[data-phase="menstrual"]  { --phase: var(--p-menstrual); }
 body[data-phase="follicular"] { --phase: var(--p-follicular); }
 body[data-phase="ovulation"]  { --phase: var(--p-ovulation); }
@@ -173,7 +145,7 @@ body[data-tab="settings"] #tab-settings { display: block; }
 }
 .hero::after {
   content: ''; position: absolute; right: -40px; top: -52px; width: 184px; height: 184px;
-  background: radial-gradient(circle, rgba(255,255,255,.55), rgba(255,255,255,0) 66%);
+  background: radial-gradient(circle, rgba(255, 236, 244, .10), rgba(255, 236, 244, 0) 66%);
   border-radius: 50%; pointer-events: none;
 }
 .hero .brand, .hero h1, .hero .date { position: relative; z-index: 1; }
@@ -625,7 +597,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 #rest-pill {
   position: fixed; left: 50%; transform: translateX(-50%);
   bottom: calc(86px + env(safe-area-inset-bottom));
-  background: var(--rose); color: #fff; border: none; cursor: pointer;
+  background: var(--rose); color: var(--on-pop); border: none; cursor: pointer;
   font-family: var(--font-body); font-weight: 800; font-size: 13.5px;
   padding: 11px 18px; border-radius: 999px; box-shadow: var(--shadow);
   z-index: 60; white-space: nowrap;
@@ -647,7 +619,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 
 .legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; font-size: 11.5px; font-weight: 800; color: var(--muted); margin-top: 12px; }
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
-.legend-pred { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--rose); }
+.legend-pred { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--p-menstrual); }
 
 /* calendar */
 .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
@@ -663,10 +635,10 @@ details.card[open] > summary { margin-bottom: 12px; }
 }
 .cal-cell.dim { color: color-mix(in srgb, var(--muted) 55%, transparent); }
 .cal-cell.period { background: var(--rose-soft); color: var(--rose-deep); font-weight: 900; }
-.cal-cell.period.p-start { background: var(--rose); color: #fff; }
-.cal-cell.pred::after { content: ''; position: absolute; inset: 0; border-radius: 12px; border: 1.5px dashed var(--rose); opacity: .6; }
+.cal-cell.period.p-start { background: var(--p-menstrual); color: var(--on-pop); }
+.cal-cell.pred::after { content: ''; position: absolute; inset: 0; border-radius: 12px; border: 1.5px dashed var(--p-menstrual); opacity: .6; }
 .cal-cell.today { outline: 2.5px solid var(--rose-deep); outline-offset: -2.5px; }
-.cal-cell .dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.cal-cell .dot { position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--text); }
 
 .ph-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 2px; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 700; gap: 10px; }
 .ph-row:last-child { border-bottom: none; }
@@ -756,7 +728,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 .sess .note { color: var(--muted); font-size: 13px; font-style: italic; margin-top: 6px; font-weight: 600; }
 .sess .ok { color: var(--accent); font-weight: 900; }
 
-.pill { font-size: 10.5px; font-weight: 900; padding: 3px 10px; border-radius: 999px; color: #fff; letter-spacing: .03em; }
+.pill { font-size: 10.5px; font-weight: 900; padding: 3px 10px; border-radius: 999px; color: var(--on-pop); letter-spacing: .03em; }
 .pill-menstrual  { background: var(--p-menstrual); }
 .pill-follicular { background: var(--p-follicular); }
 .pill-ovulation  { background: var(--p-ovulation); }
@@ -794,7 +766,7 @@ details.card[open] > summary { margin-bottom: 12px; }
 
 .phase-head {
   border-radius: var(--r-md); padding: 13px 15px; margin: 0 0 10px;
-  color: #fff; font-weight: 800; font-size: 15.5px; display: flex; flex-direction: column; gap: 1px;
+  color: var(--on-pop); font-weight: 800; font-size: 15.5px; display: flex; flex-direction: column; gap: 1px;
   font-family: var(--font-display);
 }
 .phase-head span { font-family: var(--font-body); font-weight: 700; font-size: 12px; opacity: .94; }

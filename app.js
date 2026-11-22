@@ -11,7 +11,7 @@ const STORE_KEY = 'sammy-training-v1';
 const defaultState = () => ({
   v: 3,
   name: 'Sammy',
-  theme: 'auto',            // 'light' | 'dark' | 'auto'
+  theme: 'dark',            // app is dark-only; kept for old saved states
   periods: [],              // [{start, end|null}] sorted by start
   logs: {},                 // dateISO -> log
   pregnant: false,          // pauses all programming with a warm handover
@@ -1465,9 +1465,9 @@ function renderCycle() {
       </div>
       <div class="cal-grid">${cells}</div>
       <div class="legend">
-        <span><i style="background:var(--rose)"></i>Period</span>
+        <span><i style="background:var(--p-menstrual)"></i>Period</span>
         <span><i class="legend-pred"></i>Expected</span>
-        <span><i style="background:var(--accent)"></i>Logged day</span>
+        <span><i style="background:var(--text)"></i>Logged day</span>
       </div>
     </div>`);
 
@@ -2091,12 +2091,6 @@ function renderSettings() {
   $('#tab-settings').innerHTML = `
     <h1 class="tab-title">Settings</h1>
     <div class="card">
-      <h2>Theme</h2>
-      <div class="theme-row">
-        ${['light', 'dark', 'auto'].map(t => `<button class="chip-toggle ${state.theme === t ? 'on' : ''}" data-action="theme" data-v="${t}">${t === 'light' ? '☀️ Light' : t === 'dark' ? '🌙 Dark' : '✨ Auto'}</button>`).join('')}
-      </div>
-    </div>
-    <div class="card">
       <h2>My gym 🏋️<span class="sub">Got this machine at your gym? Tap No and the app swaps in an at-home / free-weight move everywhere. You can also swap any exercise on the day itself with the ⇄ button.</span></h2>
       ${swappableExercises().map(e => `
         <div class="gym-row">
@@ -2207,14 +2201,10 @@ function burstHearts(el) {
 }
 
 /* ---------- theme ---------- */
-const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+// Dark only (Black Plum & Peony) — the palette lives in styles.css :root.
 function applyTheme() {
-  const resolved = state.theme === 'auto' ? (darkMedia.matches ? 'dark' : 'light') : state.theme;
-  document.documentElement.dataset.theme = resolved;
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#241a21' : '#fdf3f6');
+  document.documentElement.dataset.theme = 'dark';
 }
-darkMedia.addEventListener('change', () => { if (state.theme === 'auto') applyTheme(); });
 
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
@@ -2357,7 +2347,6 @@ document.addEventListener('click', e => {
   else if (a === 'open-date') { viewDate = t.dataset.date; activeTab = 'today'; render(); window.scrollTo(0, 0); }
   else if (a === 'goto-cycle') { activeTab = 'cycle'; render(); window.scrollTo(0, 0); }
   else if (a === 'quote-new') { currentQuote = randomContent(); const card = $('#quote-card'); if (card) card.outerHTML = quoteCardHTML(currentQuote); }
-  else if (a === 'theme') { state.theme = t.dataset.v; save(); applyTheme(); renderSettings(); }
   else if (a === 'pregnant-on') {
     if (confirm('Pause training programming? All your history stays safe, and you can resume anytime.')) { state.pregnant = true; save(); render(); }
   }
