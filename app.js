@@ -22,6 +22,7 @@ const defaultState = () => ({
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
   suppsOff: {},             // supplement key -> true (removed from her care plan)
+  periodTab: { len: 10, perDay: 1, start: null }, // period-inducing course: len days (0 = every day), doses/day, ISO start
   careStart: '2026-07-06',  // when repletion began — drives gentle recovery easing
   customMessages: [],        // Muneer's own love notes, mixed into the rotation
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
@@ -770,6 +771,19 @@ function inReturnMode(iso) {
 }
 function returnModeExpandedToday() { return state.returnModeExpandedOn === todayISO(); }
 function suppOn(s) { return !state.suppsOff[s.key]; }
+/* [INTERNAL] Progesterone course — off the pill (Nov 2026), her doctor uses a
+   progesterone course so a period still comes (PCOS); a bleed usually follows a
+   few days after the last tablet. Exact product/dose unknown (Duphaston-style is
+   often 10 days, twice daily), so course length (or every day) + once/twice
+   daily are set by her in Settings. Keys ptab1/ptab2 live in log.supps. */
+function periodTabInfo(iso) {
+  const p = state.periodTab;
+  if (!p || !p.start) return null;
+  const day = daysBetween(p.start, iso || todayISO()) + 1;
+  if (day < 1) return null;
+  if (p.len && day > p.len) return { done: true, daysSinceEnd: day - p.len };
+  return { active: true, day, len: p.len, perDay: p.perDay === 2 ? 2 : 1 };
+}
 function activeSupps() { return SUPPLEMENTS.filter(suppOn); }
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
@@ -839,7 +853,19 @@ function dailyCareHTML(isToday) {
       <div class="care-tip">${esc(slot.tip)}</div>
     </div>`;
   });
+  const pt = periodTabInfo(viewDate);
+  if (pt && pt.active) {
+    const doses = pt.perDay === 2 ? [['ptab1', '🌸 Morning'], ['ptab2', '🌸 Night']] : [['ptab1', '🌸 Progesterone']];
+    html += `<div class="care-slot">
+      <div class="care-when">🌸 Progesterone · ${pt.len ? `day ${pt.day} of ${pt.len}` : 'every day'}</div>
+      <div class="chips">${doses.map(([k, label]) => { const on = taken.includes(k); return `<button class="chip-toggle habit ${on ? 'on' : ''}" data-action="supp" data-k="${k}">${esc(label)}${on ? ` <span class="t-time">✓${times[k] ? ' ' + esc(times[k]) : ''}</span>` : ''}</button>`; }).join('')}</div>
+      <div class="care-tip">${pt.len ? 'Same time each day, the way your doctor showed you. Your period usually comes a few days after the last one. 🌸' : 'Same time each day, the way your doctor showed you. 🌸'}</div>
+    </div>`;
+  } else if (pt && pt.done && pt.daysSinceEnd <= 14 && !state.periods.some(pr => pr.start >= state.periodTab.start)) {
+    html += `<div class="care-cycle">🌸 Course done — your period usually arrives within a week or so of the last tablet. Log it in Cycle when it does.</div>`;
+  }
   const alarms = CARE_ALARMS.filter(([, , k]) => !k || active.some(s => s.key === k));
+  if (pt && pt.active) alarms.push([pt.perDay === 2 ? 'morning & night' : 'your usual time', `Progesterone — ${pt.len ? `day ${pt.day} of ${pt.len}` : 'every day'}`]);
   html += `<details class="care-guide"><summary>Best times &amp; phone alarms ⏰</summary>
     <p class="hint" style="margin-top:8px">This app lives fully on your phone, so it can't buzz you on its own — the surest nudge is to set these as alarms once in your Clock app 💛</p>
     <div class="alarm-list">${alarms.map(([t, d]) => `<div class="alarm-row"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>
@@ -2093,6 +2119,20 @@ function renderProgram() {
 }
 
 /* ===================== SETTINGS ===================== */
+function periodTabSettingsHTML() {
+  const p = state.periodTab || { len: 10, perDay: 1, start: null };
+  const pt = periodTabInfo();
+  const chip = (action, v, label, on) => `<button class="chip-toggle ${on ? 'on' : ''}" data-action="${action}" data-v="${v}">${label}</button>`;
+  return `<div class="section-label" style="margin-top:18px">🌸 Progesterone course</div>
+      <p class="hint">The course your doctor gave to bring your period on. Set how long and how often — it shows in Daily care on the right days, then switches itself off.</p>
+      <div class="chips">${[5, 7, 10, 12, 14, 0].map(n => chip('ptab-len', n, n ? `${n} days` : 'Every day', p.len === n)).join('')}</div>
+      <div class="chips" style="margin-top:8px">${[1, 2].map(n => chip('ptab-per', n, n === 1 ? 'Once a day' : 'Twice a day', (p.perDay || 1) === n)).join('')}</div>
+      ${pt && pt.active
+        ? `<p class="hint" style="margin-top:10px">On now — ${pt.len ? `day ${pt.day} of ${pt.len}` : 'every day'} 🌸 <button class="link-btn" data-action="ptab-stop">stop</button></p>`
+        : `<label class="field" style="margin-top:10px"><span>First tablet taken on</span>
+            <input type="date" class="select" id="ptab-date" value="${todayISO()}" max="${todayISO()}"></label>
+          <button class="ghost-btn" data-action="ptab-go">Start the course 🌸</button>`}`;
+}
 function renderSettings() {
   $('#tab-settings').innerHTML = `
     <h1 class="tab-title">Settings</h1>
@@ -2111,6 +2151,7 @@ function renderSettings() {
           <div class="gym-name"><b>${s.emoji} ${esc(s.name)}</b><span>${esc(s.why)}</span></div>
           <button class="switch ${suppOn(s) ? 'on' : 'off'}" data-action="toggle-supp" data-k="${esc(s.key)}">${suppOn(s) ? 'On' : 'Off'}</button>
         </div>`).join('')}
+      ${periodTabSettingsHTML()}
       <p class="hint" style="margin-top:14px">💚 <b>Halal note:</b> a lot of capsules use gelatin — look for “halal”, “vegetarian capsule”, or “HMC-certified” on the bottle. Solgar, Nature's Own vegetarian range, and Nutrivein have halal-friendly options in Singapore.</p>
     </div>
     <div class="card">
@@ -2313,6 +2354,17 @@ document.addEventListener('click', e => {
   }
   else if (a === 'cardio-bonus') { current.cardioBonus = !current.cardioBonus; commit(); renderToday(); }
   else if (a === 'morning-light') { current.morningLight = !current.morningLight; commit(); renderToday(); }
+  else if (a === 'ptab-len' || a === 'ptab-per') {
+    state.periodTab = Object.assign({ len: 10, perDay: 1, start: null }, state.periodTab);
+    state.periodTab[a === 'ptab-len' ? 'len' : 'perDay'] = +t.dataset.v;
+    save(); renderSettings();
+  }
+  else if (a === 'ptab-go') {
+    const el = document.getElementById('ptab-date');
+    state.periodTab = Object.assign({ len: 10, perDay: 1 }, state.periodTab, { start: (el && el.value) || todayISO() });
+    save(); render();
+  }
+  else if (a === 'ptab-stop') { state.periodTab.start = null; save(); render(); }
   else if (a === 'toggle-supp') {
     const k = t.dataset.k;
     if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true;
