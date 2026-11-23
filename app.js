@@ -1329,7 +1329,7 @@ function renderToday() {
 }
 
 /* ===================== CYCLE ===================== */
-const PHASE_COLORS = { 1: '#e3879a', 2: '#6fbb93', 3: '#eda865', 4: '#b39ddb' };
+const PHASE_COLORS = { 1: '#e5566c', 2: '#8fb1ff', 3: '#efcc7c', 4: '#b9a3f2' };
 
 function arcPath(cx, cy, r, a0, a1) {
   const rad = a => (a - 90) * Math.PI / 180;
@@ -1528,7 +1528,7 @@ function chartSVG(pts) {
   return `
     <svg viewBox="0 0 ${W} ${H}">
       <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#d96d8c" stop-opacity=".30"/><stop offset="1" stop-color="#d96d8c" stop-opacity="0"/>
+        <stop offset="0" stop-color="#ff6b9d" stop-opacity=".28"/><stop offset="1" stop-color="#ff6b9d" stop-opacity="0"/>
       </linearGradient></defs>
       <text x="${pl - 6}" y="${Y(max - pad) + 4}" text-anchor="end" class="ch-label">${Math.round(max - pad)}</text>
       <text x="${pl - 6}" y="${Y(min + pad) + 4}" text-anchor="end" class="ch-label">${Math.round(min + pad)}</text>

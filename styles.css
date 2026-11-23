@@ -1,58 +1,58 @@
 /* ===========================================================
    SWOLESAMMY — editorial × soft feminine
    Fraunces (serif) + Nunito (body) + Anton (display block)
-   Dark only — "Black Plum & Peony".
+   Dark only — "Midnight Aubergine & Peony".
 
    [INTERNAL] Colour reasoning (D:\Code\COLOR-RULES.md, "pair and pop"):
    she mostly opens this late — after work, around the gym, at wind-down —
-   so the palette is warm, intimate and calm, never clinical. That's the
-   guide's monochrome-warm exception ("now you want to stay"):
-     • Anchor  — Black Plum backgrounds/cards (never pure black). Plum reads
-                 as depth, calm and quiet luxury; easy on eyes at night.
-     • Neutral — Pearl-rose text (never pure white): soft, warm, readable.
-     • Mid     — Dusty rose (--rose-deep): labels, links, switches. Quiet.
-     • Pop     — Peony (--rose / --accent): the ONE luminous colour, only on
-                 the main button, active tab, selected chips and ticks/wins.
-                 Affection + energy without alarm. Text on it is plum.
-   No green or orange in the chrome (Muneer dislikes both). The four
-   cycle-phase colours are data, not decoration — kept as-is.
-   All text pairs checked ≥ 4.5:1 (WCAG AA).
+   so it should feel calm, intimate and quietly luxurious, never clinical.
+     • Anchor  — Midnight aubergine (never pure black). Slightly cool/violet
+                 so it reads rich, not brown; calm at night; OLED-friendly.
+     • Neutral — Pearl text (never pure white), lavender-grey for muted.
+     • Mid     — Soft orchid (--rose-deep): brand, links, switches. Quiet.
+     • Pop     — Peony (--rose / --accent): the ONE luminous, warm colour on
+                 a cool base — main button, active tab, selected chips,
+                 ticks/wins. Affection + energy. Text on it is aubergine.
+   Cycle phases are data, shown only as small markers (dots, ring, pills,
+   a thin edge on notes) in a jewel set that sits on aubergine: garnet,
+   periwinkle, champagne gold, lavender. No green or orange anywhere
+   (Muneer dislikes both). All text pairs checked ≥ 4.5:1 (WCAG AA).
    =========================================================== */
 
 :root {
-  --bg-a: #23161f;
-  --bg-b: #1a1017;
-  --blob-a: #4a1f3c;
-  --blob-b: #2f1729;
-  --blob-c: #3a1a31;
-  --surface: #2b1c27;
-  --surface-2: #352230;
-  --field: #22151e;
-  --text: #f8edf2;
-  --muted: #c7a9b8;
-  --on-pop: #1c0f18;
-  --line: #46303f;
-  --rose: #ff7aa8;
-  --rose-deep: #e0a3b8;
-  --rose-soft: #4a2a40;
-  --lilac: #c4b0e8;
-  --coral: #ff99bb;
-  --glow-rose: 0 10px 26px -10px color-mix(in srgb, var(--rose) 45%, transparent);
-  --hero-a: #45203b; --hero-b: #371a31; --hero-c: #2b1527;
-  --hero-text: #dcb6c7;
-  --hero-chip: rgba(43, 28, 39, .82);
-  --warm-a: #3a2532; --warm-b: #32202c; --warm-line: #573a4c; --warm-text: #f2c6d6;
-  --accent: #ff7aa8;
-  --accent-2: #ff99bb;
-  --done-bg: #33202e;
-  --done-text: #a98a9a;
-  --check-border: #5b3f51;
-  --ring-track: #432c3c;
-  --nav-bg: rgba(26, 16, 23, .9);
-  --shadow: 0 12px 32px rgba(8, 2, 6, .5);
-  --shadow-sm: 0 4px 14px rgba(8, 2, 6, .38);
-  --card-border: rgba(255, 122, 168, .10);
-  --card-top: rgba(255, 236, 244, .04);
+  --bg-a: #1c1223;
+  --bg-b: #130b18;
+  --blob-a: #3e1a3e;
+  --blob-b: #1f1536;
+  --blob-c: #2a1431;
+  --surface: #231830;
+  --surface-2: #2d2039;
+  --field: #1a1122;
+  --text: #f6eef7;
+  --muted: #b6a6c4;
+  --on-pop: #1a0e1d;
+  --line: #3b2c48;
+  --rose: #ff6b9d;
+  --rose-deep: #e3a6cf;
+  --rose-soft: #3b2342;
+  --lilac: #b9a3f2;
+  --coral: #ff8db6;
+  --glow-rose: 0 10px 26px -10px color-mix(in srgb, var(--rose) 50%, transparent);
+  --hero-a: #37193f; --hero-b: #281636; --hero-c: #1e1129;
+  --hero-text: #d3c1de;
+  --hero-chip: rgba(26, 17, 34, .72);
+  --warm-a: #2c1d35; --warm-b: #271a30; --warm-line: #4a3356; --warm-text: #f4c8df;
+  --accent: #ff6b9d;
+  --accent-2: #ff8db6;
+  --done-bg: #2f1f3a;
+  --done-text: #a593b2;
+  --check-border: #4d3a5c;
+  --ring-track: #362845;
+  --nav-bg: rgba(19, 11, 24, .92);
+  --shadow: 0 12px 32px rgba(6, 2, 12, .55);
+  --shadow-sm: 0 4px 14px rgba(6, 2, 12, .4);
+  --card-border: rgba(214, 190, 240, .08);
+  --card-top: rgba(250, 238, 255, .04);
   color-scheme: dark;
   accent-color: var(--rose);
   --r-lg: 26px;
@@ -62,10 +62,10 @@
   --font-block: 'Anton', 'Arial Narrow', Impact, sans-serif;
   --font-script: 'Caveat', 'Segoe Script', 'Brush Script MT', cursive;
 
-  --p-menstrual: #e3879a;
-  --p-follicular: #6fbb93;
-  --p-ovulation: #eda865;
-  --p-luteal: #b39ddb;
+  --p-menstrual: #e5566c;
+  --p-follicular: #8fb1ff;
+  --p-ovulation: #efcc7c;
+  --p-luteal: #b9a3f2;
   --phase: var(--rose);
 }
 body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
@@ -363,12 +363,13 @@ body[data-tab="settings"] #tab-settings { display: block; }
 /* ---------- notes & banners ---------- */
 .phase-note {
   display: flex; gap: 10px; align-items: flex-start;
-  background: color-mix(in srgb, var(--phase) 14%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--phase) 26%, var(--surface));
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--phase) 75%, transparent);
   border-radius: var(--r-md); padding: 12px 14px; font-size: 13.5px; font-weight: 600;
   margin-bottom: 14px; color: var(--text);
 }
-.phase-note b { color: color-mix(in srgb, var(--phase) 72%, var(--text)); }
+.phase-note b { color: var(--text); font-weight: 800; }
 .overload {
   background: linear-gradient(120deg, var(--warm-a), var(--warm-b));
   color: var(--warm-text); border-radius: var(--r-md);
@@ -770,10 +771,10 @@ details.card[open] > summary { margin-bottom: 12px; }
   font-family: var(--font-display);
 }
 .phase-head span { font-family: var(--font-body); font-weight: 700; font-size: 12px; opacity: .94; }
-.phase-head.pill-menstrual  { background: linear-gradient(120deg, #e3879a, #d4708a); }
-.phase-head.pill-follicular { background: linear-gradient(120deg, #6fbb93, #57a981); }
-.phase-head.pill-ovulation  { background: linear-gradient(120deg, #eda865, #e2924b); }
-.phase-head.pill-luteal     { background: linear-gradient(120deg, #b39ddb, #9d83cf); }
+.phase-head.pill-menstrual  { background: linear-gradient(120deg, var(--p-menstrual), color-mix(in srgb, var(--p-menstrual) 82%, var(--bg-b))); }
+.phase-head.pill-follicular { background: linear-gradient(120deg, var(--p-follicular), color-mix(in srgb, var(--p-follicular) 82%, var(--bg-b))); }
+.phase-head.pill-ovulation  { background: linear-gradient(120deg, var(--p-ovulation), color-mix(in srgb, var(--p-ovulation) 82%, var(--bg-b))); }
+.phase-head.pill-luteal     { background: linear-gradient(120deg, var(--p-luteal), color-mix(in srgb, var(--p-luteal) 82%, var(--bg-b))); }
 
 .plan-ex { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 2px; border-bottom: 1px solid var(--line); font-size: 14px; }
 .plan-ex:last-child { border-bottom: none; }
