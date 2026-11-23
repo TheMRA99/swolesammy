@@ -177,7 +177,7 @@ const DAYS = {
         { name: 'Bird Dog', scheme: '2×10 each side', tag: '✅', note: 'Same anti-extension core, on all fours.' },
         { name: 'Hollow Body Hold', scheme: '2×20 sec', tag: '🔄', note: 'Isometric version — bend the knees to make it easier.' },
       ] },
-      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging'], note: 'Grip + shoulder opener — a lovely full-body stretch at the end.', alts: [
+      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging', 'Step down onto a box — no dropping'], note: 'Grip + shoulder opener — a lovely full-body stretch at the end.', alts: [
         { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
         { name: 'DB Hold', scheme: '2×30 sec each hand', tag: '✅', note: 'Heavy dumbbell held tall — same grip benefit at home.' },
       ] },
@@ -199,7 +199,7 @@ const DAYS = {
         { name: 'Single-Leg Hip Thrust', scheme: '3×10 each', tag: '🔄', note: 'Bodyweight or light — extra glute focus, evens out the sides.' },
         { name: 'Cable Pull-Through', scheme: '3×12', tag: '🔄', note: 'Rope between the legs, hinge and squeeze to stand. Keep it light.' },
       ] },
-      { name: 'Bulgarian Split Squat', scheme: '3×8 each leg', rest: '90 sec', cues: ['Long stride, slight forward lean', 'Front heel planted', 'Exhale on the way up'], avoid: 'Never grind to failure on these.', note: 'The great evener — both legs get strong.', alts: [
+      { name: 'Bulgarian Split Squat', scheme: '3×8 each leg', rest: '90 sec', cues: ['Long stride, slight forward lean', 'Front heel planted', 'Exhale on the way up', 'One hand on a rack or bench — steadier, so you can go heavier'], avoid: 'Never grind to failure on these.', note: 'The great evener — both legs get strong.', alts: [
         { name: 'Reverse Lunge', scheme: '3×8 each', tag: '✅', note: 'Same unilateral pattern — easier on the knees.' },
         { name: 'Step-Up', scheme: '3×10 each', tag: '✅', note: 'Onto a bench, drive through the heel. Great for glutes and balance.' },
         { name: 'Split Squat', scheme: '3×10 each', tag: '✅', note: 'Both feet on the floor — easier if the elevated foot bugs you, still excellent.' },
@@ -260,7 +260,7 @@ const DAYS = {
         { name: 'Cable Fly', scheme: '2×12', tag: '✅', note: 'Constant-tension version.' },
         { name: 'Floor DB Fly', scheme: '2×12', tag: '🔄', note: 'On the floor — easy on the shoulders.' },
       ] },
-      { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Press up smoothly', 'Stop just short of locked elbows', 'Lower with control'], alts: [
+      { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Sit tall on a bench with back support', 'Press up smoothly', 'Stop just short of locked elbows', 'Lower with control'], alts: [
         { name: 'Shoulder Press Machine', scheme: '3×10', tag: '✅', note: 'Guided path, back supported.' },
         { name: 'Arnold Press', scheme: '3×10', tag: '🔄', note: 'Rotational press — more front-delt.' },
         { name: 'Landmine Press', scheme: '3×10 each', tag: '🔄', note: 'A shoulder-friendly angle if shoulders feel cranky.' },
@@ -292,7 +292,7 @@ const DAYS = {
       { name: 'Side Plank', scheme: '4×30 sec', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted', 'Alternate sides — left, right, left, right', RISE_SLOW], note: 'One set per side, four sets total.', alts: [
         { name: 'BOSU Side Plank', scheme: '4×30 sec', tag: '🔄', note: 'Add instability when you\'re ready. Alternate sides.' },
       ] },
-      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging'], note: 'Grip + shoulder opener — a lovely finisher after all that pressing.', alts: [
+      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging', 'Step down onto a box — no dropping'], note: 'Grip + shoulder opener — a lovely finisher after all that pressing.', alts: [
         { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
         { name: 'DB Hold', scheme: '2×30 sec each hand', tag: '✅', note: 'Heavy dumbbell held tall — same grip benefit at home.' },
       ] },
@@ -466,15 +466,16 @@ const TARGETS = [
    • Vitamin D3 + Omega-3 are fat-soluble → same fatty meal.
    • Magnesium bisglycinate at night (sleep + restless legs), hours after iron.
    • B12 is water-soluble → fine in the morning with the iron.
-   • Birth control → same time every day (habit anchor; matters most of all).
+   • Evening tablet (low-dose amitriptyline) at ~5:45 pm — her doctor's timing.
+   • No birth control any more (stopped Nov 2026).
    The app TRACKS her plan — it never prescribes doses. */
 const CARE_SLOTS = [
   { key: 'morning', icon: '🌅', label: 'Wake up · empty tummy',
     tip: 'Iron soaks in best on an empty tummy with a splash of vitamin C (orange or lemon). Hold off tea, milk & yogurt for ~90 min after — a chai with breakfast is lovely, just a little after the iron, not alongside it.' },
-  { key: 'anchor', icon: '💗', label: 'Same time, every day',
-    tip: 'Pick one daily anchor you’ll never miss — brushing your teeth is a good one — and keep it steady. Consistency is the whole game here.' },
   { key: 'meal', icon: '🍽️', label: 'With your biggest meal',
     tip: 'These two need a little fat to absorb — take them with your fattiest meal of the day. They buddy up nicely.' },
+  { key: 'tablet', icon: '🕠', label: '5:45 pm · same time daily',
+    tip: 'A daily 5:45 alarm makes this one automatic. It can bring a sleepy, floaty feeling for a few hours after — normal, and it usually eases after the first few weeks. Evening sessions go a touch steadier to match. 💛' },
   { key: 'evening', icon: '🌙', label: '~90 min before bed',
     tip: 'Taking it a little before you actually wind down lets it sink in for deeper sleep. Keep it hours after your morning iron.' },
   { key: 'sips', icon: '🍵', label: 'Cosy sips · your rituals',
@@ -486,31 +487,30 @@ const CARE_SLOTS = [
 const SUPPLEMENTS = [
   { key: 'iron', slot: 'morning', emoji: '⚡', name: 'Iron + vitamin C', why: 'builds your iron back up — steadier energy, calmer legs, happier hair' },
   { key: 'b12', slot: 'morning', emoji: '🔆', name: 'Vitamin B12', why: 'energy & bright mornings' },
-  { key: 'bc', slot: 'anchor', emoji: '💗', name: 'Birth control', why: 'keep it steady — same time daily' },
   { key: 'vitd', slot: 'meal', emoji: '☀️', name: 'Vitamin D3', why: 'energy, strong muscles & bones' },
   { key: 'omega3', slot: 'meal', emoji: '🐟', name: 'Omega-3', why: 'a happy heart and all-over glow' },
   { key: 'magnesium', slot: 'evening', emoji: '🌙', name: 'Magnesium', why: 'deeper, cosier sleep' },
-  /* [INTERNAL] Council v3 (Nov 2026): low-dose amitriptyline for headache prevention.
-     • Opt-in (optIn → off until SHE switches it on in Settings) — her prescription,
-       her choice. Never named, never its drug class, in UI.
-     • Train BEFORE the dose: sedation + orthostatic dips peak ~2–6 h after.
-       Its slot tip + alarm row only show while it's on, so they vanish if she
-       stops or switches medication.
+  /* [INTERNAL] Low-dose amitriptyline for headache prevention, taken ~5:45 pm
+     (her doctor's timing, confirmed by Muneer Nov 2026). Never named, never its
+     drug class, in UI. On by default; she can switch it off in Settings.
+     • Sedation + head-rushes on standing peak ~2–6 h after a dose — i.e. her
+       7–10 pm gym window. So evening sessions on tablet days quietly use the
+       gentle effort hint + no PB nudges (afterEveningTablet() in app.js), and
+       the balance-heavy moves carry steadier cues.
      • No clash with iron / Mg / D3 / omega-3 / teas. Appetite effects are never
        surfaced. Magnesium no longer promises "calmer legs": tricyclics can
        worsen restless legs, and that should reach her doctor, not be self-treated. */
-  { key: 'evetab', slot: 'evening', emoji: '🤍', name: 'Evening tablet', why: 'your doctor’s plan for calmer head days', optIn: true,
-    tip: 'Gym night? Lift first, tablet once you’re home. Same time each night is the trick.',
-    alarm: ['your doctor’s time', 'Evening tablet — after training, once you’re home'] },
+  { key: 'evetab', slot: 'tablet', emoji: '🤍', name: 'Evening tablet', why: 'your doctor’s plan for calmer head days' },
   { key: 'spearmint', slot: 'sips', emoji: '🌿', name: 'Spearmint tea', why: 'afternoon · lovely for cycle balance' },
   { key: 'chamomile', slot: 'sips', emoji: '🍵', name: 'Chamomile tea', why: 'evening · winds you down for sleep' },
 ];
 const CARE_NOTE = 'Iron’s a “for now” fix — your doctor will recheck your levels in a couple of months, so check in before you restock. 💛';
+// [time, what, supplement key] — a row shows only while that item is switched on
 const CARE_ALARMS = [
-  ['≈ 7:30 am', 'Iron + vitamin C — before your morning tea'],
-  ['your fixed time', 'Birth control — the same time every single day'],
-  ['lunch / dinner', 'Vitamin D3 + Omega-3 — with a meal that has some fat'],
-  ['≈ 10:00 pm', 'Magnesium — winding down for bed'],
+  ['≈ 7:30 am', 'Iron + vitamin C — before your morning tea', 'iron'],
+  ['lunch / dinner', 'Vitamin D3 + Omega-3 — with a meal that has some fat', 'vitd'],
+  ['5:45 pm', 'Evening tablet — same time every day', 'evetab'],
+  ['≈ 10:00 pm', 'Magnesium — winding down for bed', 'magnesium'],
 ];
 
 /* ---- Cardio (heart & energy) ----
@@ -563,7 +563,7 @@ const HEADACHE_FORM = {
   start: { label: 'When it started', opts: ['Woke up with it', 'Morning', 'Afternoon', 'Evening', 'Night'] },
   where: { label: 'Where', multi: true, opts: ['One side', 'Both sides', 'Forehead', 'Behind the eyes', 'Back of head / neck'] },
   feel: { label: 'Felt like', multi: true, opts: ['Throbbing', 'Tight / pressing', 'Stabbing'] },
-  trig: { label: 'Might have set it off', multi: true, opts: ['Short sleep', 'Skipped a meal', 'Low on water', 'Long screen day', 'Stress', 'Heat / sun', 'Pill taken late', 'After training'] },
+  trig: { label: 'Might have set it off', multi: true, opts: ['Short sleep', 'Skipped a meal', 'Low on water', 'Long screen day', 'Stress', 'Heat / sun', 'Tablet late or missed', 'After training'] },
 };
 const HEADACHE_MAIN = ['sev', 'dur', 'with', 'meds'];
 const HEADACHE_MORE = ['start', 'where', 'feel', 'trig'];

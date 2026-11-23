@@ -22,7 +22,6 @@ const defaultState = () => ({
   onboarded: false,         // first-session welcome shown
   unavailable: {},          // exercise name -> true (gym doesn't have it → auto-swap)
   suppsOff: {},             // supplement key -> true (removed from her care plan)
-  suppsOn: {},              // opt-in items (optIn: true) -> true once she switches them on
   careStart: '2026-07-06',  // when repletion began — drives gentle recovery easing
   customMessages: [],        // Muneer's own love notes, mixed into the rotation
   prompts: {},              // evolution prompt id -> {done:true} | {snooze:iso}
@@ -733,7 +732,15 @@ const EASE_BACK_DAYS = 34;    // ~5 wks (council v2: physio + detraining + psych
    same gentle treatment as recovering(): softer effort hint, no PB/volume-bump
    nudges. Never says why beyond "easing back in". */
 function easingBack(iso) { return !!(state.easeBackUntil && (iso || todayISO()) <= state.easeBackUntil); }
-function gentleMode(iso) { return recovering(iso) || easingBack(iso) || inReturnMode(iso); }
+function gentleMode(iso) { return recovering(iso) || easingBack(iso) || inReturnMode(iso) || afterEveningTablet(iso); }
+/* [INTERNAL] Her tablet is at ~5:45 pm; drowsiness + head-rushes on standing peak a
+   few hours later — right in her 7–10 pm gym window. So from 5 pm on tablet days the
+   session quietly uses the gentle effort hint and skips PB nudges. No card, no choice. */
+function afterEveningTablet(iso) {
+  if ((iso || todayISO()) !== todayISO()) return false;
+  if (!activeSupps().some(s => s.key === 'evetab')) return false;
+  return new Date().getHours() >= 17;
+}
 function startEaseBack() { state.easeBackUntil = addDays(todayISO(), EASE_BACK_DAYS); }
 
 /* ---------- Return Mode ----------
@@ -762,7 +769,7 @@ function inReturnMode(iso) {
   return gap !== null && gap >= RETURN_MODE_DAYS;
 }
 function returnModeExpandedToday() { return state.returnModeExpandedOn === todayISO(); }
-function suppOn(s) { return s.optIn ? !!(state.suppsOn || {})[s.key] : !state.suppsOff[s.key]; }
+function suppOn(s) { return !state.suppsOff[s.key]; }
 function activeSupps() { return SUPPLEMENTS.filter(suppOn); }
 /* Daily care — supplement/pill tracker, grouped by evidence-based timing.
    On-device only: no background notifications, so it shows what's due "now"
@@ -808,10 +815,9 @@ function dailyCareHTML(isToday) {
   if (!active.length) return '';
   const taken = current.supps || [];
   const hr = isToday ? new Date().getHours() : -1;
-  // Evening tablet goes AFTER training — so don't flag the evening slot as "now"
-  // while a gym session is still planned and unfinished (her 7–10pm window).
-  const holdEvening = active.some(s => s.key === 'evetab') && typeof current.day === 'number' && !current.completed && hr < 22;
-  const nowSlot = hr < 0 ? '' : (hr < 11 ? 'morning' : hr < 20 ? 'meal' : holdEvening ? '' : 'evening');
+  // 5–8 pm: the 5:45 tablet slot is "now" until it's ticked
+  const tabletDue = active.some(s => s.key === 'evetab') && !taken.includes('evetab') && hr >= 17 && hr < 20;
+  const nowSlot = hr < 0 ? '' : (hr < 11 ? 'morning' : tabletDue ? 'tablet' : hr < 20 ? 'meal' : 'evening');
   const times = current.suppTimes || {};
   let html = `<div class="card care-card"><h2>Daily care 💊<span class="sub">Tap each as you take it — it saves the time too ✓</span></h2>`;
   // Iron traffic-light — SA nutritionist F + Endo D convergence: dairy/tea/coffee/calcium
@@ -830,10 +836,10 @@ function dailyCareHTML(isToday) {
     html += `<div class="care-slot ${now ? 'now' : ''}">
       <div class="care-when">${slot.icon} ${esc(slot.label)}${now ? ' <b>· now</b>' : ''}</div>
       <div class="chips">${items.map(s => { const on = taken.includes(s.key); return `<button class="chip-toggle habit ${on ? 'on' : ''}" data-action="supp" data-k="${esc(s.key)}" title="${esc(s.why)}">${s.emoji} ${esc(s.name)}${on ? ` <span class="t-time">✓${times[s.key] ? ' ' + esc(times[s.key]) : ''}</span>` : ''}</button>`; }).join('')}</div>
-      <div class="care-tip">${esc([slot.tip, ...items.filter(s => s.tip).map(s => s.tip)].join(' '))}</div>
+      <div class="care-tip">${esc(slot.tip)}</div>
     </div>`;
   });
-  const alarms = CARE_ALARMS.concat(active.filter(s => s.alarm).map(s => s.alarm));
+  const alarms = CARE_ALARMS.filter(([, , k]) => !k || active.some(s => s.key === k));
   html += `<details class="care-guide"><summary>Best times &amp; phone alarms ⏰</summary>
     <p class="hint" style="margin-top:8px">This app lives fully on your phone, so it can't buzz you on its own — the surest nudge is to set these as alarms once in your Clock app 💛</p>
     <div class="alarm-list">${alarms.map(([t, d]) => `<div class="alarm-row"><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div>
@@ -2309,9 +2315,7 @@ document.addEventListener('click', e => {
   else if (a === 'morning-light') { current.morningLight = !current.morningLight; commit(); renderToday(); }
   else if (a === 'toggle-supp') {
     const k = t.dataset.k;
-    const s = SUPPLEMENTS.find(x => x.key === k);
-    const bag = s && s.optIn ? (state.suppsOn = state.suppsOn || {}) : state.suppsOff;
-    if (bag[k]) delete bag[k]; else bag[k] = true;
+    if (state.suppsOff[k]) delete state.suppsOff[k]; else state.suppsOff[k] = true;
     save(); renderSettings();
   }
   else if (a === 'lighter') { current.lighter = true; applyLighter(current, viewDate, current.day); commit(); renderToday(); }
