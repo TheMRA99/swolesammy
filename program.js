@@ -5,11 +5,16 @@
    never what it "fixes". Coaching rationale lives in comments only.
    ============================================================ */
 
-// Cycle phases (week 1 = first week after period starts)
+/* Cycle weeks (week 1 = first week after a logged period start).
+   [INTERNAL] Council v4 (Nov 2026): off the pill, with PCOS and progesterone-
+   induced bleeds, ovulation can't be assumed — so no "ovulation / strongest
+   week / PB window" claims and no hormone stories. The weeks stay as a simple
+   programming wave (period → building → a heavier week → steady); personal-best
+   nudges come from her own logged lifts, not the calendar. Keys stay for CSS. */
 const PHASES = {
   1: {
     key: 'menstrual',
-    phase: 'Menstrual',
+    phase: 'Period week',
     sub: 'Period week',
     intensity: 'gentle',
     goal: 'Rest well · move kindly',
@@ -18,39 +23,39 @@ const PHASES = {
   },
   2: {
     key: 'follicular',
-    phase: 'Follicular',
-    sub: 'Energy rising',
+    phase: 'Building',
+    sub: 'Steady build',
     intensity: 'push',
-    goal: 'Build strength · push weights',
-    note: 'Energy is climbing — lovely week to push the weights and feel strong doing it.',
+    goal: 'Build strength',
+    note: 'Building week — steady, honest sessions. The app watches your lifts and tells you when to go for more.',
     emoji: '🌱',
   },
   3: {
     key: 'ovulation',
-    phase: 'Ovulation',
-    sub: 'Strongest week',
+    phase: 'Heavier week',
+    sub: 'A little heavier',
     intensity: 'peak',
-    goal: 'Your strongest week',
-    note: 'Your strongest week of the month. A little heavier or one more rep — with form staying pretty.',
+    goal: 'Go a little heavier',
+    note: 'Heavier week on the plan — a little more weight where last time felt comfortable, form staying pretty.',
     emoji: '☀️',
   },
   4: {
     key: 'luteal',
-    phase: 'Luteal',
-    sub: 'Wind-down',
+    phase: 'Steady',
+    sub: 'Recover well',
     intensity: 'steady',
     goal: 'Keep it steady · recover well',
-    note: 'Wind-down week — energy dips are just biology doing its thing. Keep moving, skip the records, sleep lots.',
+    note: 'Steady week — keep moving, skip the records, sleep lots.',
     emoji: '🤍',
   },
 };
 
-// "Your Month, Decoded" — plain, kind, biology-framed explanations per phase (P24)
+// "Your Month, Decoded" — plain, kind explanations per week (no hormone claims)
 const PHASE_DECODE = {
-  1: { what: 'Your period. Hormones sit at their lowest, so energy dips and cramps or headaches can drop by.', training: 'So the app goes gentle — a feelings-first menu, lighter volume, zero pressure. Rest genuinely counts as training this week.' },
-  2: { what: 'Follicular phase. Estrogen is climbing, and your energy, mood and recovery climb with it.', training: 'The app leans in — this is build time, when pushing the weights both feels good and works.' },
-  3: { what: 'Around ovulation — often the strongest, most powerful days of your whole month.', training: 'The app flags this as your PB window: if a lift has felt close, this is when to go for it.' },
-  4: { what: 'Luteal phase. Progesterone rises, energy and mood can soften, and sleep matters more than usual.', training: 'The app eases volume a touch and leans on recovery — steady beats heroic here.' },
+  1: { what: 'Your period. Energy can dip, and cramps or headaches can drop by.', training: 'So the app goes gentle — a feelings-first menu, lighter volume, zero pressure. Rest genuinely counts as training this week.' },
+  2: { what: 'Building week — the steady middle of your month.', training: 'The plan builds week by week, and the app watches your lifts to tell you when a little more weight is ready.' },
+  3: { what: 'A heavier week on the plan.', training: 'Your main lifts go a touch heavier — only where last time moved well. Form first, always.' },
+  4: { what: 'Steady week — sleep and recovery get a little more love.', training: 'The app eases volume a touch and leans on recovery — steady beats heroic here.' },
 };
 
 const DAY_TITLES = {
@@ -62,14 +67,14 @@ const DAY_TITLES = {
 // Editorial stacked headers (P20)
 const DAY_HERO = {
   1: { micro: 'DAY 01 · LOWER BODY A', big: 'GLUTE', small: 'DAY' },
-  2: { micro: 'DAY 02 · WAIST ILLUSION', big: 'WAIST', small: 'DAY' },
+  2: { micro: 'DAY 02 · BACK & SHOULDERS', big: 'PULL', small: 'DAY' },
   3: { micro: 'DAY 03 · LOWER BODY B', big: 'STRONG', small: 'DAY' },
-  4: { micro: 'DAY 04 · UPPER SCULPT', big: 'SCULPT', small: 'DAY' },
+  4: { micro: 'DAY 04 · UPPER BODY', big: 'PRESS', small: 'DAY' },
 };
 // Mixed-weight statement lines (render <b> as-is)
 const DAY_TAGLINES = {
-  1: 'Building <b>shape</b>, one hip thrust at a time.',
-  2: 'A bigger <b>back</b> and wider <b>shoulders</b> do more for your waist than any ab exercise.',
+  1: 'Building <b>power</b>, one hip thrust at a time.',
+  2: 'A strong <b>back</b> and capable <b>shoulders</b> carry you everywhere.',
   3: 'Heaviest hip thrust day — <b>strong</b> looks good on you.',
   4: 'Building <b>strength</b>, keeping it <b>cute</b>.',
 };
@@ -97,7 +102,7 @@ const DAYS = {
       'Hip abduction machine · 1 × 15–20 · very light & slow — wake the side-glutes up',
     ],
     ex: [
-      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8–10', 3: '3×8 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Chin tucked, ribs down', 'Drive through heels to full lockout', '1-sec squeeze at the top', 'Exhale as you lift', RISE_SLOW], avoid: 'Don\'t arch the lower back at the top.', note: 'Your main shape-builder.', alts: [
+      { name: 'Hip Thrust Machine', scheme: { 1: '2×10', 2: '3×8–10', 3: '3×8 heavier', 4: '3×10' }, rest: '90 sec', ramp: true, cues: ['Chin tucked, ribs down', 'Drive through heels to full lockout', '1-sec squeeze at the top', 'Exhale as you lift', RISE_SLOW], avoid: 'Don\'t arch the lower back at the top.', note: 'Your main power lift.', alts: [
         { name: 'Glute Bridge', scheme: '3×12', tag: '✅', note: 'Floor version — shorter range, very back-friendly.' },
         { name: 'Single-Leg Hip Thrust', scheme: '3×10 each', tag: '🔄', note: 'Bodyweight or light — extra glute focus, evens out the sides.' },
         { name: 'Cable Pull-Through', scheme: '3×12', tag: '🔄', note: 'Rope between the legs, hinge and squeeze to stand. Keep it light.' },
@@ -120,14 +125,14 @@ const DAYS = {
         { name: 'Glute Bridge + Cushion Squeeze', scheme: '2×15', tag: '✅', note: 'Squeeze a cushion between the knees through the bridge.' },
         { name: 'Side-Lying Adduction Raise', scheme: '2×12 each side', tag: '✅', note: 'Small slow range is perfect.' },
       ] },
-      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Hard glute squeeze at the top', '1-sec pause', RISE_SLOW], note: 'Glute-focused and spine-friendly — all the burn, none of the lower-back load.', alts: [
-        { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', tag: '🔄', note: 'Harder — one leg, 1-sec pause at the top.' },
-        { name: 'Cable Kickback', scheme: '2×15 each leg', tag: '✅', note: 'Standing, slow, squeeze the glute.' },
-      ] },
       { name: 'Pallof Press', scheme: '2×12 each side', rest: '60 sec', tag: 'core', cues: ['Press, pause, resist the twist'], note: 'Deep core — strength from the inside out.', alts: [
         { name: 'Band Anti-Rotation Hold', scheme: '3×20 sec each', tag: '✅', note: 'Same anti-rotation job, just held still.' },
         { name: 'BOSU + Med-Ball Hold', scheme: '3×30 sec', tag: '🔄', note: 'Kneel on the half-BOSU holding a ball at the chest. Fun balance challenge — trains the core a little differently.' },
         { name: 'Suitcase Carry', scheme: '1×30 m each', tag: '✅', note: 'Hold a weight in one hand and walk tall — your core resists the lean.' },
+      ] },
+      { name: 'Glute Bridge', scheme: '2×15', rest: '60 sec', cues: ['Hips high, ribs down', 'Hard glute squeeze at the top', '1-sec pause', RISE_SLOW], note: 'Glute-focused and spine-friendly — all the burn, none of the lower-back load.', alts: [
+        { name: 'Single-Leg Glute Bridge', scheme: '2×12 each leg', tag: '🔄', note: 'Harder — one leg, 1-sec pause at the top.' },
+        { name: 'Cable Kickback', scheme: '2×15 each leg', tag: '✅', note: 'Standing, slow, squeeze the glute.' },
       ] },
     ],
     cardio: 'Incline walk · 20–25 min · 8% incline · 5 km/h — strong heart, happy legs',
@@ -142,7 +147,7 @@ const DAYS = {
       'Light lat pulldown feel set · 1 × 12 · ≈half your working weight',
     ],
     ex: [
-      { name: 'Lat Pulldown', scheme: '3×10', rest: '90 sec', ramp: true, cues: ['Flat back, proud chest', '“Drive elbows into your pockets”', 'No yanking — control the way back up'], note: 'Vertical pull — builds lat width, the waist-narrowing piece.', alts: [
+      { name: 'Lat Pulldown', scheme: '3×10', rest: '90 sec', ramp: true, cues: ['Flat back, proud chest', '“Drive elbows into your pockets”', 'No yanking — control the way back up'], note: 'Vertical pull — the road to your first pull-up.', alts: [
         { name: 'Assisted Pull-Up', scheme: '3×8', tag: '✅', note: 'Machine or band assisted. Same vertical pull — and a milestone goal lift. 🌟' },
         { name: 'Single-Arm Lat Pulldown', scheme: '3×10 each', tag: '🔄', note: 'One side at a time — evens out left and right.' },
         { name: 'Straight-Arm Pulldown', scheme: '3×12', tag: '🔄', note: 'More lat isolation, less biceps.' },
@@ -164,7 +169,7 @@ const DAYS = {
         { name: 'Bent-Over Rear Delt Raise', scheme: '2×15', tag: '✅', note: 'Chest on an incline bench to protect your back. Same muscle.' },
         { name: 'Face Pull', scheme: '2×15', tag: '✅', note: 'Interchangeable rear-delt work.' },
       ] },
-      { name: 'Dumbbell Lateral Raise', scheme: '4×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging'], note: 'The hourglass maker — shoulder width frames everything.', alts: [
+      { name: 'Dumbbell Lateral Raise', scheme: '4×12', rest: '60 sec', cues: ['Lead with the elbows', 'No swinging'], note: 'Strong, capable shoulders — they carry everything.', alts: [
         { name: 'Cable Lateral Raise', scheme: '3×12 each', tag: '✅', note: 'Constant tension — many find it even better.' },
         { name: 'Machine Lateral Raise', scheme: '3×12', tag: '✅', note: 'Guided path if your gym has one.' },
         { name: 'Leaning Lateral Raise', scheme: '3×12 each', tag: '🔄', note: 'Lean away from a support for a bigger range.' },
@@ -173,13 +178,13 @@ const DAYS = {
         { name: 'Reverse Crunch', scheme: '3×12', tag: '✅', note: 'Knees to chest, lift the hips a touch. Lower-ab focus.' },
         { name: 'Hanging Knee Raise', scheme: '3×12', tag: '🔄', note: 'A progression once your grip allows — more challenging.' },
       ] },
-      { name: 'Dead Bug', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Lower back gently pressed down', 'Slow opposite arm + leg', RISE_SLOW], alts: [
-        { name: 'Bird Dog', scheme: '2×10 each side', tag: '✅', note: 'Same anti-extension core, on all fours.' },
-        { name: 'Hollow Body Hold', scheme: '2×20 sec', tag: '🔄', note: 'Isometric version — bend the knees to make it easier.' },
-      ] },
-      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging', 'Step down onto a box — no dropping'], note: 'Grip + shoulder opener — a lovely full-body stretch at the end.', alts: [
+      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging', 'Step down onto a box — no dropping'], note: 'Grip + shoulder opener — a lovely full-body stretch.', alts: [
         { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
         { name: 'DB Hold', scheme: '2×30 sec each hand', tag: '✅', note: 'Heavy dumbbell held tall — same grip benefit at home.' },
+      ] },
+      { name: 'Dead Bug', scheme: '2×10 each side', rest: '60 sec', tag: 'core', cues: ['Lower back gently pressed down', 'Slow opposite arm + leg', RISE_SLOW], note: 'Floor work last — get down once, take your time getting up.', alts: [
+        { name: 'Bird Dog', scheme: '2×10 each side', tag: '✅', note: 'Same anti-extension core, on all fours.' },
+        { name: 'Hollow Body Hold', scheme: '2×20 sec', tag: '🔄', note: 'Isometric version — bend the knees to make it easier.' },
       ] },
     ],
     cardio: 'Bike · 20–25 min · steady, chatty pace — heart & stamina',
@@ -245,22 +250,22 @@ const DAYS = {
       'Light chest press feel set · 1 × 10 · ≈half your working weight',
     ],
     ex: [
-      { name: 'Machine Chest Press', scheme: '2×10', rest: '90 sec', cues: ['Shoulder blades back and down into the pad', 'Elbows about 45°', 'Full stretch at the bottom, no locked elbows'], note: 'A lifted, open-chest look — pairs beautifully with the posture work.', alts: [
+      { name: 'Machine Chest Press', scheme: '2×10', rest: '90 sec', cues: ['Shoulder blades back and down into the pad', 'Elbows about 45°', 'Full stretch at the bottom, no locked elbows', 'Breathe out as you press'], note: 'Pushing strength — pairs beautifully with the posture work.', alts: [
         { name: 'Dumbbell Bench Press', scheme: '2×10', tag: '✅', note: 'Flat bench, controlled lowering.' },
         { name: 'Push-Up Progression', scheme: '2×8–12', tag: '✅', note: 'Incline → knees → full. Log your variation in notes.' },
         { name: 'Cable Chest Press', scheme: '2×12', tag: '🔄', note: 'Standing, braced core, constant tension.' },
       ] },
-      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'The upper-chest line — defined and lifted.', alts: [
+      { name: 'Incline Dumbbell Press', scheme: '2×10', rest: '90 sec', cues: ['Bench at about 30°', 'Elbows about 45°', 'Slow lowering'], note: 'Pressing up and out — strong for lifting things overhead.', alts: [
         { name: 'Incline Machine Press', scheme: '2×10', tag: '✅', note: 'Same upper-chest angle, machine-guided.' },
         { name: 'Incline Push-Up', scheme: '2×10', tag: '✅', note: 'Hands elevated — bodyweight upper-chest.' },
         { name: 'Low-to-High Cable Fly', scheme: '2×12', tag: '🔄', note: 'Upper-chest fly pattern.' },
       ] },
-      { name: 'Dumbbell Chest Fly', scheme: '2×12', rest: '60 sec', cues: ['Soft elbow bend, held the whole time', 'Lower wide for a big stretch', 'Squeeze back together like hugging a tree'], note: 'Stretch-and-squeeze for shape a press can\'t give.', alts: [
+      { name: 'Dumbbell Chest Fly', scheme: '2×12', rest: '60 sec', cues: ['Soft elbow bend, held the whole time', 'Lower wide for a big stretch', 'Squeeze back together like hugging a tree'], note: 'Stretch-and-squeeze — strength through the whole range.', alts: [
         { name: 'Pec Deck Machine', scheme: '2×12', tag: '✅', note: 'Same stretch-and-squeeze, guided path.' },
         { name: 'Cable Fly', scheme: '2×12', tag: '✅', note: 'Constant-tension version.' },
         { name: 'Floor DB Fly', scheme: '2×12', tag: '🔄', note: 'On the floor — easy on the shoulders.' },
       ] },
-      { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Sit tall on a bench with back support', 'Press up smoothly', 'Stop just short of locked elbows', 'Lower with control'], alts: [
+      { name: 'Dumbbell Shoulder Press', scheme: '2×10', rest: '90 sec', cues: ['Sit tall on a bench with back support', 'Press up smoothly — breathe out as you press', 'Stop just short of locked elbows', 'Lower with control'], alts: [
         { name: 'Shoulder Press Machine', scheme: '3×10', tag: '✅', note: 'Guided path, back supported.' },
         { name: 'Arnold Press', scheme: '3×10', tag: '🔄', note: 'Rotational press — more front-delt.' },
         { name: 'Landmine Press', scheme: '3×10 each', tag: '🔄', note: 'A shoulder-friendly angle if shoulders feel cranky.' },
@@ -285,16 +290,16 @@ const DAYS = {
         { name: 'Dumbbell Hold', scheme: '2×45–60 sec', tag: '✅', note: 'Tight on space? Just hold heavy, tall and proud.' },
         { name: 'Trap-Bar Carry', scheme: '2×40 m', tag: '🔄', note: 'If a trap bar is around — easy to load heavy.' },
       ] },
-      { name: 'Front Plank', scheme: '3×30–45 sec', rest: '60 sec', tag: 'core', cues: ['Squeeze glutes, ribs down', 'Breathe'], alts: [
+      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging', 'Step down onto a box — no dropping'], note: 'Grip + shoulder opener — a lovely reset after all that pressing.', alts: [
+        { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
+        { name: 'DB Hold', scheme: '2×30 sec each hand', tag: '✅', note: 'Heavy dumbbell held tall — same grip benefit at home.' },
+      ] },
+      { name: 'Front Plank', scheme: '3×30–45 sec', rest: '60 sec', tag: 'core', cues: ['Squeeze glutes, ribs down', 'Breathe'], note: 'Floor work last — get down once, take your time getting up.', alts: [
         { name: 'Dead Bug', scheme: '3×10 each side', tag: '✅', note: 'Anti-extension option if wrists or shoulders complain.' },
         { name: 'Stability Ball Plank', scheme: '3×30 sec', tag: '🔄', note: 'Forearms on a ball — harder.' },
       ] },
       { name: 'Side Plank', scheme: '4×30 sec', rest: '60 sec', tag: 'core', cues: ['Long line, hips lifted', 'Alternate sides — left, right, left, right', RISE_SLOW], note: 'One set per side, four sets total.', alts: [
         { name: 'BOSU Side Plank', scheme: '4×30 sec', tag: '🔄', note: 'Add instability when you\'re ready. Alternate sides.' },
-      ] },
-      { name: 'Dead Hang', scheme: '2×15–20 sec', rest: '60 sec', tag: 'core', cues: ['Relaxed shoulders — let the lats pull your shoulder blades down', 'Easy breath', 'Soft knees, no swinging', 'Step down onto a box — no dropping'], note: 'Grip + shoulder opener — a lovely finisher after all that pressing.', alts: [
-        { name: 'Band-Assisted Dead Hang', scheme: '2×20 sec', tag: '✅', note: 'Loop a band from the bar for a little lift.' },
-        { name: 'DB Hold', scheme: '2×30 sec each hand', tag: '✅', note: 'Heavy dumbbell held tall — same grip benefit at home.' },
       ] },
     ],
     cardio: 'StairMaster · 12–15 min · steady pace — heart & stamina',
@@ -412,13 +417,14 @@ const POSTURE_RESET = {
    no evening time: consistency (she already has it) + morning daylight. Pairs
    with her chamomile + magnesium. */
 const WIND_DOWN = {
-  title: 'Wind-down · 4 min',
+  title: 'Wind-down · 5 min',
   sub: 'Your chill time — made restful, so you drop off easier',
   safety: 'This is YOUR time, not a chore — whenever you get it, after dinner or work, however late. Kept dim and offline, it doubles as what helps you fall asleep faster. Lovely with your chamomile & magnesium. 🍵🌙',
   items: [
     { name: 'Slow breaths', scheme: '× 10', hint: 'in through the nose 4 sec, out slow 6 sec — the long exhale is the magic' },
     { name: 'Shoulder & neck melt', scheme: '× 5 slow rolls', hint: 'roll the shoulders back and down, let the desk day slide off' },
     { name: 'Legs up the wall', scheme: '2 min', hint: 'lie down, legs resting up the wall, slow breaths — calms the whole system. Roll to your side and sit a moment before you get up' },
+    { name: 'Calf stretch', scheme: '30 sec each leg', hint: 'hands on the wall, back heel down — legs feel settled for bed' },
     { name: 'Screens down, lights low', scheme: 'last stretch of the night', hint: 'phone face-down, dim the lights, cosy pillow check 🛏️' },
   ],
 };
@@ -542,9 +548,25 @@ const HEART_CARDIO = {
 // Check-in options
 const MOODS = ['😣', '😕', '🙂', '😊', '🤩'];
 const MOOD_LABELS = ['Rough', 'Meh', 'Okay', 'Good', 'Amazing'];
-const SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Stressed', 'Energized', 'Slept well', 'Slept badly'];
-// Symptoms that surface the "want today lighter?" offer
-const ROUGH_SYMPTOMS = ['Cramps', 'Headache', 'Low energy', 'Stressed', 'Slept badly'];
+const SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Stressed', 'Energized', 'Slept well', 'Slept badly', 'Restless legs'];
+// Symptoms that surface the "want today lighter?" offer.
+// [INTERNAL] 'Restless legs' is log-only on purpose — movement helps RLS; it's
+// recorded so her doctor can see whether the evening tablet is making it worse.
+const ROUGH_SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Stressed', 'Slept badly'];
+
+/* [INTERNAL] Council v4 (Nov 2026) — evening tablet at ~5:45 pm:
+   • Sessions after the tablet: bike finisher (seated, no step-off wobble), no
+     personal-best nudges, and lower-body days (RDL, split squats, heaviest hip
+     thrust) are saved for daytime unless legs haven't come up in 5 days.
+   • The softer "leave 3–4 in the tank" cue only covers the first settling-in
+     weeks after she starts the tablet — after that evenings go back to normal
+     effort, so she's never quietly demoted for good.
+   • Headache patterns only learn from days after she came off the pill. */
+const EVENING_CARDIO = 'Bike · 12–15 min · steady, chatty pace';
+const TABLET_SETTLE_DAYS = 21;
+const TABLET_SINCE_FALLBACK = '2026-11-23';
+const LEG_DAY_GAP = 5;
+const HEADACHE_PATTERN_SINCE = '2026-11-23';
 
 /* ---- Headache diary (Nov 2026) ----
    [INTERNAL] A record for her doctor while the headache tablet / pill question is
@@ -664,9 +686,9 @@ const NUTRITION = {
 // Expected timeline (motivation screens — process-framed)
 const TIMELINE = [
   ['Months 1–2', 'Standing taller, feeling stronger, habits clicking'],
-  ['Months 3–4', 'Weights climbing, stairs feel easy · arms say hello'],
-  ['Months 5–6', 'Shoulder lines, back shape, core waking up'],
-  ['Months 8–12', 'The athletic look settles in for good'],
+  ['Months 3–4', 'Weights climbing, stairs feel easy'],
+  ['Months 5–6', 'Pulling stronger, carrying more, core waking up'],
+  ['Months 8–12', 'Strength that feels like yours for good'],
 ];
 
 // His note — shown on the Plan tab 💌

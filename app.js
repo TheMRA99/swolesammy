@@ -153,7 +153,15 @@ function lastCompletedSession(beforeISO) {
 }
 function scheduledDay(iso) {
   const last = lastCompletedSession(iso);
-  return last ? (last.day % 4) + 1 : 1;
+  let next = last ? (last.day % 4) + 1 : 1;
+  // After the evening tablet, the lower-body days (RDL, split squats, heaviest
+  // thrust) wait for daytime — unless legs haven't come up in LEG_DAY_GAP days.
+  if ((next === 1 || next === 3) && afterEveningTablet(iso) && legDayWithin(iso, LEG_DAY_GAP)) next += 1;
+  return next;
+}
+function legDayWithin(iso, days) {
+  const since = addDays(iso, -days);
+  return Object.keys(state.logs).some(d => d < iso && d > since && (state.logs[d].day === 1 || state.logs[d].day === 3) && isSession(state.logs[d]));
 }
 const DAY_TYPE_LABEL = {
   rest: 'Rest · Recovery', 'cycle-rest': 'Cycle rest 🌙', walk: 'Gentle walk',
@@ -194,7 +202,7 @@ function planFor(week, day, opts) {
     type: 'workout', day,
     title: DAY_TITLES[day], hero: DAY_HERO[day], tagline: DAY_TAGLINES[day],
     warmup: block.warmup, burnout: day === 3 && (week === 2 || week === 3) ? block.burnout : null,
-    cardio: week === 1 ? 'Gentle walk · 15 min 🌙' : block.cardio,
+    cardio: week === 1 ? 'Gentle walk · 15 min 🌙' : opts.evening ? EVENING_CARDIO : block.cardio,
     ex,
   };
 }
@@ -733,14 +741,28 @@ const EASE_BACK_DAYS = 34;    // ~5 wks (council v2: physio + detraining + psych
    same gentle treatment as recovering(): softer effort hint, no PB/volume-bump
    nudges. Never says why beyond "easing back in". */
 function easingBack(iso) { return !!(state.easeBackUntil && (iso || todayISO()) <= state.easeBackUntil); }
-function gentleMode(iso) { return recovering(iso) || easingBack(iso) || inReturnMode(iso) || afterEveningTablet(iso); }
+function gentleMode(iso) { return recovering(iso) || easingBack(iso) || inReturnMode(iso) || (afterEveningTablet(iso) && tabletSettling()); }
 /* [INTERNAL] Her tablet is at ~5:45 pm; drowsiness + head-rushes on standing peak a
-   few hours later — right in her 7–10 pm gym window. So from 5 pm on tablet days the
-   session quietly uses the gentle effort hint and skips PB nudges. No card, no choice. */
+   few hours later — right in her 7–10 pm gym window. "After the tablet" starts at the
+   time she ticks it (or 5 pm if she hasn't yet). Evenings then get a bike finisher,
+   no PB nudges and upper-body days first; the softer effort cue only applies during
+   the first TABLET_SETTLE_DAYS. Reads state, never `current` (called while building it). */
+function timeLabelMinutes(label) {
+  const m = /^(\d{1,2}):(\d{2})(am|pm)$/i.exec(label || '');
+  if (!m) return null;
+  return ((+m[1] % 12) + (m[3].toLowerCase() === 'pm' ? 12 : 0)) * 60 + +m[2];
+}
 function afterEveningTablet(iso) {
   if ((iso || todayISO()) !== todayISO()) return false;
   if (!activeSupps().some(s => s.key === 'evetab')) return false;
-  return new Date().getHours() >= 17;
+  const now = new Date();
+  const tick = timeLabelMinutes(((state.logs[todayISO()] || {}).suppTimes || {}).evetab);
+  return tick !== null ? now.getHours() * 60 + now.getMinutes() >= tick : now.getHours() >= 17;
+}
+function tabletSettling() {
+  const first = Object.keys(state.logs).sort().find(d => (state.logs[d].supps || []).includes('evetab'));
+  const since = first && first < TABLET_SINCE_FALLBACK ? first : TABLET_SINCE_FALLBACK;
+  return daysBetween(since, todayISO()) < TABLET_SETTLE_DAYS;
 }
 function startEaseBack() { state.easeBackUntil = addDays(todayISO(), EASE_BACK_DAYS); }
 
@@ -1141,12 +1163,14 @@ function renderToday() {
   const rough = (current.mood !== null && current.mood <= 1) || current.symptoms.some(s => ROUGH_SYMPTOMS.includes(s));
   const weekSessionCount = (() => { let n = 0; for (let i = 0; i < 7; i++) { const l = state.logs[addDays(todayISO(), -i)]; if (l && isSession(l)) n++; } return n; })();
   const isMonday = new Date(viewDate + 'T00:00:00').getDay() === 1;
-  // Week 4 (luteal): energy is often unpredictable — soft-surface the lighter option (Coach H).
-  const autoOffer = isToday && !rough && (weekSessionCount >= 3 || isMonday || week === 4);
+  // Progesterone-course days: energy can wobble — soft-surface the lighter option
+  // (council v4: replaces the old luteal-week trigger, which assumed ovulation).
+  const courseOn = !!(periodTabInfo(viewDate) || {}).active;
+  const autoOffer = isToday && !rough && (weekSessionCount >= 3 || isMonday || courseOn);
   if (typeof day === 'number' && (rough || autoOffer) && !current.lighter && !current.offerDismissed && week !== 1) {
     const hint = rough
       ? 'Rough days still count. Pick whatever feels kind:'
-      : (week === 4 ? 'Wind-down week — energy tends to dip a touch. Softer today is totally on the table:'
+      : (courseOn ? 'Steady days — energy can wobble a little, so softer today is totally on the table:'
         : isMonday ? 'Fresh week — sometimes a softer start feels best. Totally your call:'
         : 'You\'ve been showing up all week — kind to yourself if you want it easier today:');
     parts.push(`
@@ -1161,14 +1185,16 @@ function renderToday() {
   // predictive: headache heads-up (water + iron), surfaced a day or two early from her own pattern
   const headsUp = isToday ? headacheHeadsUp(viewDate) : null;
   if (headsUp) parts.push(`<div class="phase-note"><span>💧</span><span>Heads-up: headaches often visit you around cycle day ${headsUp.day} — likely in the next day or two. Front-loading water and an iron-rich meal today really helps. 🍋</span></div>`);
-  // proactive: strong-window PB flag (follicular / ovulation, training days)
+  // proactive: go-heavier nudge — earned from her own lifts (a lift where every set
+  // hit the top of the range last time), never from the calendar
   const roughToday = current.mood !== null && current.mood !== undefined && current.mood <= 1;
-  if (typeof day === 'number' && strongWindowFor(viewDate).active && !gentleMode(viewDate) && !roughToday) {
-    parts.push(`<div class="overload" id="power-nudge">✨ Strong window — your energy's up. If a lift's felt close, today's a lovely day to chase a personal best. 💪</div>`);
+  const liftReady = (current.ex || []).some(e => ownedLastTime(e.name, e.scheme, viewDate));
+  if (typeof day === 'number' && liftReady && goHeavierOk(viewDate) && !gentleMode(viewDate) && !roughToday && !rough) {
+    parts.push(`<div class="overload" id="power-nudge">✨ Last time moved well — where a lift felt comfortable, today's a lovely day to go a little heavier. 💪</div>`);
   }
 
   // ---- render the day ----
-  const plan = planFor(week, day, { lighter: current.lighter });
+  const plan = planFor(week, day, { lighter: current.lighter, evening: afterEveningTablet(viewDate) });
 
   if (plan.type === 'rest') {
     parts.push(`
@@ -1245,7 +1271,7 @@ function renderToday() {
         <div class="ex-row cardio-row ${current.cardioDone ? 'done' : ''}">
           <div class="top">
             <button class="check" data-action="toggle-cardio" aria-label="Cardio done">${current.cardioDone ? '✓' : ''}</button>
-            <div class="ex-main"><div class="ex-name">🚶‍♀️ Cardio finisher</div><div class="ex-scheme">${esc(plan.cardio)} · ease off for the last 2 min</div></div>
+            <div class="ex-main"><div class="ex-name">🚶‍♀️ Cardio finisher</div><div class="ex-scheme">${esc(plan.cardio)} · ease off for the last 2 min, then step off slowly</div></div>
           </div>
           <div class="cardio-fields">
             <span class="cf-label">Your settings — your call 💗</span>
@@ -1435,7 +1461,6 @@ function renderCycle() {
     // ---- Your Month, Decoded (intelligence layer) ----
     const dPhase = PHASES[info.week];
     const dec = PHASE_DECODE[info.week];
-    const sw = strongWindowFor(todayISO());
     const fc = strengthForecast();
     const pats = patternsDetected();
     const fcLines = [];
@@ -1443,7 +1468,6 @@ function renderCycle() {
     // Gate forward-projection copy behind mood ≥ Okay; use retrospective on rough/meh days.
     const todaysMood = (state.logs[todayISO()] || {}).mood;
     const roughMoodToday = todaysMood !== null && todaysMood !== undefined && todaysMood <= 1;
-    if (sw.active && !gentleMode() && !roughMoodToday) fcLines.push('✨ <b>Strong window.</b> Your energy peaks around now — the best shot at a personal best you\'ll get this month.');
     if (fc && !roughMoodToday) fcLines.push(`📈 At this pace, <b>${fc.target} kg ${esc(fc.name.replace(' Machine', ''))}</b> around <b>${esc(monthYear(fc.etaISO))}</b> — give or take ~${fc.bandWeeks} weeks. (Strength only, never a number on a scale.)`);
     if (roughMoodToday) {
       const doneThisMonth = Object.keys(state.logs).filter(d => monthKey(d) === monthKey(todayISO()) && isShowedUp(state.logs[d])).length;
@@ -1620,7 +1644,7 @@ function headacheEntries() {
   return Object.keys(state.logs)
     .filter(d => (state.logs[d].symptoms || []).includes('Headache'))
     .sort().reverse()
-    .map(d => ({ d, h: state.logs[d].headache || {}, info: cycleInfo(d), period: inPeriod(d) }));
+    .map(d => ({ d, h: state.logs[d].headache || {}, info: cycleInfo(d), period: inPeriod(d), course: (state.logs[d].supps || []).some(k => k === 'ptab1' || k === 'ptab2') }));
 }
 function headacheDetailBits(h) {
   const list = (f, prefix) => (h[f] && h[f].length) ? [`${prefix}${h[f].join(', ').toLowerCase()}`] : [];
@@ -1637,7 +1661,7 @@ function headacheDetailBits(h) {
   ];
 }
 function headacheDayLabel(e) {
-  return `${shortDateW(e.d)}${e.info ? ` · cycle day ${e.info.day}` : ''}${e.period ? ' (period)' : ''}`;
+  return `${shortDateW(e.d)}${e.info ? ` · cycle day ${e.info.day}` : ''}${e.period ? ' (period)' : ''}${e.course ? ' · progesterone day' : ''}`;
 }
 function headacheMonths(entries) {
   const by = {};
@@ -1690,8 +1714,9 @@ function buildHeadacheText() {
 
 function headachePattern() {
   const days = [];
+  // only learns from days after she came off the pill — older patterns would mislead
   Object.keys(state.logs).forEach(d => {
-    if ((state.logs[d].symptoms || []).includes('Headache')) {
+    if (d >= HEADACHE_PATTERN_SINCE && (state.logs[d].symptoms || []).includes('Headache')) {
       const info = cycleInfo(d);
       if (info) days.push(info.day);
     }
@@ -1730,10 +1755,11 @@ function linReg(pts) {
   return { slope, intercept, resStd: Math.sqrt(ss / Math.max(1, n - 2)), n };
 }
 
-// is today inside a high-energy window? (follicular / ovulation)
-function strongWindowFor(iso) {
+// may the app suggest going heavier today? Not in period week, not on progesterone-
+// course days, never after the evening tablet. (Readiness itself comes from her lifts.)
+function goHeavierOk(iso) {
   const info = cycleInfo(iso);
-  return { active: !!info && (info.week === 2 || info.week === 3) };
+  return !(info && info.week === 1) && !(periodTabInfo(iso) || {}).active && !afterEveningTablet(iso);
 }
 
 // headache forecast from her own clustering (only if the pattern exists)
@@ -1776,7 +1802,7 @@ function patternsDetected() {
   });
   const totalMax = wk[1] + wk[2] + wk[3] + wk[4];
   if (totalMax >= 4 && (wk[2] + wk[3]) > (wk[1] + wk[4])) {
-    out.push({ text: 'Your heaviest lifts tend to land in the week or two right after your period — that\'s your strong window.', n: totalMax });
+    out.push({ text: 'Your heaviest lifts tend to land in the week or two right after your period.', n: totalMax });
   }
   const ms = { 1: [0, 0], 2: [0, 0], 3: [0, 0], 4: [0, 0] };
   Object.keys(state.logs).forEach(d => {
@@ -1788,10 +1814,10 @@ function patternsDetected() {
   const moodN = ms[1][1] + ms[2][1] + ms[3][1] + ms[4][1];
   const others = [1, 2, 3].map(avg).filter(x => x != null);
   if (moodN >= 8 && avg(4) != null && others.length && avg(4) < Math.min(...others)) {
-    out.push({ text: 'Lower-mood days are usually your luteal week — biology with a schedule, not a failing. 🤍', n: moodN });
+    out.push({ text: 'Lower-mood days tend to land in your steady week — a pattern, not a failing. 🤍', n: moodN });
   }
   const hd = headachePattern();
-  if (hd) out.push({ text: `Headaches tend to cluster around cycle day ${hd} for you — usually the days just before your period.`, n: '3+' });
+  if (hd) out.push({ text: `Headaches tend to cluster around cycle day ${hd} for you.`, n: '3+' });
   let sg = [0, 0], sa = [0, 0];
   Object.keys(state.logs).forEach(d => {
     const l = state.logs[d]; if (l.mood === null || l.mood === undefined) return;
