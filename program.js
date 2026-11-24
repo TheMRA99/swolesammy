@@ -563,6 +563,19 @@ const ROUGH_SYMPTOMS = ['Cramps', 'Headache', 'Bloating', 'Low energy', 'Stresse
      effort, so she's never quietly demoted for good.
    • Headache patterns only learn from days after she came off the pill. */
 const EVENING_CARDIO = 'Bike · 12–15 min · steady, chatty pace';
+/* [INTERNAL] Lunch express (Nov 2026): she trains in her weekday lunch hour when
+   work allows, ~18 h after the tablet (its quietest window — good for lifting), but
+   only ~40 min once she's changed. So weekday 10am–3pm sessions are served trimmed,
+   automatically (no choice to make): the main lifts + grip/carry work stay, the
+   accessories and floor moves wait for full sessions, and the finisher is a short
+   easy bike so she isn't drenched going back to the office. Names match DAYS. */
+const EXPRESS = {
+  1: ['Hip Thrust Machine', 'Romanian Deadlift', 'Seated Hamstring Curl', 'Hip Abduction Machine', 'Pallof Press'],
+  2: ['Lat Pulldown', 'Seated Cable Row', 'Face Pull', 'Dumbbell Lateral Raise', 'Dead Hang'],
+  3: ['Hip Thrust Machine', 'Bulgarian Split Squat', 'Leg Press', 'Cable Kickback'],
+  4: ['Machine Chest Press', 'Dumbbell Shoulder Press', 'Dumbbell Lateral Raise', 'Farmer\'s Carry', 'Dead Hang'],
+};
+const EXPRESS_CARDIO = 'Bike · 8 min · easy, chatty pace';
 const TABLET_SETTLE_DAYS = 21;
 const TABLET_SINCE_FALLBACK = '2026-11-23';
 const LEG_DAY_GAP = 5;
@@ -642,6 +655,7 @@ const NUTRITION = {
       'This isn\'t a diet. It\'s giving your muscles what they\'ve earned.',
       'The honest measure is in here: your lifts rising, your mood steady, your period arriving kindly. 💛',
       'Don\'t lift on empty — a small bite 60–90 min before (yogurt + banana, toast + eggs) makes sessions feel better.',
+      'Lunch-hour session? A mid-morning bite (banana, yogurt, a boiled egg) and a glass of water, then your proper lunch straight after.',
     ],
   },
   principles: {

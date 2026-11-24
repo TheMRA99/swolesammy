@@ -197,12 +197,13 @@ function planFor(week, day, opts) {
       });
     }
   }
+  if (opts.express && EXPRESS[day]) ex = ex.filter(e => EXPRESS[day].includes(e.swappedFrom || e.name));
   if (opts.lighter) ex = ex.map(e => ({ ...e, scheme: dropSet(e.scheme) }));
   return {
-    type: 'workout', day,
+    type: 'workout', day, express: !!(opts.express && EXPRESS[day]),
     title: DAY_TITLES[day], hero: DAY_HERO[day], tagline: DAY_TAGLINES[day],
-    warmup: block.warmup, burnout: day === 3 && (week === 2 || week === 3) ? block.burnout : null,
-    cardio: week === 1 ? 'Gentle walk · 15 min 🌙' : opts.evening ? EVENING_CARDIO : block.cardio,
+    warmup: block.warmup, burnout: day === 3 && (week === 2 || week === 3) && !opts.express ? block.burnout : null,
+    cardio: week === 1 ? 'Gentle walk · 15 min 🌙' : opts.express ? EXPRESS_CARDIO : opts.evening ? EVENING_CARDIO : block.cardio,
     ex,
   };
 }
@@ -257,7 +258,7 @@ function blankLog(iso, dayOverride) {
   const info = cycleInfo(iso);
   const week = info ? info.week : 2;
   const day = dayOverride !== undefined ? dayOverride : scheduledDay(iso);
-  const plan = planFor(week, day);
+  const plan = planFor(week, day, { express: lunchExpress(iso) });
   return {
     week, day,
     completed: false, notes: '', mood: null,
@@ -317,13 +318,18 @@ function buildLog(iso, dayOverride) {
         syncEx(ne);
         return ne;
       });
+      // never drop logged work if today's list changed shape (lunch express ⇄ full)
+      const have = new Set(fresh.ex.map(e => e.name));
+      saved.ex.forEach(s => {
+        if (!have.has(s.name) && Array.isArray(s.sets) && s.sets.some(x => x.done || x.w !== '' || x.r !== '')) fresh.ex.push(s);
+      });
     }
   }
   return fresh;
 }
 function applyLighter(log, iso, day) {
   const info = cycleInfo(iso);
-  const plan = planFor(info ? info.week : 2, day, { lighter: true });
+  const plan = planFor(info ? info.week : 2, day, { lighter: true, express: lunchExpress(iso) });
   if (plan.ex) log.ex = plan.ex.map(freshExFromPlan);
 }
 function isMeaningful(log) {
@@ -758,6 +764,12 @@ function afterEveningTablet(iso) {
   const now = new Date();
   const tick = timeLabelMinutes(((state.logs[todayISO()] || {}).suppTimes || {}).evetab);
   return tick !== null ? now.getHours() * 60 + now.getMinutes() >= tick : now.getHours() >= 17;
+}
+// Weekday lunch hour (10am–3pm, Mon–Fri) → the trimmed ~40-min session
+function lunchExpress(iso) {
+  if ((iso || todayISO()) !== todayISO()) return false;
+  const now = new Date(), wd = now.getDay(), h = now.getHours();
+  return wd >= 1 && wd <= 5 && h >= 10 && h < 15;
 }
 function tabletSettling() {
   const first = Object.keys(state.logs).sort().find(d => (state.logs[d].supps || []).includes('evetab'));
@@ -1194,7 +1206,7 @@ function renderToday() {
   }
 
   // ---- render the day ----
-  const plan = planFor(week, day, { lighter: current.lighter, evening: afterEveningTablet(viewDate) });
+  const plan = planFor(week, day, { lighter: current.lighter, evening: afterEveningTablet(viewDate), express: lunchExpress(viewDate) });
 
   if (plan.type === 'rest') {
     parts.push(`
@@ -1232,7 +1244,7 @@ function renderToday() {
     if (plan.type === 'workout') {
       parts.push(`
         <div class="day-hero">
-          <div class="micro">${esc(plan.hero.micro)}${current.lighter ? ' · LIGHTER 💗' : ''}</div>
+          <div class="micro">${esc(plan.hero.micro)}${plan.express ? ' · LUNCH EXPRESS ⚡' : ''}${current.lighter ? ' · LIGHTER 💗' : ''}</div>
           <div class="big">${esc(plan.hero.big)}<span>${esc(plan.hero.small)}</span></div>
           <div class="statement">${plan.tagline}</div>
         </div>`);
